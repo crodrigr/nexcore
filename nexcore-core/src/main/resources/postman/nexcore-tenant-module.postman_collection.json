@@ -1,14 +1,17 @@
 {
   "info": {
-    "name": "Nexcore - Module Tenant",
+    "name": "Nexcore - Platform API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Colección de endpoints del módulo tenant: Tenants, Usuarios, Roles e Invitaciones."
+    "description": "Colección de endpoints NexCore: módulo tenant (Tenants, Usuarios, Roles) y módulo menu (Perfil de UI)."
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:8080" },
-    { "key": "tenant_id", "value": "00000000-0000-0000-0000-000000000001" },
-    { "key": "actor_id",  "value": "00000000-0000-0000-0000-000000000002" },
-    { "key": "tenant_slug", "value": "demo" }
+    { "key": "base_url",          "value": "http://localhost:8080" },
+    { "key": "tenant_system_id",  "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant system" },
+    { "key": "tenant_demo_id",    "value": "00000000-0000-0000-0000-000000000002", "description": "Tenant demo" },
+    { "key": "tenant_id",         "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant activo usado en los headers (cambiar según contexto)" },
+    { "key": "actor_id",          "value": "00000000-0000-0000-0001-000000000001", "description": "super.admin (sistema)" },
+    { "key": "actor_demo_id",     "value": "00000000-0000-0000-0001-000000000002", "description": "admin.demo (tenant demo)" },
+    { "key": "tenant_slug",       "value": "demo" }
   ],
   "item": [
     {
@@ -441,6 +444,75 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
             ],
             "description": "Elimina un rol personalizado. Falla si el rol tiene usuarios asignados o es de sistema. Retorna 204 No Content."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu — Perfil de UI",
+      "description": "Módulo menu: perfil completo de UI del usuario autenticado (user, permissions, menus).",
+      "item": [
+        {
+          "name": "Perfil de UI — super.admin (tenant system)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/me/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "me", "profile"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_system_id}}", "description": "Tenant system" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}",         "description": "super.admin" }
+            ],
+            "description": "Retorna el perfil de UI del usuario super.admin en el tenant system.\n\nEsperar:\n- user.roles: [\"SUPER_ADMIN\"]\n- permissions: todos los componentes con acceso efectivo\n- menus: árbol completo con location y access por ítem"
+          }
+        },
+        {
+          "name": "Perfil de UI — admin.demo (tenant demo)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/me/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "me", "profile"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}", "description": "Tenant demo" },
+              { "key": "X-Actor-Id",  "value": "{{actor_demo_id}}", "description": "admin.demo" }
+            ],
+            "description": "Retorna el perfil de UI del usuario admin.demo en el tenant demo.\n\nEsperar:\n- user.roles: [\"TENANT_ADMIN\"]\n- permissions: componentes con access execute/view/hidden\n- menus: navbar items con access execute, Administration con access hidden"
+          }
+        },
+        {
+          "name": "Perfil de UI — usuario no encontrado (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/me/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "me", "profile"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}" },
+              { "key": "X-Actor-Id",  "value": "00000000-0000-0000-0000-000000000099", "description": "UUID inexistente" }
+            ],
+            "description": "Debe retornar HTTP 404 con código NXC-MNU-0001."
+          }
+        },
+        {
+          "name": "Perfil de UI — header faltante (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/me/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "me", "profile"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}" }
+            ],
+            "description": "Sin X-Actor-Id. Debe retornar HTTP 400 (header requerido faltante)."
           }
         }
       ]

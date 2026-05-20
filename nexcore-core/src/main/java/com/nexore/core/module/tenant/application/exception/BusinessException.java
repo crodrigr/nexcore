@@ -169,4 +169,21 @@ public class BusinessException extends RuntimeException {
         return new BusinessException("NXC-ROL-0031",
                 "This operation would leave the tenant with no active TENANT_ADMIN.", HttpStatus.UNPROCESSABLE_ENTITY);
     }
+
+    // ---- Menu / profile errors ----
+
+    public static BusinessException menuUserNotFound() {
+        return new BusinessException("NXC-MNU-0001",
+                "User not found or not active in this tenant.", HttpStatus.NOT_FOUND);
+    }
+
+    public static BusinessException menuTenantNotActive() {
+        return new BusinessException("NXC-MNU-0002",
+                "Tenant not found or not in an active state.", HttpStatus.FORBIDDEN);
+    }
+
+    public static BusinessException menuUserSuspended() {
+        return new BusinessException("NXC-MNU-0003",
+                "User account is suspended or blocked.", HttpStatus.FORBIDDEN);
+    }
 }
