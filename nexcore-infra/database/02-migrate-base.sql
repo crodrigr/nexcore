@@ -551,7 +551,7 @@ BEGIN
         v_tid_system, v_comp_dashboard, NULL,
         'Dashboard', 'Panel Principal', '/graphics',
         'layout-dashboard', 'tabler',
-        'ITEM', 10, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_dashboard;
@@ -568,7 +568,7 @@ BEGIN
         v_tid_system, v_comp_alerts, NULL,
         'Alerts', 'Alertas', '/alerts',
         'bell', 'tabler',
-        'ITEM', 20, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_alerts;
@@ -585,7 +585,7 @@ BEGIN
         v_tid_system, v_comp_incidents, NULL,
         'Incidents', 'Incidentes', '/incidents',
         'alert-circle', 'tabler',
-        'ITEM', 30, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_incidents;
@@ -602,7 +602,7 @@ BEGIN
         v_tid_system, v_comp_traps, NULL,
         'Traps', 'Traps SNMP', '/traps',
         'radar', 'tabler',
-        'ITEM', 40, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_traps;
@@ -620,7 +620,7 @@ BEGIN
         v_tid_system, NULL, NULL,
         'ProfileMenu', 'Perfil', NULL,
         'user-circle', 'tabler',
-        'GROUP', 50, TRUE, TRUE, 'EXECUTE',
+        'GROUP', 50, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_profile_group;
@@ -638,7 +638,7 @@ BEGIN
         v_tid_system, NULL, v_menu_profile_group,
         'Profile', 'Mi Perfil', '/profile',
         'user', 'tabler',
-        'ITEM', 10, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_profile_item;
@@ -652,7 +652,7 @@ BEGIN
         v_tid_system, v_comp_settings, v_menu_profile_group,
         'Settings', 'Configuración', '/admin/settings',
         'settings', 'tabler',
-        'ITEM', 20, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_settings_item;
@@ -666,7 +666,7 @@ BEGIN
         v_tid_system, v_comp_auth, v_menu_profile_group,
         'Logout', 'Cerrar Sesión', '/auth/login',
         'logout', 'tabler',
-        'ITEM', 30, TRUE, TRUE, 'EXECUTE',
+        'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_logout_item;
@@ -681,7 +681,7 @@ BEGIN
         v_tid_system, NULL, NULL,
         'Administration', 'Administración', NULL,
         'shield', 'tabler',
-        'GROUP', 60, TRUE, TRUE, 'HIDDEN',
+        'GROUP', 60, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_admin_group;
@@ -698,7 +698,7 @@ BEGIN
         v_tid_system, v_comp_users, v_menu_admin_group,
         'Users', 'Usuarios', '/admin/users',
         'users', 'tabler',
-        'ITEM', 10, TRUE, TRUE, 'HIDDEN',
+        'ITEM', 10, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_admin_users;
@@ -712,7 +712,7 @@ BEGIN
         v_tid_system, v_comp_roles, v_menu_admin_group,
         'Roles', 'Roles', '/admin/roles',
         'lock', 'tabler',
-        'ITEM', 20, TRUE, TRUE, 'HIDDEN',
+        'ITEM', 20, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_admin_roles;
@@ -726,7 +726,7 @@ BEGIN
         v_tid_system, v_comp_menus, v_menu_admin_group,
         'Menus', 'Menús', '/admin/menus',
         'layout-navbar', 'tabler',
-        'ITEM', 30, TRUE, TRUE, 'HIDDEN',
+        'ITEM', 30, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_admin_menus;
@@ -740,7 +740,7 @@ BEGIN
         v_tid_system, v_comp_audit, v_menu_admin_group,
         'Audit', 'Auditoría', '/admin/audit',
         'history', 'tabler',
-        'ITEM', 40, TRUE, TRUE, 'HIDDEN',
+        'ITEM', 40, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
     RETURNING id INTO v_menu_admin_audit;
