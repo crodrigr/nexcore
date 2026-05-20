@@ -76,13 +76,12 @@ Representa el acceso de un usuario a un componente de UI y sus elementos interac
 |---|---|---|
 | `component` | String | `module_key` del componente (ej. `"dashboard"`) |
 | `route` | String | Ruta Angular del componente (ej. `"/graphics"`) |
-| `allowedActions` | `List<String>` | Acciones semánticas habilitadas para el usuario en este componente |
-| `elements` | `List<ElementPermission>` | Elementos de UI con acceso ≥ VIEW |
+| `access` | `AccessLevel` | Nivel de acceso efectivo del usuario sobre el componente: `execute \| view \| hidden` |
+| `elements` | `List<ElementPermission>` | Todos los elementos de UI del componente con su acceso efectivo |
 
 **Reglas de inclusión:**
-- Solo se incluye un componente si el **nivel de acceso efectivo** del usuario sobre él es ≥ `VIEW`.
-- Si el acceso es `VIEW`, solo se añade la acción `"view"` y los elementos no ejecutables no tienen acción.
-- Si el acceso es `EXECUTE`, se añaden todas las acciones habilitadas por los elementos EXECUTE.
+- Se incluyen **todos** los componentes del tenant (incluyendo `hidden`). El frontend usa el valor de `access` para decidir si renderiza el componente, lo deshabilita o lo oculta.
+- Se incluyen **todos** los elementos de cada componente con su acceso efectivo, también incluyendo `hidden`.
 
 ---
 
@@ -91,10 +90,9 @@ Representa el acceso de un usuario a un componente de UI y sus elementos interac
 | Campo | Tipo | Descripción |
 |---|---|---|
 | `elementKey` | String | Clave técnica del elemento (ej. `"filterButton"`, `"app-alert-groups[groupSelected]"`) |
-| `action` | String | Evento DOM / acción semántica del elemento (ej. `"click"`, `"emit"`) |
+| `access` | `AccessLevel` | Nivel de acceso efectivo del usuario sobre el elemento: `execute \| view \| hidden` |
 
-**Solo se incluyen elementos con acceso efectivo ≥ `VIEW`.**  
-El campo `action` corresponde al tipo de evento DOM que el frontend escucha sobre ese elemento.
+Se incluyen **todos** los elementos del componente con su acceso efectivo. El frontend usa el valor de `access` para renderizar el elemento activo (`execute`), deshabilitado (`view`) o no renderizarlo (`hidden`).
 
 ---
 
@@ -110,7 +108,9 @@ Nodo del árbol de navegación visible para el usuario.
 | `route` | String | Ruta Angular. `null` para GROUPs sin ruta propia |
 | `icon` | String | Nombre del icono (ej. `"layout-dashboard"`, `"bell"`) |
 | `iconType` | String | Librería de iconos: `"tabler"` \| `"material"` \| `"custom"` |
+| `location` | String | Ubicación en la UI: `"navbar"` \| `"sidebar"` \| `"header-dropdown"` \| `"footer"` \| `"internal"` |
 | `itemType` | `MenuItemType` | `GROUP \| ITEM \| DIVIDER \| EXTERNAL_LINK` |
+| `access` | `AccessLevel` | Nivel de acceso efectivo del usuario sobre este ítem: `execute \| view \| hidden` |
 | `orderIndex` | Integer | Posición dentro del mismo nivel del árbol |
 | `children` | `List<MenuItem>` | Ítems hijo. Lista vacía si no tiene hijos |
 
@@ -171,58 +171,20 @@ Si existe un override con `expires_at` expirado, se ignora y se usa el acceso po
 
 ---
 
-## 4. Derivación de `allowedActions`
+## 4. Serialización del campo `access`
 
-El campo `allowedActions` de `ComponentPermission` es una lista de etiquetas semánticas que describen qué puede hacer el usuario en ese componente. Se construye a partir de los elementos con acceso ≥ EXECUTE.
+El enum `nxc_menu.access_level` en la base de datos usa valores en mayúscula: `EXECUTE`, `VIEW`, `HIDDEN`. En el JSON de respuesta, estos valores se serializan en **minúscula** para mantener el contrato con el frontend Angular:
 
-### Tabla de mapeo: element_key → allowed_action
-
-| `element_key` (patrón) | `action` DOM | `allowed_action` semántica |
-|---|---|---|
-| `*FilterSelect*`, `*Filter*` | `change` | `filter` |
-| `filterButton` | `click` | `filter` |
-| `refreshButton` | `click` | `refresh` |
-| `columnsMenuBtn` | `click` | `toggle-columns` |
-| `toggleColumnItem` | `click` | `toggle-columns` |
-| `resetColumnsBtn` | `click` | `toggle-columns` |
-| `searchInput` | `keyup` | `filter` |
-| `paginator` | `page` | `paginate` |
-| `matSortHeader` | `sort` | `sort` |
-| `rowClickToggle` | `click` | `expand-row` |
-| `loginButton` | `click` | `login` |
-| `resendCodeButton` | `click` | `2fa` |
-| `togglePasswordButton` | `click` | `login` |
-| `goBackButton` | `click` | `login` |
-| `[groupSelected]` (sufijo) | `emit` | `select-group` |
-| `[incidentUpdated]` (sufijo) | `emit` | `update-incident` |
-| `btn-create-*` | `click` | `create` |
-| `btn-edit-*` | `click` | `edit` |
-| `btn-delete-*` | `click` | `delete` |
-| `btn-suspend-*` | `click` | `suspend` |
-| `btn-invite-*` | `click` | `invite` |
-| `btn-assign-*` | `click` | `assign` |
-| `tab-*` | `click` | `navigate` |
-| *(otros)* | `click` | *(omitir de allowedActions)* |
-
-### Reglas de construcción de `allowedActions`
-
-1. Si acceso al componente ≥ `VIEW` → incluir siempre `"view"`.
-2. Si acceso al componente = `EXECUTE` → para cada elemento con acceso ≥ `EXECUTE`, añadir su `allowed_action` semántica (sin duplicados, sin `null`).
-3. El orden de `allowedActions` es: `["view", <resto por orden de element_key en la tabla>]`.
-
-### Campo `action` por elemento
-
-El campo `action` de `ElementPermissionResponse` se determina por `element_type`:
-
-| `element_type` (DB) | `action` |
+| Valor en DB | Valor en JSON |
 |---|---|
-| `BUTTON` | `"click"` |
-| `FIELD` | `"keyup"` |
-| `TAB` | `"click"` |
-| `SELECT` | `"change"` |
-| `ACTION` con `element_key` terminando en `[xxx]` | `"emit"` |
-| `ACTION` (otros) | `"click"` |
-| `PAGINATOR` | `"page"` |
+| `EXECUTE` | `"execute"` |
+| `VIEW` | `"view"` |
+| `HIDDEN` | `"hidden"` |
+
+Este contrato aplica uniformemente a:
+- El campo `access` en cada entrada de `permissions` (nivel componente).
+- El campo `access` en cada elemento dentro de `elements` (nivel elemento).
+- El campo `access` en cada ítem del árbol de `menus` y sus `children`.
 
 ---
 
@@ -244,17 +206,13 @@ El campo `action` de `ElementPermissionResponse` se determina por `element_type`
 
 1. El sistema extrae `tenant_id` y `user_id` de los headers `X-Tenant-Id` y `X-Actor-Id`.
 2. El sistema consulta `nxc_tenant.v_user_login_profile` con `user_id` y `tenant_id` para obtener los datos del usuario y sus `role_ids` activos (excluyendo roles con `expires_at` expirado).
-3. El sistema consulta `nxc_menu.component_permissions` para todos los `role_ids` del usuario en el tenant activo, obteniendo el nivel máximo de acceso por componente (`MAX(access)` agrupado por `component_id`).
-4. El sistema descarta los componentes con `acceso_efectivo = HIDDEN`.
-5. Para cada componente con `acceso_efectivo ≥ VIEW`, el sistema consulta `nxc_menu.element_permissions` para los `role_ids` del usuario, obteniendo el nivel máximo de acceso por elemento.
-6. El sistema aplica los overrides de usuario desde `nxc_menu.user_element_overrides` (donde `expires_at IS NULL OR expires_at > NOW()`), sobreescribiendo el acceso por rol.
-7. El sistema descarta los elementos con `acceso_final = HIDDEN`.
-8. El sistema construye la lista `elements` y el campo `action` por `element_type`.
-9. El sistema calcula `allowedActions` según las reglas de la sección 4.
-10. El sistema consulta `nxc_menu.v_menu_effective_access` para los `role_ids` del usuario en el tenant, tomando el nivel máximo por `menu_item_id`.
-11. El sistema descarta los ítems de menú con `acceso_efectivo = HIDDEN`.
-12. El sistema ordena los ítems por `order_index` y construye el árbol: los ítems con `parent_id IS NULL` son la raíz; los ítems hijo se anidan en el campo `children` del padre correspondiente.
-13. El sistema ensambla el `UserProfile` y retorna HTTP 200 con `UserProfileResponse`.
+3. El sistema consulta `nxc_menu.component_permissions` para todos los `role_ids` del usuario en el tenant, obteniendo el nivel máximo de acceso por componente (`MAX(access)` agrupado por `component_id`). Se incluyen **todos** los componentes con su acceso efectivo, incluidos los de acceso `hidden`.
+4. Para cada componente, el sistema consulta `nxc_menu.element_permissions` para los `role_ids` del usuario, obteniendo el nivel máximo de acceso por elemento. Se incluyen **todos** los elementos con su acceso efectivo.
+5. El sistema aplica los overrides de usuario desde `nxc_menu.user_element_overrides` (donde `expires_at IS NULL OR expires_at > NOW()`), sobreescribiendo el acceso por rol.
+6. El sistema construye la lista `elements` con el acceso efectivo de cada elemento (incluyendo los de acceso `hidden`).
+7. El sistema consulta `nxc_menu.v_menu_effective_access` para los `role_ids` del usuario en el tenant, tomando el nivel máximo por `menu_item_id`. Se incluyen **todos** los ítems de menú con su acceso efectivo, incluidos los de acceso `hidden`.
+8. El sistema ordena los ítems por `order_index` y construye el árbol: los ítems con `parent_id IS NULL` son la raíz; los ítems hijo se anidan en el campo `children` del padre correspondiente.
+9. El sistema ensambla el `UserProfile` y retorna HTTP 200 con `UserProfileResponse`.
 
 **Flujos alternativos:**
 
@@ -269,7 +227,7 @@ El campo `action` de `ElementPermissionResponse` se determina por `element_type`
 SELECT * FROM nxc_tenant.v_user_login_profile
 WHERE user_id = :userId AND tenant_id = :tenantId;
 
--- Paso 3: acceso efectivo por componente (multi-rol: MAX)
+-- Paso 3: acceso efectivo por componente (multi-rol: MAX), todos los componentes
 SELECT
     c.module_key,
     c.route,
@@ -278,13 +236,11 @@ FROM nxc_menu.component_permissions cp
 JOIN nxc_menu.components c ON c.id = cp.component_id AND c.deleted_at IS NULL
 WHERE cp.tenant_id = :tenantId
   AND cp.role_id = ANY(:roleIds)
-GROUP BY c.id, c.module_key, c.route
-HAVING MAX(cp.access::int) > 0;  -- descarta HIDDEN
+GROUP BY c.id, c.module_key, c.route;
 
--- Paso 5: acceso efectivo por elemento (multi-rol: MAX + override)
+-- Paso 4: acceso efectivo por elemento (multi-rol: MAX + override), todos los elementos
 SELECT
     ce.element_key,
-    ce.element_type,
     COALESCE(
         ueo.access,                                      -- override de usuario
         MAX(ep.access::int)::nxc_menu.access_level       -- máximo por rol
@@ -298,13 +254,12 @@ LEFT JOIN nxc_menu.user_element_overrides ueo
 WHERE ce.component_id = :componentId
   AND ep.tenant_id = :tenantId
   AND ep.role_id = ANY(:roleIds)
-GROUP BY ce.element_key, ce.element_type, ueo.access
-HAVING COALESCE(ueo.access::int, MAX(ep.access::int)) > 0;
+GROUP BY ce.element_key, ueo.access;
 
--- Paso 10: árbol de menú (acceso efectivo por ítem, multi-rol: MAX)
+-- Paso 7: árbol de menú (acceso efectivo por ítem, multi-rol: MAX), todos los ítems
 SELECT
     mi.id, mi.parent_id, mi.name, mi.title, mi.route,
-    mi.icon, mi.icon_type, mi.item_type, mi.order_index,
+    mi.icon, mi.icon_type, mi.location, mi.item_type, mi.order_index,
     MAX(COALESCE(cp.access::int, mi.default_access::int)) AS effective_access
 FROM nxc_menu.menu_items mi
 LEFT JOIN nxc_menu.components c ON c.id = mi.component_id AND c.deleted_at IS NULL
@@ -316,8 +271,7 @@ WHERE mi.tenant_id = :tenantId
   AND mi.deleted_at IS NULL
   AND mi.is_visible = TRUE
 GROUP BY mi.id, mi.parent_id, mi.name, mi.title, mi.route,
-         mi.icon, mi.icon_type, mi.item_type, mi.order_index, mi.default_access
-HAVING MAX(COALESCE(cp.access::int, mi.default_access::int)) > 0;
+         mi.icon, mi.icon_type, mi.location, mi.item_type, mi.order_index, mi.default_access;
 ```
 
 ---
@@ -354,25 +308,35 @@ token           String                  JWT de sesión. null en fase MVP
     {
       "component": "dashboard",
       "route": "/graphics",
-      "allowed_actions": ["view", "filter", "refresh"],
+      "access": "execute",
       "elements": [
-        { "element_key": "timeFilterSelect#timeFilter", "action": "change" },
-        { "element_key": "cityFilterSelect#cityFilter", "action": "change" },
-        { "element_key": "hostFilterSelect#hostFilter", "action": "change" },
-        { "element_key": "filterButton",               "action": "click"  },
-        { "element_key": "refreshButton",              "action": "click"  }
+        { "element_key": "timeFilterSelect#timeFilter", "access": "execute" },
+        { "element_key": "cityFilterSelect#cityFilter", "access": "execute" },
+        { "element_key": "hostFilterSelect#hostFilter", "access": "execute" },
+        { "element_key": "filterButton",               "access": "execute" },
+        { "element_key": "refreshButton",              "access": "execute" }
       ]
     },
     {
       "component": "alerts",
       "route": "/alerts",
-      "allowed_actions": ["view", "toggle-columns", "filter", "paginate"],
+      "access": "execute",
       "elements": [
-        { "element_key": "columnsMenuBtn",   "action": "click"  },
-        { "element_key": "toggleColumnItem", "action": "click"  },
-        { "element_key": "resetColumnsBtn",  "action": "click"  },
-        { "element_key": "searchInput",      "action": "keyup"  },
-        { "element_key": "paginator",        "action": "page"   }
+        { "element_key": "columnsMenuBtn",   "access": "execute" },
+        { "element_key": "toggleColumnItem", "access": "execute" },
+        { "element_key": "resetColumnsBtn",  "access": "execute" },
+        { "element_key": "searchInput",      "access": "execute" },
+        { "element_key": "paginator",        "access": "execute" }
+      ]
+    },
+    {
+      "component": "user-management",
+      "route": "/admin/users",
+      "access": "hidden",
+      "elements": [
+        { "element_key": "btn-create-user",  "access": "hidden" },
+        { "element_key": "btn-edit-user",    "access": "hidden" },
+        { "element_key": "btn-delete-user",  "access": "hidden" }
       ]
     }
   ],
@@ -384,7 +348,9 @@ token           String                  JWT de sesión. null en fase MVP
       "route": "/graphics",
       "icon": "layout-dashboard",
       "icon_type": "tabler",
+      "location": "navbar",
       "item_type": "ITEM",
+      "access": "execute",
       "order_index": 10,
       "children": []
     },
@@ -395,7 +361,9 @@ token           String                  JWT de sesión. null en fase MVP
       "route": null,
       "icon": "user-circle",
       "icon_type": "tabler",
+      "location": "header-dropdown",
       "item_type": "GROUP",
+      "access": "execute",
       "order_index": 50,
       "children": [
         {
@@ -405,7 +373,9 @@ token           String                  JWT de sesión. null en fase MVP
           "route": "/profile",
           "icon": "user",
           "icon_type": "tabler",
+          "location": "header-dropdown",
           "item_type": "ITEM",
+          "access": "execute",
           "order_index": 10,
           "children": []
         },
@@ -416,8 +386,37 @@ token           String                  JWT de sesión. null en fase MVP
           "route": "/auth/login",
           "icon": "logout",
           "icon_type": "tabler",
+          "location": "header-dropdown",
           "item_type": "ITEM",
+          "access": "execute",
           "order_index": 30,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "...",
+      "name": "Administration",
+      "title": "Administración",
+      "route": null,
+      "icon": "shield",
+      "icon_type": "tabler",
+      "location": "header-dropdown",
+      "item_type": "GROUP",
+      "access": "hidden",
+      "order_index": 60,
+      "children": [
+        {
+          "id": "...",
+          "name": "Users",
+          "title": "Usuarios",
+          "route": "/admin/users",
+          "icon": "users",
+          "icon_type": "tabler",
+          "location": "header-dropdown",
+          "item_type": "ITEM",
+          "access": "hidden",
+          "order_index": 10,
           "children": []
         }
       ]
@@ -448,8 +447,8 @@ roles           String[]        Nombres de roles activos (ej. ["TENANT_ADMIN"])
 ```
 component       String          module_key del componente (ej. "dashboard")
 route           String          Ruta Angular (ej. "/graphics")
-allowed_actions String[]        Acciones semánticas habilitadas (ej. ["view","filter","refresh"])
-elements        ElementPermissionResponse[]  Elementos con acceso ≥ VIEW
+access          String          Nivel de acceso efectivo: "execute" | "view" | "hidden"
+elements        ElementPermissionResponse[]  Todos los elementos del componente con su acceso efectivo
 ```
 
 ---
@@ -458,7 +457,7 @@ elements        ElementPermissionResponse[]  Elementos con acceso ≥ VIEW
 
 ```
 element_key     String          Clave técnica del elemento (ej. "filterButton")
-action          String          Evento DOM: "click" | "keyup" | "change" | "page" | "sort" | "emit"
+access          String          Nivel de acceso: "execute" | "view" | "hidden"
 ```
 
 ---
@@ -472,7 +471,9 @@ title           String          Etiqueta localizable para mostrar al usuario
 route           String          Ruta Angular. null para GROUPs sin ruta
 icon            String          Nombre del icono (ej. "layout-dashboard")
 icon_type       String          Librería: "tabler" | "material" | "custom"
+location        String          Ubicación en la UI: "navbar" | "sidebar" | "header-dropdown" | "footer" | "internal"
 item_type       String          "GROUP" | "ITEM" | "DIVIDER" | "EXTERNAL_LINK"
+access          String          Nivel de acceso efectivo: "execute" | "view" | "hidden"
 order_index     Integer         Posición dentro del mismo nivel
 children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no tiene hijos
 ```
@@ -519,8 +520,8 @@ children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no t
 **entonces:**
 - La respuesta tiene `status 200`.
 - El bloque `user` contiene `roles: ["TENANT_ADMIN"]`.
-- El bloque `permissions` incluye todos los componentes con `effective_access ≥ VIEW` para el rol `TENANT_ADMIN` (dashboard, alerts, incidents, traps, auth, user-management, role-management, menu-management, audit-viewer, tenant-settings).
-- El bloque `menus` incluye todos los ítems de menú con `effective_access ≠ HIDDEN` para el rol `TENANT_ADMIN`, incluyendo el grupo `Administration` y sus hijos.
+- El bloque `permissions` incluye todos los componentes configurados para el tenant (incluyendo los de acceso `hidden`).
+- El bloque `menus` incluye todos los ítems de menú del tenant (incluyendo los de acceso `hidden`), incluyendo el grupo `Administration` y sus hijos con `access: "hidden"`.
 - El campo `token` es `null`.
 
 ---
@@ -531,18 +532,19 @@ children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no t
 **cuando** se invoca `GET /api/v1/me/profile`,  
 **entonces:**
 - Para cada componente, el sistema aplica el nivel máximo: si `VIEWER` tiene `VIEW` y `EDITOR` tiene `EXECUTE`, el resultado es `EXECUTE`.
-- El bloque `permissions` refleja el acceso EXECUTE, incluidos los `allowedActions` correspondientes.
+- El bloque `permissions` refleja el acceso EXECUTE con `"access": "execute"`.
 - El bloque `user.roles` contiene `["VIEWER", "EDITOR"]`.
 
 ---
 
-### CA-MNU-003 — Componentes HIDDEN no aparecen
+### CA-MNU-003 — Componentes HIDDEN llegan con acceso `"hidden"`
 
 **Dado** un usuario con rol `VIEWER`,  
 **cuando** se invoca `GET /api/v1/me/profile`,  
 **entonces:**
-- Los componentes `user-management`, `role-management`, `menu-management`, `audit-viewer` y `tenant-settings` **no aparecen** en el bloque `permissions` (acceso efectivo es `HIDDEN` para `VIEWER`).
-- Los ítems de menú `Administration` y sus hijos (`Users`, `Roles`, `Menus`, `Audit`) **no aparecen** en el bloque `menus`.
+- Los componentes `user-management`, `role-management`, `menu-management`, `audit-viewer` y `tenant-settings` aparecen en el bloque `permissions` con `"access": "hidden"`.
+- Los ítems de menú `Administration` y sus hijos (`Users`, `Roles`, `Menus`, `Audit`) aparecen en el bloque `menus` con `"access": "hidden"`.
+- El frontend Angular usa el valor `"hidden"` para no renderizar esas secciones.
 
 ---
 
@@ -551,9 +553,9 @@ children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no t
 **Dado** un usuario con rol `EDITOR`,  
 **cuando** se invoca `GET /api/v1/me/profile`,  
 **entonces:**
-- Los elementos `btn-delete-user`, `btn-suspend-user`, `btn-delete-role` tienen acceso `VIEW` para `EDITOR`. El frontend los recibe pero los renderiza deshabilitados.
-- Los elementos con acceso `HIDDEN` no aparecen en la respuesta.
-- Los elementos con acceso `EXECUTE` incluyen el campo `action` correcto.
+- Los elementos `btn-delete-user`, `btn-suspend-user`, `btn-delete-role` tienen acceso `VIEW` para `EDITOR`. El frontend los recibe con `"access": "view"` y los renderiza deshabilitados.
+- Los elementos con acceso `HIDDEN` aparecen en la respuesta con `"access": "hidden"`.
+- Los elementos con acceso `EXECUTE` aparecen con `"access": "execute"`.
 
 ---
 
@@ -563,8 +565,8 @@ children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no t
 **cuando** se invoca `GET /api/v1/me/profile`,  
 **entonces:**
 - El elemento `btn-create-user` aparece en el bloque `elements` del componente `user-management`.
-- La acción es `"click"`.
-- El `allowedActions` del componente incluye `"create"`.
+- El campo `access` del elemento es `"execute"`.
+- El campo `access` del componente `user-management` también refleja el nivel elevado por el override.
 
 ---
 
@@ -585,7 +587,7 @@ children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no t
 - Los ítems raíz (`parent_id IS NULL`) están en el array raíz de `menus`.
 - Los ítems hijo están anidados en el campo `children` del ítem padre correcto.
 - Dentro de cada nivel, los ítems están ordenados por `order_index` ascendente.
-- Ningún ítem con `effective_access = HIDDEN` aparece en el árbol (ni en raíz ni en `children`).
+- Los ítems con `effective_access = HIDDEN` aparecen en el árbol con `"access": "hidden"`, tanto en raíz como en `children`; el frontend decide su renderizado.
 
 ---
 
@@ -619,14 +621,13 @@ children        MenuItemResponse[]  Ítems hijo, recursivo. Lista vacía si no t
 
 ---
 
-### CA-MNU-011 — allowedActions contiene solo acciones EXECUTE
+### CA-MNU-011 — Serialización de `access` en minúscula
 
-**Dado** un usuario con rol `VIEWER` (acceso `VIEW` al componente `dashboard`),  
+**Dado** cualquier usuario activo,  
 **cuando** se invoca `GET /api/v1/me/profile`,  
 **entonces:**
-- El componente `dashboard` aparece en `permissions` (acceso ≥ VIEW).
-- `allowedActions` contiene únicamente `["view"]`.
-- Los elementos de `dashboard` aparecen en `elements` pero **no se añaden acciones** a `allowedActions` (porque el acceso al componente es VIEW, no EXECUTE).
+- Todos los campos `access` en `permissions`, `elements` y `menus` usan valores en minúscula: `"execute"`, `"view"` o `"hidden"` (nunca `"EXECUTE"`, `"VIEW"`, `"HIDDEN"`).
+- El contrato es uniforme en todos los niveles: componente, elemento e ítem de menú.
 
 ---
 
@@ -684,9 +685,9 @@ module/menu/
 │   ├── model/
 │   │   ├── UserProfile.java                 ← aggregate root: { user, permissions, menus, token }
 │   │   ├── UserInfo.java                    ← value object: { id, username, name, email, phone, photo, roles }
-│   │   ├── ComponentPermission.java         ← value object: { component, route, allowedActions, elements }
-│   │   ├── ElementPermission.java           ← value object: { elementKey, action }
-│   │   ├── MenuItem.java                    ← value object: { id, name, title, route, icon, iconType, itemType, orderIndex, children }
+│   │   ├── ComponentPermission.java         ← value object: { component, route, access, elements }
+│   │   ├── ElementPermission.java           ← value object: { elementKey, access }
+│   │   ├── MenuItem.java                    ← value object: { id, name, title, route, icon, iconType, location, itemType, access, orderIndex, children }
 │   │   ├── AccessLevel.java                 ← enum: HIDDEN | VIEW | EXECUTE
 │   │   └── MenuItemType.java                ← enum: GROUP | ITEM | DIVIDER | EXTERNAL_LINK
 │   └── repository/
