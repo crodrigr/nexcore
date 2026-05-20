@@ -1,0 +1,25 @@
+
+services:
+
+  # 🗄 POSTGRES
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: incidents
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - nexcore_postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexcore-network 
+
+volumes:
+  nexcore_postgres_data:
+
+networks:
+  nexcore-network:
+    driver: bridge

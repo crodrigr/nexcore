@@ -1,0 +1,449 @@
+{
+  "info": {
+    "name": "Nexcore - Module Tenant",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección de endpoints del módulo tenant: Tenants, Usuarios, Roles e Invitaciones."
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "tenant_id", "value": "00000000-0000-0000-0000-000000000001" },
+    { "key": "actor_id",  "value": "00000000-0000-0000-0000-000000000002" },
+    { "key": "tenant_slug", "value": "demo" }
+  ],
+  "item": [
+    {
+      "name": "Tenants",
+      "item": [
+        {
+          "name": "Listar tenants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenants?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenants"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "SUPER_ADMIN — Lista todos los tenants paginados."
+          }
+        },
+        {
+          "name": "Crear tenant",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenants",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenants"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"mi-empresa\",\n  \"name\": \"Mi Empresa SAS\",\n  \"legalName\": \"Mi Empresa S.A.S.\",\n  \"taxId\": \"900123456-1\",\n  \"plan\": \"STARTER\",\n  \"mode\": \"SAAS_SHARED\",\n  \"timezone\": \"America/Bogota\",\n  \"locale\": \"es-CO\",\n  \"dateFormat\": \"DD/MM/YYYY\",\n  \"currency\": \"COP\"\n}"
+            },
+            "description": "SUPER_ADMIN — Crea un nuevo tenant. El trigger de BD crea automáticamente los roles TENANT_ADMIN, EDITOR y VIEWER."
+          }
+        },
+        {
+          "name": "Obtener tenant por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenants/{{tenant_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenants", "{{tenant_id}}"]
+            },
+            "description": "Obtiene el detalle de un tenant por su UUID."
+          }
+        },
+        {
+          "name": "Actualizar tenant",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenants/{{tenant_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenants", "{{tenant_id}}"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Actor-Super-Admin", "value": "false" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mi Empresa Actualizada SAS\",\n  \"legalName\": \"Mi Empresa Actualizada S.A.S.\",\n  \"timezone\": \"America/Bogota\",\n  \"locale\": \"es-CO\",\n  \"mfaRequired\": false,\n  \"sessionTimeoutMinutes\": 480,\n  \"maxLoginAttempts\": 5,\n  \"passwordMinLength\": 8,\n  \"passwordRequiresUpper\": true,\n  \"passwordRequiresSpecial\": false\n}"
+            },
+            "description": "Actualiza datos del tenant. X-Actor-Super-Admin=true permite cambiar plan/modo."
+          }
+        },
+        {
+          "name": "Suspender tenant",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenants/{{tenant_id}}/suspend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenants", "{{tenant_id}}", "suspend"]
+            },
+            "description": "SUPER_ADMIN — Suspende el tenant. Retorna 204 No Content."
+          }
+        },
+        {
+          "name": "Activar tenant",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenants/{{tenant_id}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenants", "{{tenant_id}}", "activate"]
+            },
+            "description": "SUPER_ADMIN — Reactiva un tenant suspendido. Retorna 204 No Content."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "status", "value": "ACTIVE", "disabled": true },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "description": "Lista usuarios del tenant con paginación y filtros opcionales: status (PENDING_ACTIVATION|ACTIVE|SUSPENDED|BLOCKED|DELETED) y search."
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.usuario@empresa.com\",\n  \"username\": \"nuevo.usuario\",\n  \"fullName\": \"Nuevo Usuario\",\n  \"phone\": \"3001234567\",\n  \"roleIds\": [],\n  \"sendInvite\": true\n}"
+            },
+            "description": "Crea un usuario dentro del tenant. sendInvite=true envía correo de activación."
+          }
+        },
+        {
+          "name": "Mi perfil (me)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "Retorna el perfil del usuario autenticado (actor)."
+          }
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{actor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "{{actor_id}}"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "description": "Obtiene el detalle de un usuario específico del tenant."
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{actor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "{{actor_id}}"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin",  "value": "false" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nombre Actualizado\",\n  \"phone\": \"3009876543\",\n  \"photoUrl\": \"https://cdn.ejemplo.com/foto.png\"\n}"
+            },
+            "description": "Actualiza datos del usuario. X-Is-Tenant-Admin=true amplía los campos editables."
+          }
+        },
+        {
+          "name": "Suspender usuario",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{actor_id}}/suspend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "{{actor_id}}", "suspend"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "Suspende el usuario. Retorna 204 No Content."
+          }
+        },
+        {
+          "name": "Activar usuario",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{actor_id}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "{{actor_id}}", "activate"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "Activa un usuario suspendido. Retorna 204 No Content."
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{actor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "{{actor_id}}"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "Soft-delete del usuario. Retorna 204 No Content."
+          }
+        },
+        {
+          "name": "Asignar roles a usuario",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{actor_id}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "{{actor_id}}", "roles"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignments\": [\n    {\n      \"roleId\": \"00000000-0000-0000-0000-000000000010\",\n      \"expiresAt\": null\n    }\n  ]\n}"
+            },
+            "description": "Reemplaza los roles del usuario. Los roles anteriores se eliminan y se asignan los nuevos."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invitaciones",
+      "item": [
+        {
+          "name": "Invitar usuario",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/invite",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "invite"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invitado@empresa.com\",\n  \"roleIds\": [\n    \"00000000-0000-0000-0000-000000000010\"\n  ]\n}"
+            },
+            "description": "Envía una invitación por email al usuario con los roles pre-asignados."
+          }
+        },
+        {
+          "name": "Aceptar invitación",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/invitations/accept",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "invitations", "accept"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"TOKEN_DE_INVITACION\",\n  \"username\": \"nuevo.usuario\",\n  \"fullName\": \"Nuevo Usuario Invitado\"\n}"
+            },
+            "description": "El usuario acepta la invitación usando el token recibido por email."
+          }
+        },
+        {
+          "name": "Listar invitaciones",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/invitations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "invitations"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "description": "Lista todas las invitaciones del tenant (pendientes, aceptadas y revocadas)."
+          }
+        },
+        {
+          "name": "Revocar invitación",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/invitations/00000000-0000-0000-0000-000000000099/revoke",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "invitations", "00000000-0000-0000-0000-000000000099", "revoke"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "Revoca una invitación pendiente por su ID. Retorna 204 No Content."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "description": "Lista todos los roles del tenant (incluye los de sistema: TENANT_ADMIN, EDITOR, VIEWER)."
+          }
+        },
+        {
+          "name": "Crear rol",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"SUPERVISOR\",\n  \"description\": \"Rol de supervisión con acceso de lectura extendido\",\n  \"isDefault\": false\n}"
+            },
+            "description": "Crea un rol personalizado para el tenant."
+          }
+        },
+        {
+          "name": "Obtener rol por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/00000000-0000-0000-0000-000000000010",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", "00000000-0000-0000-0000-000000000010"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "description": "Obtiene el detalle de un rol con el conteo de usuarios activos."
+          }
+        },
+        {
+          "name": "Actualizar rol",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/00000000-0000-0000-0000-000000000010",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", "00000000-0000-0000-0000-000000000010"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"SUPERVISOR\",\n  \"description\": \"Descripción actualizada del rol\",\n  \"isDefault\": false\n}"
+            },
+            "description": "Actualiza nombre y descripción del rol. No se pueden modificar roles de sistema."
+          }
+        },
+        {
+          "name": "Eliminar rol",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/00000000-0000-0000-0000-000000000010",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", "00000000-0000-0000-0000-000000000010"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+            ],
+            "description": "Elimina un rol personalizado. Falla si el rol tiene usuarios asignados o es de sistema. Retorna 204 No Content."
+          }
+        }
+      ]
+    }
+  ]
+}
