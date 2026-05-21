@@ -1,0 +1,95 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: nexcore-auth-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: ${DB_USER:admin}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_schema: nxc_auth
+
+  # Flyway removed from this service; migrations managed externally
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USER:crodrigr.test1@gmail.com}
+    password: ${GMAIL_PASS:xqwd vqvg pauk mptb}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    default-encoding: UTF-8
+
+# Configuración personalizada de NexCore Auth
+nexcore:
+  auth:
+    jwt:
+      secret: ${JWT_SECRET:changeme-this-is-a-secret-key-for-jwt-signing-must-be-at-least-256-bits}
+      access-expiry-seconds: 900      # 15 minutos
+      challenge-expiry-seconds: 300   # 5 minutos
+      refresh-expiry-days: 7
+    
+    otp:
+      length: 6
+      expiry-minutes: 10
+      max-attempts: 5
+    
+    brute-force:
+      max-attempts: 10
+      window-minutes: 15
+      
+    password-reset:
+      expiry-minutes: 30
+      max-requests-per-hour: 3
+    
+    email:
+      from: crodrigr@gmail.com
+      from-name: Crodrigr (NexCore)
+      templates:
+        otp: classpath:templates/email/otp-code.html
+        password-reset: classpath:templates/email/password-reset.html
+        password-changed: classpath:templates/email/password-changed.html
+    
+  core:
+    url: ${NEXCORE_CORE_URL:http://localhost:8080}
+    endpoints:
+      user-profile: /api/v1/me/profile
+
+logging:
+  level:
+    com.nexore.auth: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized

@@ -17,16 +17,21 @@ services:
     networks:
       - nexcore-network 
 
-  # 📧 POSTFIX (Mail Server)
+
+  # 📧 Postfix relay for sending real emails from containers
   postfix:
-    image: catatnight/postfix
-    container_name: postfix-mail
+    image: boky/postfix:latest
+    container_name: postfix-relay
     restart: unless-stopped
-    environment:
-      - maildomain=mail.local
-      - smtp_user=admin:admin
     ports:
-      - "25:25"
+      - "1587:587" # submission port
+    environment:
+      - HOSTNAME=postfix
+      - ALLOWED_SENDER_DOMAINS=example.com
+      # If you need a relay host, uncomment and set the following:
+      # - RELAYHOST=smtp.relay.example.com:587
+      # - RELAYHOST_USERNAME=relayuser
+      # - RELAYHOST_PASSWORD=relaypass
     networks:
       - nexcore-network
 

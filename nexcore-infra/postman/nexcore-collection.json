@@ -6,12 +6,20 @@
   },
   "variable": [
     { "key": "base_url",          "value": "http://localhost:8080" },
+    { "key": "auth_base_url",     "value": "http://localhost:8081", "description": "Base URL for Auth Service" },
     { "key": "tenant_system_id",  "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant system" },
     { "key": "tenant_demo_id",    "value": "00000000-0000-0000-0000-000000000002", "description": "Tenant demo" },
     { "key": "tenant_id",         "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant activo usado en los headers (cambiar según contexto)" },
     { "key": "actor_id",          "value": "00000000-0000-0000-0001-000000000001", "description": "super.admin (sistema)" },
     { "key": "actor_demo_id",     "value": "00000000-0000-0000-0001-000000000002", "description": "admin.demo (tenant demo)" },
-    { "key": "tenant_slug",       "value": "demo" }
+    { "key": "tenant_slug",       "value": "demo" },
+    { "key": "test_username",     "value": "super.admin" },
+    { "key": "test_password",     "value": "NexCore@2026!" },
+    { "key": "challenge_token",   "value": "", "description": "Token from login (step 1)" },
+    { "key": "access_token",      "value": "", "description": "JWT access token" },
+    { "key": "refresh_token",     "value": "", "description": "Refresh token" },
+    { "key": "session_id",        "value": "", "description": "Current session ID" },
+    { "key": "user_id",           "value": "", "description": "Current user ID" }
   ],
   "item": [
     {
@@ -513,6 +521,204 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}" }
             ],
             "description": "Sin X-Actor-Id. Debe retornar HTTP 400 (header requerido faltante)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autenticación (Auth Service)",
+      "description": "Endpoints del servicio de autenticación: login 2FA, gestión de sesiones y recuperación de contraseña.",
+      "item": [
+        {
+          "name": "Login - Paso 1 (Enviar OTP)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/login",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"username\": \"{{test_username}}\",\n  \"password\": \"{{test_password}}\"\n}"
+            },
+            "description": "Paso 1 del login 2FA: valida credenciales y envía OTP al email del usuario.\n\nRespuesta exitosa (200):\n{\n  \"challengeToken\": \"eyJhbGc...\",\n  \"message\": \"OTP sent to your email\",\n  \"expiresIn\": 300\n}\n\nGuardar challengeToken en variable de entorno para el paso 2."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('challenge_token', jsonData.challengeToken);",
+                  "    console.log('Challenge token saved:', jsonData.challengeToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Paso 2 (Verificar OTP)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/verify-otp",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "verify-otp"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeToken\": \"{{challenge_token}}\",\n  \"code\": \"123456\"\n}"
+            },
+            "description": "Paso 2 del login 2FA: verifica el código OTP recibido por email.\n\nRespuesta exitosa (200):\n{\n  \"token\": \"eyJhbGc...\",\n  \"refreshToken\": \"a1b2c3...\",\n  \"expiresIn\": 900,\n  \"profile\": { ... }\n}\n\nGuardar token, refreshToken y sessionId para uso posterior."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.token);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                  "    console.log('Access token saved');",
+                  "    console.log('Refresh token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refrescar Token",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/refresh",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "header": [
+              { "key": "X-Refresh-Token", "value": "{{refresh_token}}" }
+            ],
+            "description": "Genera un nuevo access token usando el refresh token.\n\nRespuesta exitosa (200):\n{\n  \"token\": \"eyJhbGc...\",\n  \"refreshToken\": \"a1b2c3...\",\n  \"expiresIn\": 900,\n  \"profile\": { ... }\n}\n\nEl refreshToken se mantiene igual."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.token);",
+                  "    console.log('Access token refreshed');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout - Cerrar Sesión",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/logout?sessionId={{session_id}}",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "logout"],
+              "query": [
+                { "key": "sessionId", "value": "{{session_id}}" }
+              ]
+            },
+            "description": "Cierra la sesión actual invalidando el refresh token.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Logged out successfully\"\n}"
+          }
+        },
+        {
+          "name": "Logout All - Cerrar Todas las Sesiones",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/logout-all?userId={{user_id}}&currentSessionId={{session_id}}",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "logout-all"],
+              "query": [
+                { "key": "userId", "value": "{{user_id}}" },
+                { "key": "currentSessionId", "value": "{{session_id}}" }
+              ]
+            },
+            "description": "Cierra todas las sesiones del usuario excepto la actual.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"All other sessions have been logged out\"\n}"
+          }
+        },
+        {
+          "name": "Solicitar Reset de Contraseña",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/password/reset/request",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "password", "reset", "request"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"email\": \"usuario@empresa.com\"\n}"
+            },
+            "description": "Solicita un reset de contraseña enviando un email con el token.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Password reset email sent\"\n}\n\nEl token se envía por email y tiene validez de 1 hora."
+          }
+        },
+        {
+          "name": "Confirmar Reset de Contraseña",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/password/reset/confirm",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "password", "reset", "confirm"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"RESET_TOKEN_FROM_EMAIL\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "description": "Confirma el reset usando el token recibido por email y establece la nueva contraseña.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Password reset successfully\"\n}"
+          }
+        },
+        {
+          "name": "Cambiar Contraseña (Usuario Autenticado)",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{auth_base_url}}/auth/password?userId={{user_id}}",
+              "host": ["{{auth_base_url}}"],
+              "path": ["auth", "password"],
+              "query": [
+                { "key": "userId", "value": "{{user_id}}" }
+              ]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"OldPassword123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "description": "Permite al usuario autenticado cambiar su contraseña proporcionando la contraseña actual.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Password changed successfully\"\n}"
           }
         }
       ]

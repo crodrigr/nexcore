@@ -67,7 +67,7 @@ Está construido como un conjunto de microservicios y un monolito modular (`nexc
 | Build | Gradle | 9.x |
 | Base de datos | PostgreSQL | 15 |
 | Seguridad BD | Row-Level Security (RLS) | — |
-| Migraciones | Flyway | — |
+| Migraciones | Gestión externa (scripts/migrations) | — |
 | Frontend | Angular + Nx | 18 |
 | Contenedores | Docker + Compose | — |
 | Orquestación | Kubernetes + Helm | — |
@@ -89,7 +89,7 @@ Está construido como un conjunto de microservicios y un monolito modular (`nexc
 | **Spring Data JPA** | | | ✓ | | | ✓ | ✓ | ✓ |
 | **Spring Data R2DBC** | | | | ✓ | | | | |
 | **Spring Data MongoDB Reactive** | | | | ✓ | | | | |
-| **Flyway Migration** | | | ✓ | | | ✓ | | |
+| **DB Migrations** (managed externally) | | | ✓ | | | ✓ | | |
 | **Validation** | | | ✓ | | ✓ | ✓ | ✓ | ✓ |
 | **Java Mail Sender** | | | ✓ | | ✓ | | | |
 | **Spring Boot Actuator** | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -171,7 +171,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.flywaydb:flyway-database-postgresql'
+    // Flyway removed — migrations handled externally
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
