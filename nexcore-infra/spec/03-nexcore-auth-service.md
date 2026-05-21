@@ -189,13 +189,13 @@ nexcore-auth-service → Servicios HTTP:
 
 **Errores:**
 
-| Código | HTTP | Condición |
+| Code | HTTP | Condition |
 |---|---|---|
-| `NXC-AUTH-0001` | 401 | Credenciales incorrectas (username o password inválido) |
-| `NXC-AUTH-0002` | 403 | Usuario suspendido o bloqueado |
-| `NXC-AUTH-0003` | 403 | Tenant inactivo |
-| `NXC-AUTH-0004` | 429 | Demasiados intentos fallidos (anti-brute-force) |
-| `NXC-AUTH-0005` | 503 | Error al enviar email (el OTP no fue enviado) |
+| `NXC-AUTH-0001` | 401 | Invalid credentials (username or password) |
+| `NXC-AUTH-0002` | 403 | User suspended or blocked |
+| `NXC-AUTH-0003` | 403 | Tenant inactive |
+| `NXC-AUTH-0004` | 429 | Too many failed attempts (anti-brute-force) |
+| `NXC-AUTH-0005` | 503 | Email sending error (OTP not sent) |
 
 > **Seguridad:** Ante credenciales incorrectas, siempre retornar el mismo mensaje genérico ("Credenciales incorrectas"), sin indicar si el usuario existe o no.
 
@@ -232,12 +232,12 @@ nexcore-auth-service → Servicios HTTP:
 
 **Errores:**
 
-| Código | HTTP | Condición |
+| Code | HTTP | Condition |
 |---|---|---|
-| `NXC-AUTH-0006` | 401 | `challengeToken` inválido o expirado |
-| `NXC-AUTH-0007` | 401 | Código OTP incorrecto |
-| `NXC-AUTH-0008` | 401 | Código OTP expirado |
-| `NXC-AUTH-0009` | 429 | Demasiados intentos fallidos de OTP (bloquear tras N intentos) |
+| `NXC-AUTH-0006` | 401 | Invalid or expired `challengeToken` |
+| `NXC-AUTH-0007` | 401 | Invalid OTP code |
+| `NXC-AUTH-0008` | 401 | Expired OTP code |
+| `NXC-AUTH-0009` | 429 | Too many failed OTP attempts (block after N attempts) |
 
 ---
 
@@ -269,10 +269,10 @@ nexcore-auth-service → Servicios HTTP:
 
 **Errores:**
 
-| Código | HTTP | Condición |
+| Code | HTTP | Condition |
 |---|---|---|
-| `NXC-AUTH-0010` | 429 | Demasiadas solicitudes de reset en un período corto |
-| `NXC-AUTH-0011` | 503 | Error al enviar email |
+| `NXC-AUTH-0010` | 429 | Too many reset requests in a short period |
+| `NXC-AUTH-0011` | 503 | Email sending error |
 
 ---
 
@@ -306,12 +306,12 @@ nexcore-auth-service → Servicios HTTP:
 
 **Errores:**
 
-| Código | HTTP | Condición |
+| Code | HTTP | Condition |
 |---|---|---|
-| `NXC-AUTH-0012` | 400 | Token inválido o ya utilizado |
-| `NXC-AUTH-0013` | 400 | Token expirado |
-| `NXC-AUTH-0014` | 400 | Las contraseñas no coinciden |
-| `NXC-AUTH-0015` | 400 | La contraseña no cumple la política de seguridad |
+| `NXC-AUTH-0012` | 400 | Invalid or already used token |
+| `NXC-AUTH-0013` | 400 | Expired token |
+| `NXC-AUTH-0014` | 400 | Passwords do not match |
+| `NXC-AUTH-0015` | 400 | Password does not meet security policy |
 
 ---
 
@@ -354,13 +354,13 @@ Authorization: Bearer {accessToken}
 
 **Errores:**
 
-| Código | HTTP | Condición |
+| Code | HTTP | Condition |
 |---|---|---|
-| `NXC-AUTH-0016` | 401 | Token inválido o expirado |
-| `NXC-AUTH-0017` | 400 | Contraseña actual incorrecta |
-| `NXC-AUTH-0018` | 400 | La nueva contraseña es igual a la actual |
-| `NXC-AUTH-0019` | 400 | Las contraseñas no coinciden |
-| `NXC-AUTH-0020` | 400 | La contraseña no cumple la política de seguridad |
+| `NXC-AUTH-0016` | 401 | Invalid or expired token |
+| `NXC-AUTH-0017` | 400 | Incorrect current password |
+| `NXC-AUTH-0018` | 400 | New password is the same as current password |
+| `NXC-AUTH-0019` | 400 | Passwords do not match |
+| `NXC-AUTH-0020` | 400 | Password does not meet security policy |
 
 ---
 
