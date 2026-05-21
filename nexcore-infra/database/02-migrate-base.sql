@@ -544,13 +544,13 @@ BEGIN
     -- Navbar principal (location implícita: navbar)
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_dashboard, NULL,
         'Dashboard', 'Panel Principal', '/graphics',
-        'layout-dashboard', 'tabler',
+        'layout-dashboard', 'tabler', 'navbar'::nxc_menu.menu_location,
         'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -561,13 +561,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_alerts, NULL,
         'Alerts', 'Alertas', '/alerts',
-        'bell', 'tabler',
+        'bell', 'tabler', 'navbar'::nxc_menu.menu_location,
         'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -578,13 +578,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_incidents, NULL,
         'Incidents', 'Incidentes', '/incidents',
-        'alert-circle', 'tabler',
+        'alert-circle', 'tabler', 'navbar'::nxc_menu.menu_location,
         'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -595,13 +595,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_traps, NULL,
         'Traps', 'Traps SNMP', '/traps',
-        'radar', 'tabler',
+        'radar', 'tabler', 'navbar'::nxc_menu.menu_location,
         'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -613,13 +613,13 @@ BEGIN
     -- Grupo dropdown de perfil (header-dropdown) — sin ruta propia
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, NULL, NULL,
         'ProfileMenu', 'Perfil', NULL,
-        'user-circle', 'tabler',
+        'user-circle', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'GROUP', 50, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -631,13 +631,13 @@ BEGIN
     -- Hijos del grupo perfil
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, NULL, v_menu_profile_group,
         'Profile', 'Mi Perfil', '/profile',
-        'user', 'tabler',
+        'user', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -645,13 +645,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_settings, v_menu_profile_group,
         'Settings', 'Configuración', '/admin/settings',
-        'settings', 'tabler',
+        'settings', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -659,13 +659,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_auth, v_menu_profile_group,
         'Logout', 'Cerrar Sesión', '/auth/login',
-        'logout', 'tabler',
+        'logout', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -674,13 +674,13 @@ BEGIN
     -- Grupo Administración (solo visible para TENANT_ADMIN y SUPER_ADMIN)
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, NULL, NULL,
         'Administration', 'Administración', NULL,
-        'shield', 'tabler',
+        'shield', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'GROUP', 60, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -691,13 +691,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_users, v_menu_admin_group,
         'Users', 'Usuarios', '/admin/users',
-        'users', 'tabler',
+        'users', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 10, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -705,13 +705,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_roles, v_menu_admin_group,
         'Roles', 'Roles', '/admin/roles',
-        'lock', 'tabler',
+        'lock', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 20, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -719,13 +719,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_menus, v_menu_admin_group,
         'Menus', 'Menús', '/admin/menus',
-        'layout-navbar', 'tabler',
+        'layout-navbar', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 30, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -733,13 +733,13 @@ BEGIN
 
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
-        name, title, route, icon, icon_type,
+        name, title, route, icon, icon_type, location,
         item_type, order_index, is_visible, is_system, default_access,
         created_by, created_at, updated_at, version
     ) VALUES (
         v_tid_system, v_comp_audit, v_menu_admin_group,
         'Audit', 'Auditoría', '/admin/audit',
-        'history', 'tabler',
+        'history', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
         'ITEM', 40, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING

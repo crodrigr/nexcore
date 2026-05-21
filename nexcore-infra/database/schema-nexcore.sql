@@ -88,6 +88,16 @@ DO $$ BEGIN
         );
     END IF;
 
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'menu_location') THEN
+        CREATE TYPE nxc_menu.menu_location AS ENUM (
+            'navbar',           -- barra de navegación principal
+            'sidebar',          -- panel lateral
+            'header-dropdown',  -- menú desplegable del header (perfil, ajustes, logout)
+            'footer',           -- pie de página
+            'internal'          -- uso interno, no visible en la navegación principal
+        );
+    END IF;
+
 END $$;
 
 -- =============================================================================
@@ -520,6 +530,7 @@ CREATE TABLE IF NOT EXISTS nxc_menu.menu_items (
     route           VARCHAR(255),
     icon            VARCHAR(150),
     icon_type       VARCHAR(50)     NOT NULL DEFAULT 'tabler', -- 'tabler' | 'material' | 'custom'
+    location        nxc_menu.menu_location  NOT NULL DEFAULT 'navbar',
     item_type       nxc_menu.menu_item_type NOT NULL DEFAULT 'ITEM',
     order_index     INTEGER         NOT NULL DEFAULT 0,
     is_visible      BOOLEAN         NOT NULL DEFAULT TRUE,
@@ -1106,6 +1117,7 @@ SELECT
     mi.route,
     mi.icon,
     mi.icon_type,
+    mi.location,
     mi.item_type,
     mi.order_index,
     mi.is_visible,
