@@ -32,6 +32,14 @@ Está construido como un conjunto de microservicios y un monolito modular (`nexc
 - **Sin secretos en código**: configuración por variables de entorno / Vault en producción
 - **Dominio-agnóstico**: los módulos base (tenant, menu, auth, config) son genéricos; el negocio se añade encima
 
+### 1.3 Envío de correos (SMTP/Postfix)
+
+- Todos los correos transaccionales (OTP, recuperación, notificaciones) se envían vía **SMTP** usando un servidor Postfix corporativo o de desarrollo.
+- La configuración SMTP (host, puerto, usuario, contraseña, TLS) se define por variables de entorno o archivos de configuración (`application.yml`).
+- El servicio usa `spring-boot-starter-mail` (JavaMailSender) para enviar los correos.
+- Las plantillas pueden ser HTML (Thymeleaf) o texto plano, según la configuración del proyecto.
+- No se debe usar ningún proveedor externo (SendGrid, SES, etc.) salvo que se indique explícitamente.
+
 ---
 
 ## 2. Servicios y estado actual
@@ -438,69 +446,3 @@ nexcore/
         ├── 01-nexcore-core-module-tenant-specs.md
         ├── 02-nexcore-core-module-menu-specs.md
         └── 03-nexcore-auth-service.md
-```
-
----
-
-## 7. Configuración de BD local (desarrollo)
-
-| Parámetro | Valor |
-|---|---|
-| Host | `localhost:5432` |
-| Base de datos | `postgres` |
-| Usuario | `admin` |
-| Contraseña | `admin` |
-| Contenedor Docker | `postgres-db` |
-| Schemas activos | `nxc_tenant`, `nxc_menu`, `nxc_config`, `nxc_auth` |
-
-> Los scripts SQL están en `nexcore-infra/database/`. Para re-crear la BD desde cero: ejecutar primero `schema-nexcore.sql`, luego `02-migrate-base.sql`.
-
----
-
-## 8. Endpoints implementados
-
-### nexcore-core (puerto 8082)
-
-**Módulo tenant** — spec [01](01-nexcore-core-module-tenant-specs.md)
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| POST | `/api/v1/tenants` | Crear tenant |
-| GET | `/api/v1/tenants` | Listar tenants |
-| GET | `/api/v1/tenants/{id}` | Obtener tenant |
-| PATCH | `/api/v1/tenants/{id}` | Actualizar tenant |
-| POST | `/api/v1/tenants/{id}/users` | Crear usuario en tenant |
-| GET | `/api/v1/tenants/{id}/users` | Listar usuarios |
-| GET | `/api/v1/tenants/{id}/users/{userId}` | Obtener usuario |
-| PATCH | `/api/v1/tenants/{id}/users/{userId}` | Actualizar usuario |
-| POST | `/api/v1/tenants/{id}/roles` | Crear rol |
-| GET | `/api/v1/tenants/{id}/roles` | Listar roles |
-| PATCH | `/api/v1/tenants/{id}/roles/{roleId}` | Actualizar rol |
-| DELETE | `/api/v1/tenants/{id}/roles/{roleId}` | Eliminar rol |
-| PUT | `/api/v1/tenants/{id}/users/{userId}/roles` | Asignar roles a usuario |
-
-**Módulo menu** — spec [02](02-nexcore-core-module-menu-specs.md)
-
-| Método | Endpoint | Descripción | Headers |
-|---|---|---|---|
-| GET | `/api/v1/me/profile` | Perfil completo de UI (user + permissions + menus) | `X-Tenant-Id`, `X-Actor-Id` |
-
----
-
-## 9. Pendientes globales
-
-| # | Tema | Servicio | Prioridad |
-|---|---|---|---|
-| P-01 | JWT en módulo-menu (campo `token`) | nexcore-auth-service | Alta |
-| P-02 | Reemplazar headers `X-Tenant-Id`/`X-Actor-Id` por JWT real | nexcore-core | Alta |
-| P-03 | nexcore-auth-service — implementación completa (spec §03) | nexcore-auth-service | Alta |
-| P-04 | nexcore-gateway — routing + filtro JWT | nexcore-gateway | Media |
-| P-05 | Feature flags en module-menu | nexcore-core | Media |
-| P-06 | tenant_menu_config (overrides de menú por tenant) | nexcore-core | Media |
-| P-07 | module-preference — preferencias de usuario | nexcore-core | Media |
-| P-08 | module-config — feature flags CRUD | nexcore-core | Baja |
-| P-09 | nexcore-audit-service | nexcore-audit-service | Baja |
-| P-10 | nexcore-notification-service | nexcore-notification-service | Baja |
-| P-11 | nexcore-frontend (Angular) | nexcore-frontend | Alta |
-| P-12 | Tests unitarios e integración | todos | Media |
-| P-13 | Redis cache para perfil de UI | nexcore-core | Baja |

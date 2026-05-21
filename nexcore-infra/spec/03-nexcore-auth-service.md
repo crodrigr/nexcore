@@ -40,6 +40,14 @@ nexcore-auth-service → SMTP / proveedor email     (envío de OTP y enlaces de 
 
 Tras un login exitoso (2FA completado), `nexcore-auth-service` llama a `nexcore-core GET /api/v1/me/profile` para obtener el perfil de UI y lo incluye en la respuesta al cliente. El campo `token` del perfil será el JWT emitido por este servicio.
 
+### 1.4 Infraestructura de correo (SMTP/Postfix)
+
+- El envío de OTP, enlaces de recuperación y confirmaciones se realiza vía **SMTP** usando un servidor Postfix (desarrollo o producción).
+- La configuración SMTP se define en variables de entorno/configuración (`application.yml`), nunca en código fuente.
+- Se utiliza `spring-boot-starter-mail` (JavaMailSender) para el envío.
+- Las plantillas de correo pueden ser Thymeleaf (HTML) o texto plano.
+- No se usan proveedores externos de email salvo configuración explícita.
+
 ---
 
 ## 2. Modelos del dominio (exploración)
