@@ -17,6 +17,19 @@ services:
     networks:
       - nexcore-network 
 
+  # 📧 POSTFIX (Mail Server)
+  postfix:
+    image: catatnight/postfix
+    container_name: postfix-mail
+    restart: unless-stopped
+    environment:
+      - maildomain=mail.local
+      - smtp_user=admin:admin
+    ports:
+      - "25:25"
+    networks:
+      - nexcore-network
+
 volumes:
   nexcore_postgres_data:
 

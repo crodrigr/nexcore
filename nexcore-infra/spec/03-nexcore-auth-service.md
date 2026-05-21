@@ -143,7 +143,6 @@ Cliente                      nexcore-auth-service              nexcore-core
 #### 3.1.2 Paso 1 — Validación de credenciales (`POST /auth/login`)
 
 **Request:**
-```json
 {
   "tenantId": "uuid",
   "username": "string",
@@ -154,7 +153,24 @@ Cliente                      nexcore-auth-service              nexcore-core
 **Proceso interno:**
 1. Resolver el tenant por `tenantId` → debe estar `ACTIVE`
 2. Buscar el usuario por `username` + `tenantId` en `nxc_tenant.users`
+
+```
+nexcore-auth-service → Base de datos (tablas):
+  • nxc_tenant.users          (identidad, status, email)
+  • nxc_tenant.user_roles     (roles asignados al usuario)
+  • nxc_auth.login_attempts   (registro de intentos)
+  • nxc_auth.otp_codes        (códigos 2FA transitorios)
+  • nxc_auth.refresh_tokens   (tokens de renovación)
+  • nxc_auth.sessions         (sesiones activas)
+  • nxc_auth.password_resets  (tokens de recuperación)
+
+nexcore-auth-service → Servicios HTTP:
+  • nexcore-core (GET /api/v1/me/profile tras login exitoso)
+    - Los módulos tenant y menu están en nexcore-core, por eso las tablas de tenant y roles están allí.
+
 3. Verificar que el usuario no esté `SUSPENDED` o `BLOCKED`
+  • SMTP / proveedor de email (envío de OTP y enlaces de reset)
+```
 4. Verificar la contraseña contra el hash almacenado (bcrypt)
 5. Verificar límite de intentos fallidos (anti-brute-force)
 6. Generar un `challengeToken` (JWT temporal de corta duración, p.ej. 5 minutos, sin acceso a recursos)
