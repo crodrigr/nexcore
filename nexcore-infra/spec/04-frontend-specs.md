@@ -17,7 +17,338 @@ El frontend de NexCore es una aplicación Angular 18 construida con **Nx workspa
 - **Responsive**: diseño mobile-first con breakpoints consistentes
 - **Mantenible**: arquitectura de estilos centralizada y escalable
 
-### 1.1 Stack Tecnológico
+### 1.1 Estructura del Proyecto
+
+```
+nexcore-frontend/                           # Nx Workspace root
+├── apps/
+│   └── web/                                # Aplicación principal
+│       ├── src/
+│       │   ├── app/
+│       │   │   ├── app.component.ts        # Root component
+│       │   │   ├── app.component.scss
+│       │   │   ├── app.config.ts           # App configuration
+│       │   │   ├── app.routes.ts           # Routing principal
+│       │   │   └── core/                   # Core singleton services
+│       │   │       ├── guards/
+│       │   │       │   ├── auth.guard.ts
+│       │   │       │   └── permission.guard.ts
+│       │   │       ├── interceptors/
+│       │   │       │   ├── auth.interceptor.ts
+│       │   │       │   ├── error.interceptor.ts
+│       │   │       │   └── tenant.interceptor.ts
+│       │   │       └── services/
+│       │   │           ├── auth.service.ts
+│       │   │           ├── notification.service.ts
+│       │   │           └── websocket.service.ts
+│       │   ├── assets/
+│       │   │   ├── images/
+│       │   │   │   ├── logo-light.svg
+│       │   │   │   ├── logo-dark.svg
+│       │   │   │   └── favicon.ico
+│       │   │   ├── fonts/
+│       │   │   │   ├── inter/
+│       │   │   │   └── roboto/
+│       │   │   └── i18n/
+│       │   │       ├── en.json
+│       │   │       └── es.json
+│       │   ├── environments/
+│       │   │   ├── environment.ts
+│       │   │   └── environment.prod.ts
+│       │   ├── index.html
+│       │   ├── main.ts
+│       │   └── styles.scss                 # Global styles import
+│       ├── project.json
+│       └── tsconfig.app.json
+│
+├── libs/                                   # Shared libraries
+│   ├── features/                           # Feature modules
+│   │   ├── auth/                           # Módulo de autenticación
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── auth.routes.ts      # Rutas del módulo
+│   │   │   │   │   ├── login/
+│   │   │   │   │   │   ├── login.component.ts
+│   │   │   │   │   │   ├── login.component.html
+│   │   │   │   │   │   ├── login.component.scss
+│   │   │   │   │   │   └── login.component.spec.ts
+│   │   │   │   │   ├── forgot-password/
+│   │   │   │   │   │   ├── forgot-password.component.ts
+│   │   │   │   │   │   ├── forgot-password.component.html
+│   │   │   │   │   │   ├── forgot-password.component.scss
+│   │   │   │   │   │   └── forgot-password.component.spec.ts
+│   │   │   │   │   ├── reset-password/
+│   │   │   │   │   │   ├── reset-password.component.ts
+│   │   │   │   │   │   ├── reset-password.component.html
+│   │   │   │   │   │   ├── reset-password.component.scss
+│   │   │   │   │   │   └── reset-password.component.spec.ts
+│   │   │   │   │   ├── verify-otp/
+│   │   │   │   │   │   ├── verify-otp.component.ts
+│   │   │   │   │   │   ├── verify-otp.component.html
+│   │   │   │   │   │   ├── verify-otp.component.scss
+│   │   │   │   │   │   └── verify-otp.component.spec.ts
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   ├── dashboard/                      # Dashboard principal
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── dashboard.routes.ts
+│   │   │   │   │   ├── dashboard.component.ts
+│   │   │   │   │   ├── dashboard.component.html
+│   │   │   │   │   ├── dashboard.component.scss
+│   │   │   │   │   ├── dashboard.component.spec.ts
+│   │   │   │   │   ├── widgets/
+│   │   │   │   │   │   ├── stats-card/
+│   │   │   │   │   │   │   ├── stats-card.component.ts
+│   │   │   │   │   │   │   ├── stats-card.component.html
+│   │   │   │   │   │   │   └── stats-card.component.scss
+│   │   │   │   │   │   ├── chart-widget/
+│   │   │   │   │   │   │   ├── chart-widget.component.ts
+│   │   │   │   │   │   │   ├── chart-widget.component.html
+│   │   │   │   │   │   │   └── chart-widget.component.scss
+│   │   │   │   │   │   └── recent-activity/
+│   │   │   │   │   │       ├── recent-activity.component.ts
+│   │   │   │   │   │       ├── recent-activity.component.html
+│   │   │   │   │   │       └── recent-activity.component.scss
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   ├── tenants/                        # Gestión de tenants
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── tenants.routes.ts
+│   │   │   │   │   ├── tenant-list/
+│   │   │   │   │   │   ├── tenant-list.component.ts
+│   │   │   │   │   │   ├── tenant-list.component.html
+│   │   │   │   │   │   ├── tenant-list.component.scss
+│   │   │   │   │   │   └── tenant-list.component.spec.ts
+│   │   │   │   │   ├── tenant-create/
+│   │   │   │   │   │   ├── tenant-create.component.ts
+│   │   │   │   │   │   ├── tenant-create.component.html
+│   │   │   │   │   │   └── tenant-create.component.scss
+│   │   │   │   │   ├── tenant-detail/
+│   │   │   │   │   │   ├── tenant-detail.component.ts
+│   │   │   │   │   │   ├── tenant-detail.component.html
+│   │   │   │   │   │   └── tenant-detail.component.scss
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   ├── menu-config/                    # Configuración de menús
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── menu-config.routes.ts
+│   │   │   │   │   ├── component-list/
+│   │   │   │   │   ├── element-list/
+│   │   │   │   │   ├── menu-builder/
+│   │   │   │   │   └── role-permissions/
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   ├── user-profile/                   # Perfil de usuario
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── user-profile.routes.ts
+│   │   │   │   │   ├── profile-view/
+│   │   │   │   │   │   ├── profile-view.component.ts
+│   │   │   │   │   │   ├── profile-view.component.html
+│   │   │   │   │   │   ├── profile-view.component.scss
+│   │   │   │   │   │   └── profile-view.component.spec.ts
+│   │   │   │   │   ├── profile-edit/
+│   │   │   │   │   │   ├── profile-edit.component.ts
+│   │   │   │   │   │   ├── profile-edit.component.html
+│   │   │   │   │   │   └── profile-edit.component.scss
+│   │   │   │   │   ├── change-password/
+│   │   │   │   │   │   ├── change-password.component.ts
+│   │   │   │   │   │   ├── change-password.component.html
+│   │   │   │   │   │   └── change-password.component.scss
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   └── settings/                       # Configuración del sistema
+│   │       ├── src/
+│   │       │   ├── lib/
+│   │       │   │   ├── settings.routes.ts
+│   │       │   │   ├── general-settings/
+│   │       │   │   ├── notification-settings/
+│   │       │   │   └── security-settings/
+│   │       │   └── index.ts
+│   │       └── project.json
+│   │
+│   ├── shared/                             # Código compartido
+│   │   ├── ui/                             # Componentes de UI reutilizables
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── components/
+│   │   │   │   │   │   ├── button/
+│   │   │   │   │   │   │   ├── button.component.ts
+│   │   │   │   │   │   │   ├── button.component.scss
+│   │   │   │   │   │   │   ├── button.component.spec.ts
+│   │   │   │   │   │   │   ├── button.types.ts
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   ├── input/
+│   │   │   │   │   │   │   ├── input.component.ts
+│   │   │   │   │   │   │   ├── input.component.scss
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   ├── card/
+│   │   │   │   │   │   ├── modal/
+│   │   │   │   │   │   ├── table/
+│   │   │   │   │   │   ├── dropdown/
+│   │   │   │   │   │   ├── tabs/
+│   │   │   │   │   │   ├── breadcrumb/
+│   │   │   │   │   │   ├── badge/
+│   │   │   │   │   │   ├── avatar/
+│   │   │   │   │   │   ├── skeleton/
+│   │   │   │   │   │   ├── alert/
+│   │   │   │   │   │   ├── spinner/
+│   │   │   │   │   │   └── tooltip/
+│   │   │   │   │   ├── layouts/
+│   │   │   │   │   │   ├── app-layout/
+│   │   │   │   │   │   │   ├── app-layout.component.ts
+│   │   │   │   │   │   │   ├── app-layout.component.html
+│   │   │   │   │   │   │   ├── app-layout.component.scss
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   ├── auth-layout/
+│   │   │   │   │   │   │   ├── auth-layout.component.ts
+│   │   │   │   │   │   │   ├── auth-layout.component.html
+│   │   │   │   │   │   │   ├── auth-layout.component.scss
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   ├── dashboard-layout/
+│   │   │   │   │   │   └── empty-layout/
+│   │   │   │   │   ├── navigation/
+│   │   │   │   │   │   ├── sidebar/
+│   │   │   │   │   │   │   ├── sidebar.component.ts
+│   │   │   │   │   │   │   ├── sidebar.component.html
+│   │   │   │   │   │   │   ├── sidebar.component.scss
+│   │   │   │   │   │   │   ├── sidebar-item/
+│   │   │   │   │   │   │   │   ├── sidebar-item.component.ts
+│   │   │   │   │   │   │   │   ├── sidebar-item.component.html
+│   │   │   │   │   │   │   │   └── sidebar-item.component.scss
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   ├── navbar/
+│   │   │   │   │   │   │   ├── navbar.component.ts
+│   │   │   │   │   │   │   ├── navbar.component.html
+│   │   │   │   │   │   │   ├── navbar.component.scss
+│   │   │   │   │   │   │   ├── user-menu/
+│   │   │   │   │   │   │   │   ├── user-menu.component.ts
+│   │   │   │   │   │   │   │   ├── user-menu.component.html
+│   │   │   │   │   │   │   │   └── user-menu.component.scss
+│   │   │   │   │   │   │   ├── notifications/
+│   │   │   │   │   │   │   │   ├── notifications.component.ts
+│   │   │   │   │   │   │   │   ├── notifications.component.html
+│   │   │   │   │   │   │   │   └── notifications.component.scss
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   ├── breadcrumbs/
+│   │   │   │   │   │   └── menu/
+│   │   │   │   │   ├── theme/
+│   │   │   │   │   │   ├── theme.service.ts
+│   │   │   │   │   │   ├── theme-toggle/
+│   │   │   │   │   │   │   ├── theme-toggle.component.ts
+│   │   │   │   │   │   │   ├── theme-toggle.component.scss
+│   │   │   │   │   │   │   └── index.ts
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   └── directives/
+│   │   │   │   │       ├── has-permission.directive.ts
+│   │   │   │   │       ├── click-outside.directive.ts
+│   │   │   │   │       └── index.ts
+│   │   │   │   ├── styles/                 # Sistema de diseño
+│   │   │   │   │   ├── _tokens.scss
+│   │   │   │   │   ├── tokens/
+│   │   │   │   │   │   ├── _colors.scss
+│   │   │   │   │   │   ├── _typography.scss
+│   │   │   │   │   │   ├── _spacing.scss
+│   │   │   │   │   │   ├── _shadows.scss
+│   │   │   │   │   │   ├── _borders.scss
+│   │   │   │   │   │   ├── _breakpoints.scss
+│   │   │   │   │   │   └── _z-index.scss
+│   │   │   │   │   ├── themes/
+│   │   │   │   │   │   ├── _light.scss
+│   │   │   │   │   │   ├── _dark.scss
+│   │   │   │   │   │   └── _theme-base.scss
+│   │   │   │   │   ├── _mixins.scss
+│   │   │   │   │   ├── _utilities.scss
+│   │   │   │   │   └── global.scss
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   ├── data-access/                    # Servicios de datos
+│   │   │   ├── src/
+│   │   │   │   ├── lib/
+│   │   │   │   │   ├── auth/
+│   │   │   │   │   │   ├── auth.service.ts
+│   │   │   │   │   │   ├── auth.store.ts
+│   │   │   │   │   │   ├── auth.models.ts
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   ├── tenants/
+│   │   │   │   │   │   ├── tenant.service.ts
+│   │   │   │   │   │   ├── tenant.store.ts
+│   │   │   │   │   │   ├── tenant.models.ts
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   ├── menu/
+│   │   │   │   │   │   ├── menu.service.ts
+│   │   │   │   │   │   ├── menu.store.ts
+│   │   │   │   │   │   ├── menu.models.ts
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   ├── user/
+│   │   │   │   │   │   ├── user.service.ts
+│   │   │   │   │   │   ├── user.store.ts
+│   │   │   │   │   │   ├── user.models.ts
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
+│   │   │   └── project.json
+│   │   │
+│   │   └── utils/                          # Utilidades compartidas
+│   │       ├── src/
+│   │       │   ├── lib/
+│   │       │   │   ├── validators/
+│   │       │   │   │   ├── custom-validators.ts
+│   │       │   │   │   └── index.ts
+│   │       │   │   ├── helpers/
+│   │       │   │   │   ├── date.helpers.ts
+│   │       │   │   │   ├── string.helpers.ts
+│   │       │   │   │   ├── array.helpers.ts
+│   │       │   │   │   └── index.ts
+│   │       │   │   ├── constants/
+│   │       │   │   │   ├── api.constants.ts
+│   │       │   │   │   ├── error.constants.ts
+│   │       │   │   │   └── index.ts
+│   │       │   │   └── index.ts
+│   │       │   └── index.ts
+│   │       └── project.json
+│   │
+│   └── testing/                            # Testing utilities
+│       ├── src/
+│       │   ├── lib/
+│       │   │   ├── mocks/
+│       │   │   ├── fixtures/
+│       │   │   └── test-helpers.ts
+│       │   └── index.ts
+│       └── project.json
+│
+├── .storybook/                             # Storybook configuration
+│   ├── main.ts
+│   ├── preview.ts
+│   └── theme.ts
+│
+├── tools/                                  # Custom Nx generators and executors
+│   ├── generators/
+│   └── executors/
+│
+├── .eslintrc.json                          # ESLint config
+├── .prettierrc                             # Prettier config
+├── jest.config.ts                          # Jest config
+├── nx.json                                 # Nx workspace config
+├── package.json
+├── tsconfig.base.json                      # Base TypeScript config
+└── README.md
+```
+
+### 1.2 Stack Tecnológico
 
 | Tecnología | Versión | Propósito |
 |---|---|---|
@@ -34,7 +365,180 @@ El frontend de NexCore es una aplicación Angular 18 construida con **Nx workspa
 
 ---
 
-## 2. Sistema de Design Tokens
+## 2. Rutas y Navegación
+
+### 2.1 Estructura de Rutas
+
+```typescript
+// apps/web/src/app/app.routes.ts
+import { Routes } from '@angular/router';
+import { AuthGuard } from './core/guards/auth.guard';
+import { PermissionGuard } from './core/guards/permission.guard';
+
+export const routes: Routes = [
+  // Ruta raíz - redirect a dashboard o login
+  {
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  },
+  
+  // Rutas públicas (sin autenticación)
+  {
+    path: 'auth',
+    loadChildren: () => import('@nexcore/features/auth').then(m => m.AUTH_ROUTES),
+    data: { layout: 'auth' }
+  },
+  
+  // Rutas protegidas (requieren autenticación)
+  {
+    path: '',
+    canActivate: [AuthGuard],
+    3.1a: { layout: 'app' },
+    children: [
+      // Dashboard
+      {
+        path: 'dashboard',
+        loadComponent: () => 
+          import('@nexcore/features/dashboard').then(m => m.DashboardComponent),
+        data: { 
+          title: 'Dashboard',
+          breadcrumb: 'Dashboard'
+        }
+      },
+      
+      // Perfil de usuario
+      {
+        path: 'profile',
+        loadChildren: () => 
+          import('@nexcore/features/user-profile').then(m => m.USER_PROFILE_ROUTES),
+        data: { 
+          title: 'Mi Perfil',
+          breadcrumb: 'Perfil'
+        }
+      },
+      
+      // Gestión de Tenants (requiere permisos)
+      {
+        path: 'tenants',
+        canActivate: [PermissionGuard],
+        data: { 
+          permission: { component: 'TENANT', element: 'VIEW' },
+          title: 'Tenants',
+          breadcrumb: 'Tenants'
+        },
+        loadChildren: () => 
+          import('@nexcore/features/tenants').then(m => m.TENANTS_ROUTES)
+      },
+      
+      // Configuración de Menús (requiere permisos)
+      {
+        path: 'menu-config',
+        canActivate: [PermissionGuard],
+        data: { 
+          permission: { component: 'MENU', element: 'VIEW' },
+          title: 'Configuración de Menús',
+          breadcrumb: 'Menús'
+        },
+        loadChildren: () => 
+          import('@nexcore/features/menu-config').then(m => m.MENU_CONFIG_ROUTES)
+      },
+      
+      // Configuración del sistema (requiere permisos)
+      {
+        path: 'settings',
+        canActivate: [PermissionGuard],
+        data: { 
+          permission: { component: 'SETTINGS', element: 'VIEW' },
+          title: 'Configuración',
+          breadcrumb: 'Configuración'
+        },
+        loadChildren: () => 
+          import('@nexcore/features/settings').then(m => m.SETTINGS_ROUTES)
+      }
+    ]
+  },
+  
+  // Ruta 404
+  {
+    path: '**',
+    loadComponent: () => 
+      import('./shared/pages/not-found/not-found.component').then(m => m.NotFoundComponent),
+    data: { layout: 'empty' }
+  }
+];
+```
+
+### 2.2 Rutas del Módulo Auth
+
+```typescript
+// libs/features/auth/src/lib/auth.routes.ts
+import { Routes } from '@angular/router';
+
+export const AUTH_ROUTES: Routes = [
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    loadComponent: () => 
+      import('./login/login.component').then(m => m.LoginComponent),
+    data: { title: 'Iniciar Sesión' }
+  },
+  {
+    path: 'verify-otp',
+    loadComponent: () => 
+      import('./verify-otp/verify-otp.component').then(m => m.VerifyOtpComponent),
+    data: { title: 'Verificar Código' }
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => 
+      import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    data: { title: 'Recuperar Contraseña' }
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => 
+      import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    data: { title: 'Restablecer Contraseña' }
+  }
+];
+```
+3.2
+### 2.3 Rutas del Módulo User Profile
+
+```typescript
+// libs/features/user-profile/src/lib/user-profile.routes.ts
+import { Routes } from '@angular/router';
+
+export const USER_PROFILE_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () => 
+      import('./profile-view/profile-view.component').then(m => m.ProfileViewComponent),
+    data: { title: 'Mi Perfil' }
+  },
+  {
+    path: 'edit',
+    loadComponent: () => 
+      import('./profile-edit/profile-edit.component').then(m => m.ProfileEditComponent),
+    data: { title: 'Editar Perfil' }
+  },
+  {
+    path: 'change-password',
+    loadComponent: () => 
+      import('./change-password/change-password.component').then(m => m.ChangePasswordComponent),
+    data: { title: 'Cambiar Contraseña' }
+  }
+];
+```
+
+---
+
+## 3. Sistema de Design Tokens
 
 Los **design tokens** son la capa base del sistema de diseño. Todos los valores de color, tipografía, espaciado, sombras, etc., están centralizados en variables CSS y SCSS.
 
@@ -70,7 +574,7 @@ libs/
 ```scss
 // ============================================================
 // PALETA BASE — Colores primitivos (no usar directamente en componentes)
-// ============================================================
+// =3.3========================================================
 
 // Primarios
 $color-primary-50:  #e3f2fd;
@@ -279,7 +783,7 @@ $font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
 ```
 
-### 2.5 Tokens de Sombras
+### 3.4 Tokens de Sombras
 
 **Archivo:** `libs/shared/ui/styles/tokens/_shadows.scss`
 
@@ -300,7 +804,7 @@ $font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
 ```
 
-### 2.6 Tokens de Bordes
+### 3.5 Tokens de Bordes
 
 **Archivo:** `libs/shared/ui/styles/tokens/_borders.scss`
 
@@ -324,7 +828,7 @@ $font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
 ```
 
-### 2.7 Breakpoints Responsivos
+### 3.6 Breakpoints Responsivos
 
 **Archivo:** `libs/shared/ui/styles/tokens/_breakpoints.scss`
 
@@ -361,7 +865,7 @@ $breakpoint-2xl: 1536px; // Large screens
 }
 ```
 
-### 2.8 Z-Index Scale
+### 3.7 Z-Index Scale
 
 **Archivo:** `libs/shared/ui/styles/tokens/_z-index.scss`
 
@@ -381,9 +885,9 @@ $breakpoint-2xl: 1536px; // Large screens
 
 ---
 
-## 3. Sistema de Temas (Light / Dark)
+## 4. Sistema de Temas (Light / Dark)
 
-### 3.1 Estructura de Temas
+### 4.1 Estructura de Temas
 
 Los temas sobrescriben las **CSS custom properties** definidas en `_colors.scss`. El cambio de tema es reactivo mediante el atributo `[data-theme]` en el `<body>`.
 
@@ -464,7 +968,7 @@ Los temas sobrescriben las **CSS custom properties** definidas en `_colors.scss`
 }
 ```
 
-### 3.2 Servicio de Temas (Angular)
+### 4.2 Servicio de Temas (Angular)
 
 **Archivo:** `libs/shared/ui/theme/src/lib/theme.service.ts`
 
@@ -538,7 +1042,7 @@ export class ThemeService {
 }
 ```
 
-### 3.3 Componente Toggle de Tema
+### 4.3 Componente Toggle de Tema
 
 **Archivo:** `libs/shared/ui/theme/src/lib/theme-toggle/theme-toggle.component.ts`
 
@@ -615,44 +1119,698 @@ export class ThemeToggleComponent {
 
 ---
 
-## 4. Arquitectura de Componentes
+## 5. Componentes Principales
 
-### 4.1 Jerarquía de Componentes
+### 5.1 Navbar (Barra Superior)
 
+**Archivo:** `libs/shared/ui/navigation/navbar/navbar.component.ts`
+
+```typescript
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ThemeToggleComponent } from '../../theme/theme-toggle/theme-toggle.component';
+import { UserMenuComponent } from './user-menu/user-menu.component';
+import { NotificationsComponent } from './notifications/notifications.component';
+import { AuthService } from '@nexcore/data-access/auth';
+
+@Component({
+  selector: 'nxc-navbar',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ThemeToggleComponent,
+    UserMenuComponent,
+    NotificationsComponent
+  ],
+  template: `
+    <nav class="navbar">
+      <div class="navbar-container">
+        <!-- Botón menú hamburguesa (móvil) -->
+        <button 
+          class="menu-toggle"
+          (click)="toggleSidebar.emit()"
+          aria-label="Toggle menu"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        
+        <!-- Logo / Breadcrumbs -->
+        <div class="navbar-left">
+          <h1 class="page-title">{{ pageTitle() }}</h1>
+        </div>
+        
+        <!-- Actions -->
+        <div class="navbar-right">
+          <!-- Búsqueda global (opcional) -->
+          <button class="icon-button" aria-label="Search">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+          
+          <!-- Notificaciones -->
+          <nxc-notifications />
+          
+          <!-- Toggle tema -->
+          <nxc-theme-toggle />
+          
+          <!-- Menú de usuario -->
+          <nxc-user-menu />
+        </div>
+      </div>
+    </nav>
+  `,
+  styles: [`
+    .navbar {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border-light);
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      height: 64px;
+    }
+    
+    .navbar-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      padding: 0 var(--spacing-6);
+      gap: var(--spacing-4);
+    }
+    
+    .menu-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: var(--spacing-2);
+      color: var(--color-text-primary);
+      
+      @media (max-width: 768px) {
+        display: flex;
+      }
+    }
+    
+    .navbar-left {
+      flex: 1;
+    }
+    
+    .page-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+    
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+    }
+    
+    .icon-button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: var(--spacing-2);
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: var(--color-surface-hover);
+        color: var(--color-text-primary);
+      }
+    }
+    
+    .icon {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+  `]6.1
+})
+export class NavbarComponent {
+  private authService = inject(AuthService);
+  
+  pageTitle = signal('Dashboard');
+  toggleSidebar = signal<void>();
+}
 ```
-libs/shared/ui/
-├── components/          # Componentes atómicos y moleculares
-│   ├── button/
-│   ├── input/
-│   ├── card/
-│   ├── modal/
-│   ├── table/
-│   ├── form/
-│   ├── dropdown/
-│   ├── tabs/
-│   ├── breadcrumb/
-│   ├── badge/
-│   ├── avatar/
-│   ├── skeleton/
-│   └── alert/
-├── layouts/            # Layouts de página
-│   ├── app-layout/
-│   ├── auth-layout/
-│   ├── dashboard-layout/
-│   └── empty-layout/
-├── navigation/         # Componentes de navegación
-│   ├── sidebar/
-│   ├── navbar/
-│   ├── menu/
-│   └── breadcrumbs/
-└── theme/             # Sistema de temas
-    ├── theme.service.ts
-    └── theme-toggle/
+
+### 5.2 User Menu (Menú de Usuario)
+
+**Archivo:** `libs/shared/ui/navigation/navbar/user-menu/user-menu.component.ts`
+
+```typescript
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '@nexcore/data-access/auth';
+
+@Component({
+  selector: 'nxc-user-menu',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <div class="user-menu" (clickOutside)="isOpen.set(false)">
+      <!-- Avatar trigger -->
+      <button 
+        class="user-avatar"
+        (click)="isOpen.update(v => !v)"
+        [attr.aria-expanded]="isOpen()"
+      >
+        @if (user()?.avatar) {
+          <img [src]="user()?.avatar" [alt]="user()?.name" />
+        } @else {
+          <span class="avatar-initials">
+            {{ getInitials(user()?.name) }}
+          </span>
+        }
+      </button>
+      
+      <!-- Dropdown menu -->
+      @if (isOpen()) {
+        <div class="dropdown-menu">
+          <div class="user-info">
+            <div class="user-name">{{ user()?.name }}</div>
+            <div class="user-email">{{ user()?.email }}</div>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <nav class="menu-items">
+            <a 
+              routerLink="/profile" 
+     6.1      class="menu-item"
+              (click)="isOpen.set(false)"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Mi Perfil</span>
+            </a>
+            
+            <a 
+              routerLink="/profile/change-password" 
+              class="menu-item"
+              (click)="isOpen.set(false)"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>Cambiar Contraseña</span>
+            </a>
+            
+            <a 
+              routerLink="/settings" 
+              class="menu-item"
+              (click)="isOpen.set(false)"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6"></path>
+              </svg>
+              <span>Configuración</span>
+            </a>
+          </nav>
+          
+          <div class="divider"></div>
+          
+          <button class="menu-item logout" (click)="logout()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    .user-menu {
+      position: relative;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--color-border-light);
+      background: var(--color-interactive-primary);
+      color: var(--color-text-inverse);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      overflow: hidden;
+      
+      &:hover {
+        border-color: var(--color-interactive-primary);
+      }
+   7. Layouts
+
+### 7   width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-sm);
+      }
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + var(--spacing-2));
+      right: 0;
+      min-width: 240px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--spacing-2);
+      z-index: var(--z-dropdown);
+      animation: slideDown 0.2s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .user-info {
+      padding: var(--spacing-3);
+    }
+    
+    .user-name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+    }
+    
+    .user-email {
+      color: var(--color-text-tertiary);
+      font-size: var(--font-size-xs);
+      margin-top: var(--spacing-1);
+    }
+    
+    .divider {
+      height: 1px;
+      background: var(--color-border-light);
+      margin: var(--spacing-2) 0;
+    }
+    
+    .menu-items {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-3);
+      color: var(--color-text-primary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+      font-size: var(--font-size-sm);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      
+      &:hover {
+        background: var(--color-surface-hover);
+      }
+      
+      &.logout {
+        color: var(--color-error);
+      }
+    }
+    
+    .icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+  `]
+})
+export class UserMenuComponent {
+  private authService = inject(AuthService);
+  
+  isOpen = signal(false);
+  user = this.authService.userProfile;
+  
+  getInitials(name?: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+  
+  logout(): void {
+    this.authService.logout();
+  }
+}
+```8. Guías de Implementación para Stitch AI
+
+### 8.3 Sidebar (Menú Lateral)
+
+**Archivo:** `libs/shared/ui/navigation/sidebar/sidebar.component.ts`
+
+```typescript
+import { Component, inject, input, output, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
+import { MenuService } from '@nexcore/data-access/menu';
+
+expo8t interface MenuItem {
+  id: string;
+  label: string;
+  icon: string;
+  route?: string;
+  children?: MenuItem[];
+  badge?: string;
+  badgeType?: 'info' | 'success' | 'warning' | 'error';
+}
+
+@Component({
+  selector: 'nxc-sidebar',
+  standalone: true,
+  im8orts: [CommonModule, RouterModule, SidebarItemComponent],
+  template: `
+    <aside class="sidebar" [class.collapsed]="collapsed()">
+      <!-- Logo -->
+      <div class="sidebar-header">
+        @if (!collapsed()) {
+          <img src="/assets/images/logo-full.svg" alt="NexCore" class="logo-full" />
+        } @else {
+          <img src="/assets/images/logo-mini.svg" alt="NexCore" class="logo-mini" />
+        }
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        @for (item of menuItems(); track item.id) {
+          <nxc-sidebar-item 
+            [item]="item" 
+            [collapsed]="collapsed()"
+          />
+        }
+    8 </nav>
+      
+      <!-- Collapse toggle -->
+      <button 
+        class="collapse-toggle"
+        (click)="toggleCollapse.emit()"
+        [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      >
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          @if (collapsed()) {
+            <polyline points="9 18 15 12 9 6"></polyline>
+          } @else {
+    8       <polyline points="15 18 9 12 15 6"></polyline>
+          }
+        </svg>
+      </button>
+    </aside>
+  `,
+  styles: [`
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border-light);
+      width: 280px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      transition: width 0.3s ease;
+      
+      &.collapsed {
+        width: 64px;
+      }
+    }
+    
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      padding: var(--spacing-4);
+      border-bottom: 1px solid var(--color-border-light);
+      
+      .logo-full,
+      .logo-mini {
+        max-width: 100%;
+        height: auto;
+      }
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      padding: var(--spacing-4);
+      overflow-y: auto;
+      
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+   9. Integración con Backend
+
+### 9 }
+    }
+    
+    .collapse-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      border: none;
+      border-top: 1px solid var(--color-border-light);
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: var(--color-surface-hover);
+        color: var(--color-text-primary);
+      }
+    }
+    
+    .icon {
+      width: 20px;
+      height: 20px;
+    9 stroke-width: 2;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: var(--z-fixed);
+        transform: translateX(-100%);
+        
+        &.open {
+          transform: translateX(0);
+        }
+      }
+    }
+  `]
+})
+export class SidebarComponent {
+  private menuService = inject(MenuService);
+  
+  collapsed = input(false);
+  toggleCollapse = output<void>();
+  
+  menuItems = this.menuService.menuItems;
+}
 ```
 
-### 4.2 Convenciones de Diseño
+### 5.4 Dashboard
 
-#### 4.2.1 Botones
+**Archivo:** `libs/features/dashboard/src/lib/dashboard.component.ts`
+
+```typescript
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { StatsCardComponent } from './widgets/stats-card/stats-card.component';
+import { ChartWidgetComponent } from './widgets/chart-widget/chart-widget.component';
+import { RecentActivityComponent } from './widgets/recent-activity/recent-activity.component';
+
+@Component({
+  selector: 'nxc-dashboard',
+  s10. Performance y Optimización
+
+### 10ommonModule,
+    StatsCardComponent,
+    ChartWidgetComponent,
+    RecentActivityComponent
+  ],
+  template: `
+    <div class="dashboard">
+      <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p class="subtitle">Bienvenido de vuelta, {{ userName }}</p>
+      </div>
+      
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        @for (stat of stats; track stat.id) {
+          <nxc-stats-card
+            [title]="stat.title"
+            [value]="stat.value"
+    10       [change]="stat.change"
+            [icon]="stat.icon"
+            [trend]="stat.trend"
+          />
+        }
+      </div>
+      
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <nxc-chart-widget
+          title="Usuarios Activos"
+          [data]="userActivityData"
+          type="line"
+    10   />
+        
+        <nxc-chart-widget
+          title="Distribución por Tenant"
+          [data]="tenantDistributionData"
+          type="pie"
+        />
+      </div>
+      
+      <!-- Recent Activity -->
+      <nxc-recent-activity />
+    </div>
+  `,
+  styles: [`
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-6);
+    }
+   11. Testing
+
+### 11 margin-bottom: var(--spacing-8);
+      
+      h1 {
+        font-size: var(--font-size-3xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        margin: 0 0 var(--spacing-2) 0;
+      }
+      
+      .subtitle {
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-lg);
+        margin: 0;
+      }
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-8);
+    }
+    
+    .charts-row {
+      display: grid;
+    2. Storybook
+
+### 12margin-bottom: var(--spacing-8);
+    }
+  `]
+})
+export class DashboardComponent implements OnInit {
+  userName = 'Usuario';
+  
+  stats = [
+    {
+      id: 1,
+      title: 'Total Usuarios',
+      value: '1,234',
+      change: '+12.5%',
+      trend: 'up' as const,
+      icon: 'users'
+    },
+    {
+      id: 2,
+      title: 'Tenants Activos',
+      value: '42',
+      change: '+3',
+      trend: 'up' as const,
+      icon: 'building'
+    },
+    {
+      id: 3,
+      title: 'Sesiones Hoy',
+      value: '567',
+      change: '-2.3%',
+      trend: 'down' as const,
+      icon: 'activity'
+    },
+    {
+      id: 4,
+      title: 'Tasa de Éxito',
+      value: '98.5%',
+      change: '+0.5%',
+      trend: 'up' as const,
+      icon: 'check-circle'
+    }
+  ];
+  
+  userActivityData = {};
+  tenantDistributionData = {};
+  
+  ngOnInit(): void {
+    // Load dashboard data
+  }
+}
+```
+
+---
+
+## 63. Deployment
+
+### 131 Convenciones de Diseño
+
+#### 6.1.1 Botones
 
 ```typescript
 // libs/shared/ui/components/button/button.component.ts
@@ -666,7 +1824,7 @@ libs/shared/ui/
       [disabled]="disabled"
     >
       @if (loading) {
-        <span class="spinner"></span>
+     3  <span class="spinner"></span>
       }
       <ng-content></ng-content>
     </button>
@@ -680,7 +1838,7 @@ libs/shared/ui/
       cursor: pointer;
       border: none;
       
-      &:focus-visible {
+    4 &:focus-visible {
         outline: none;
         box-shadow: var(--shadow-focus);
       }
@@ -707,7 +1865,7 @@ libs/shared/ui/
     }
     
     .btn-secondary {
-      background: transparent;
+    5 background: transparent;
       color: var(--color-text-primary);
       border: 1px solid var(--color-border-medium);
       padding: var(--spacing-3) var(--spacing-6);
