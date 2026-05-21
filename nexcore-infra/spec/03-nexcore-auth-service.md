@@ -10,7 +10,7 @@
 
 ## 1. Contexto y propósito
 
-`nexcore-auth-service` es el microservicio responsable de todo el ciclo de autenticación y gestión de credenciales de los usuarios de la plataforma NexCore. Está diseñado como un servicio independiente del core para permitir escalado, despliegue y mantenimiento autónomo.
+`nexcore-auth-service` es el microservicio responsable de todo el ciclo de autenticación y gestión de credenciales de los usuarios de cualquier aplicación construida sobre NexCore. Está diseñado como un servicio independiente del core para permitir escalado, despliegue y mantenimiento autónomo.
 
 ### 1.1 Alcance de este documento
 

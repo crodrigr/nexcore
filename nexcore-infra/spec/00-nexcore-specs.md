@@ -1,4 +1,4 @@
-# NexCore — Especificación General de la Plataforma
+# NexCore — Especificación General
 **Versión:** 0.2  
 **Fecha:** 2026-05  
 **Estado:** En desarrollo activo
@@ -7,14 +7,30 @@
 
 ## 1. Visión general
 
-NexCore es una plataforma AIOps multi-tenant para gestión de alertas, incidentes y traps de red. Está construida como un conjunto de microservicios y un monolito modular (core), con un frontend Angular que consume una API unificada a través de un gateway.
+NexCore es una **base de ingeniería** para construir aplicaciones empresariales escalables, mantenibles y distribuidas. No está atado a ningún dominio de negocio específico: es el casco estructural sobre el que se levanta cualquier producto, proveyendo desde el primer día los patrones, la seguridad y la infraestructura que un proyecto de alta ingeniería necesita.
 
-### 1.1 Principios de diseño
+Está construido como un conjunto de microservicios y un monolito modular (`nexcore-core`), con un frontend Angular que consume una API unificada a través de un gateway. El desarrollador arranca con la estructura resuelta y se concentra en el dominio de su negocio.
+
+### 1.1 Qué resuelve NexCore
+
+| Problema común | Solución incluida |
+|---|---|
+| Multi-tenancy desde cero | PostgreSQL RLS + `nxc_tenant` schema |
+| Autenticación segura con 2FA | `nexcore-auth-service` con JWT + OTP email |
+| Permisos dinámicos de UI | `module-menu`: roles → componentes → elementos → menús |
+| Auditoría de cambios | `nexcore-audit-service` (Kafka + MongoDB) |
+| Notificaciones en tiempo real | `nexcore-notification-service` (STOMP/WebSocket) |
+| Gateway unificado | `nexcore-gateway` con rate limiting, JWT validation, CORS |
+| Frontend estructurado | Angular 18 + Nx con design system y feature libs |
+| IaC lista para producción | Helm + Terraform + GitHub Actions |
+
+### 1.2 Principios de diseño
 
 - **Multi-tenant con Row-Level Security**: cada tenant solo accede a sus datos vía PostgreSQL RLS
 - **Arquitectura hexagonal** en todos los servicios backend (domain → application → infrastructure)
 - **Permisos dinámicos**: roles → componentes de UI → elementos → menús, sin hard-coding en frontend
 - **Sin secretos en código**: configuración por variables de entorno / Vault en producción
+- **Dominio-agnóstico**: los módulos base (tenant, menu, auth, config) son genéricos; el negocio se añade encima
 
 ---
 

@@ -10,11 +10,11 @@
 
 ## 1. Contexto y propósito
 
-El módulo `module-tenant` es el núcleo de identidad de la plataforma NexCore. Gestiona las tres entidades raíz sobre las que todo el sistema se construye: **tenants** (empresas cliente), **usuarios** (empleados de cada tenant) y **roles** (perfiles de acceso dentro de cada tenant).
+El módulo `module-tenant` es el núcleo de identidad de NexCore. Gestiona las tres entidades raíz sobre las que cualquier aplicación multi-tenant se construye: **tenants** (organizaciones o empresas cliente), **usuarios** (miembros de cada tenant) y **roles** (perfiles de acceso dentro de cada tenant).
 
 Aplica el **Modelo B de identidad local**: un usuario pertenece a exactamente un tenant. No existe un usuario global. El aislamiento entre tenants se garantiza a dos niveles: la capa de aplicación valida `tenant_id` en cada operación, y PostgreSQL aplica Row-Level Security (RLS) como segunda línea de defensa.
 
-Existe un tenant especial (`slug = 'system'`) cuyos usuarios con rol `SUPER_ADMIN` administran la plataforma completa y tienen bypass de RLS.
+Existe un tenant especial (`slug = 'system'`) cuyos usuarios con rol `SUPER_ADMIN` administran la instancia completa de NexCore y tienen bypass de RLS.
 
 ---
 
@@ -22,7 +22,7 @@ Existe un tenant especial (`slug = 'system'`) cuyos usuarios con rol `SUPER_ADMI
 
 ### 2.1 Tenant
 
-Representa una empresa cliente que contrata la plataforma. Es la raíz de todo el aislamiento de datos.
+Representa una organización o empresa que usa la aplicación. Es la raíz de todo el aislamiento de datos.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
