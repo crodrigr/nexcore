@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexCore Admin - Access Audit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;900&amp;family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #0f1419;
+            color: #dfe2ea;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for enterprise feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f1419;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #31353b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #404752;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(137, 145, 157, 0.1);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#00354a",
+                        "inverse-surface": "#dfe2ea",
+                        "surface-container-low": "#181c22",
+                        "surface": "#0f1419",
+                        "tertiary-fixed": "#ffdcc2",
+                        "on-primary": "#003258",
+                        "outline": "#89919d",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "inverse-primary": "#0061a4",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#00497d",
+                        "on-background": "#dfe2ea",
+                        "surface-container": "#1c2026",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "on-tertiary": "#4d2700",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#001d36",
+                        "inverse-on-surface": "#2d3137",
+                        "surface-bright": "#353940",
+                        "surface-container-lowest": "#0a0e14",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "primary-container": "#2196f3",
+                        "tertiary": "#ffb77b",
+                        "primary-fixed-dim": "#9ecaff",
+                        "background": "#0f1419",
+                        "surface-dim": "#0f1419",
+                        "outline-variant": "#404752",
+                        "on-surface": "#dfe2ea",
+                        "on-secondary-container": "#00374d",
+                        "secondary-fixed": "#c4e7ff",
+                        "surface-container-highest": "#31353b",
+                        "primary-fixed": "#d1e4ff",
+                        "secondary-container": "#00a6e0",
+                        "on-surface-variant": "#bfc7d4",
+                        "surface-variant": "#31353b",
+                        "surface-container-high": "#262a30",
+                        "on-tertiary-container": "#452200",
+                        "on-tertiary-fixed": "#2e1500",
+                        "secondary": "#7bd0ff",
+                        "primary": "#9ecaff",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#001e2c",
+                        "surface-tint": "#9ecaff",
+                        "on-primary-container": "#002c4f",
+                        "tertiary-container": "#db7900"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "1rem",
+                        "lg": "1.5rem",
+                        "gutter": "1rem",
+                        "md": "1rem",
+                        "margin-desktop": "2rem",
+                        "base": "4px",
+                        "xs": "0.25rem",
+                        "xl": "2.5rem",
+                        "sm": "0.5rem"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Hanken Grotesk"],
+                        "code-sm": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "code-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-lg">
+<!-- SideNavBar (Authority Source: JSON) -->
+<nav class="fixed left-0 top-0 h-full flex flex-col border-r border-outline-variant bg-surface-container-low dark:bg-surface-container-low w-64 z-50">
+<div class="px-lg py-xl flex flex-col gap-xs">
+<h1 class="font-headline-lg text-headline-lg font-black text-on-surface">NexCore</h1>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Enterprise Console</p>
+</div>
+<div class="flex-1 px-md flex flex-col gap-sm">
+<!-- Nav Item: Logs is Active -->
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Users</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-md text-label-md">Roles</span>
+</a>
+<!-- ACTIVE TAB -->
+<a class="flex items-center gap-md bg-secondary-container text-on-secondary-container rounded-xl px-md py-sm active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-md text-label-md">Logs</span>
+</a>
+</div>
+<div class="px-md pb-xl flex flex-col gap-sm border-t border-outline-variant pt-lg">
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar (Authority Source: JSON) -->
+<header class="flex justify-between items-center w-full px-margin-desktop py-md sticky top-0 z-40 bg-surface dark:bg-surface">
+<div class="flex items-center gap-lg">
+<div class="relative">
+<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-high border-none rounded-full pl-xl pr-lg py-sm text-body-sm w-80 focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="Search audit trails..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="settings">settings</button>
+<div class="h-10 w-10 rounded-full border-2 border-primary-container overflow-hidden">
+<img alt="Administrator Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMJHs9kfnNfr6GdbKUqIT6pHzHT0mt3i_vqUdAqm5pRWmO1lt6-ancQ1-B4dj_0UgchRI2lQGw8v4hJmv8B-YXG56DVZy4q5zrvFNvbHNG2WfeE9Z7Igdcjxx2iVy9M5B7A4adzJnjij86iNox2u_tAhuIA3nN_YRwAgMoAG9lyGAX5ekWvvkO31rK-AKgpRSx1gkpnQ6_IPgJ-yVJRJ_q3Ic2VCo5RJKNO9USbaqUFIGMhMe4FNREaedXLman3DRJN_Dq8tr8m-tu"/>
+</div>
+</div>
+</header>
+<!-- Page Header -->
+<section class="px-margin-desktop py-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Access Audit Trail</h2>
+<p class="font-body-lg text-on-surface-variant">Real-time monitoring of security events and tenant access logs.</p>
+</div>
+<div class="flex gap-sm">
+<button class="flex items-center gap-xs px-lg py-sm bg-surface-container-high text-on-surface rounded-xl border border-outline-variant hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span class="font-label-md text-label-md">Filters</span>
+</button>
+<button class="flex items-center gap-xs px-lg py-sm bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+<span class="font-label-md text-label-md">Export CSV</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Stats Bento Grid -->
+<section class="px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
+<div class="p-lg rounded-full bg-surface-container border border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Total Attempts (24h)</p>
+<h3 class="font-display-lg text-display-lg text-primary">12.4k</h3>
+<div class="flex items-center gap-xs text-green-400 mt-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="trending_up">trending_up</span>
+<span class="text-body-sm">+12% vs yesterday</span>
+</div>
+</div>
+<div class="p-lg rounded-full bg-surface-container border border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Blocked IPs</p>
+<h3 class="font-display-lg text-display-lg text-error">142</h3>
+<div class="flex items-center gap-xs text-error mt-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="security">security</span>
+<span class="text-body-sm">3 High-risk threats</span>
+</div>
+</div>
+<div class="p-lg rounded-full bg-surface-container border border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Active Tenants</p>
+<h3 class="font-display-lg text-display-lg text-secondary">89</h3>
+<div class="flex items-center gap-xs text-on-surface-variant mt-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="hub">hub</span>
+<span class="text-body-sm">Normal traffic patterns</span>
+</div>
+</div>
+<div class="p-lg rounded-full bg-surface-container border border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Avg. Response Time</p>
+<h3 class="font-display-lg text-display-lg text-on-surface">42ms</h3>
+<div class="flex items-center gap-xs text-on-surface-variant mt-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="speed">speed</span>
+<span class="text-body-sm">Optimal performance</span>
+</div>
+</div>
+</section>
+<!-- Audit Table Section -->
+<section class="px-margin-desktop flex-1 pb-xl">
+<div class="bg-surface-container-low rounded-xl border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high">
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Timestamp</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">User / Tenant</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Event Type</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">IP Address</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Location</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="px-lg py-md"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Entry 1 -->
+<tr class="hover:bg-surface-container-highest transition-colors group">
+<td class="px-lg py-lg">
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">Oct 24, 2023</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">14:32:01.422</span>
+</div>
+</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">JD</div>
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">jane.doe@acme.com</span>
+<span class="font-label-md text-label-md text-secondary">Tenant: ACME_CORP</span>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="px-md py-1 rounded-full bg-surface-container-highest text-on-surface font-label-md text-label-md border border-outline-variant">MFA_VALIDATE</span>
+</td>
+<td class="px-lg py-lg font-code-sm text-code-sm text-on-surface">192.168.1.45</td>
+<td class="px-lg py-lg text-body-sm text-on-surface-variant">London, UK</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-xs text-green-400">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Success</span>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="more_vert">more_vert</button>
+</td>
+</tr>
+<!-- Entry 2 - Blocked -->
+<tr class="hover:bg-surface-container-highest transition-colors group">
+<td class="px-lg py-lg">
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">Oct 24, 2023</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">14:30:55.102</span>
+</div>
+</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center text-on-error-container font-bold text-xs">?</div>
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">admin_test</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Tenant: UNKNOWN</span>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="px-md py-1 rounded-full bg-surface-container-highest text-on-surface font-label-md text-label-md border border-outline-variant">LOGIN_ATTEMPT</span>
+</td>
+<td class="px-lg py-lg font-code-sm text-code-sm text-error">45.22.103.11</td>
+<td class="px-lg py-lg text-body-sm text-on-surface-variant">Pyongyang, NK</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-xs text-error">
+<span class="material-symbols-outlined text-[20px]" data-icon="block" style="font-variation-settings: 'FILL' 1;">block</span>
+<span class="font-label-md text-label-md">Blocked</span>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="more_vert">more_vert</button>
+</td>
+</tr>
+<!-- Entry 3 -->
+<tr class="hover:bg-surface-container-highest transition-colors group">
+<td class="px-lg py-lg">
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">Oct 24, 2023</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">14:28:12.889</span>
+</div>
+</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-xs">MS</div>
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">m.smith@globex.io</span>
+<span class="font-label-md text-label-md text-secondary">Tenant: GLOBEX_GLOBAL</span>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="px-md py-1 rounded-full bg-surface-container-highest text-on-surface font-label-md text-label-md border border-outline-variant">TOKEN_REFRESH</span>
+</td>
+<td class="px-lg py-lg font-code-sm text-code-sm text-on-surface">88.192.4.221</td>
+<td class="px-lg py-lg text-body-sm text-on-surface-variant">Berlin, DE</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-xs text-green-400">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Success</span>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="more_vert">more_vert</button>
+</td>
+</tr>
+<!-- Entry 4 -->
+<tr class="hover:bg-surface-container-highest transition-colors group">
+<td class="px-lg py-lg">
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">Oct 24, 2023</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">14:25:00.001</span>
+</div>
+</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">RS</div>
+<div class="flex flex-col">
+<span class="font-title-md text-on-surface">r.sanchez@acme.com</span>
+<span class="font-label-md text-label-md text-secondary">Tenant: ACME_CORP</span>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="px-md py-1 rounded-full bg-surface-container-highest text-on-surface font-label-md text-label-md border border-outline-variant">FILE_UPLOAD</span>
+</td>
+<td class="px-lg py-lg font-code-sm text-code-sm text-on-surface">192.168.1.12</td>
+<td class="px-lg py-lg text-body-sm text-on-surface-variant">San Francisco, US</td>
+<td class="px-lg py-lg">
+<div class="flex items-center gap-xs text-green-400">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Success</span>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="more_vert">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-lg py-md flex items-center justify-between border-t border-outline-variant bg-surface-container-high">
+<span class="font-label-md text-label-md text-on-surface-variant">Showing 1-10 of 2,451 records</span>
+<div class="flex gap-sm">
+<button class="p-2 rounded-xl hover:bg-surface-container-highest text-on-surface-variant disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="px-md py-1 rounded-xl bg-primary text-on-primary font-bold text-sm">1</button>
+<button class="px-md py-1 rounded-xl hover:bg-surface-container-highest text-on-surface-variant text-sm">2</button>
+<button class="px-md py-1 rounded-xl hover:bg-surface-container-highest text-on-surface-variant text-sm">3</button>
+<button class="p-2 rounded-xl hover:bg-surface-container-highest text-on-surface-variant">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Visualization Section -->
+<section class="px-margin-desktop pb-xl grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<div class="bg-surface-container rounded-xl border border-outline-variant p-lg">
+<h4 class="font-title-md text-title-md text-on-surface mb-lg">Geographic Distribution</h4>
+<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover opacity-60" data-alt="A sophisticated dark-themed world map visualization showing global server access points. Glowing cyan nodes represent successful connections, while sharp red pulses indicate blocked attempts. The map features high-contrast lines and a minimalist slate-blue palette, emphasizing high-security tech surveillance. Dark background with subtle grid lines creating a futuristic war-room aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjD8GKz4QiLLaI2mglMlO2kpnDL-5BTD_14MKv11AyqFojLiI1Mr0qBsNli8eM7X8fDAb2aGn17RWnnwOczaaJ9_ln9KiuimUvFMlpGi1Ga-SJSiEVecdbYGcb14v0LUU6di5nPXno-uV5dIAal0U8LgwbwPxWxY7n4U8sVS7BH78VVBFssiX7oNrgkHaNNQy3ydcADU74rjnBLDJeQ18EkbepJ5YDgyDUyBBizGqee7C3c3--egWyw8tKrFLqs4pEZlmxcTrX1mO2"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent"></div>
+<div class="absolute bottom-lg left-lg right-lg flex justify-between items-end">
+<div class="flex flex-col gap-xs">
+<div class="flex items-center gap-sm">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs font-label-md">North America (45%)</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="text-xs font-label-md">Europe (32%)</span>
+</div>
+</div>
+<button class="px-md py-sm bg-surface-container-highest text-on-surface rounded-full text-xs font-bold border border-outline-variant">View Full Map</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl border border-outline-variant p-lg flex flex-col">
+<h4 class="font-title-md text-title-md text-on-surface mb-lg">Access Velocity</h4>
+<div class="flex-1 flex items-end gap-sm py-md">
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 40%;"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 60%;"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 45%;"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 80%;"></div>
+<div class="flex-1 bg-primary rounded-t-lg transition-all" style="height: 95%;"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 70%;"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 55%;"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg transition-all hover:bg-primary" style="height: 30%;"></div>
+</div>
+<div class="flex justify-between mt-md font-label-md text-label-md text-on-surface-variant">
+<span>08:00</span>
+<span>10:00</span>
+<span>12:00</span>
+<span>14:00</span>
+<span>Current</span>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB (Authority Source: Mandate) -->
+<!-- FAB is suppressed as this is a high-density data audit page -->
+<script>
+        // Micro-interactions for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('scale-[0.99]');
+                setTimeout(() => row.classList.remove('scale-[0.99]'), 100);
+            });
+        });
+
+        // Hover effect for the bar chart
+        const bars = document.querySelectorAll('.flex-1.rounded-t-lg');
+        bars.forEach(bar => {
+            bar.addEventListener('mouseenter', () => {
+                bar.style.filter = 'brightness(1.2)';
+            });
+            bar.addEventListener('mouseleave', () => {
+                bar.style.filter = 'none';
+            });
+        });
+    </script>
+</body></html>

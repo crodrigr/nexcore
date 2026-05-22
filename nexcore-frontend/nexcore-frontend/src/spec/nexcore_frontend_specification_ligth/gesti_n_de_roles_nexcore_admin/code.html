@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestión de Roles - NexCore Enterprise</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#ebeef6",
+                    "primary-container": "#2196f3",
+                    "on-error": "#ffffff",
+                    "tertiary": "#904d00",
+                    "surface-container-low": "#f1f3fc",
+                    "error-container": "#ffdad6",
+                    "on-background": "#181c22",
+                    "on-tertiary-fixed": "#2e1500",
+                    "on-secondary": "#ffffff",
+                    "outline-variant": "#bfc7d4",
+                    "inverse-surface": "#2d3137",
+                    "on-surface": "#181c22",
+                    "outline": "#707883",
+                    "on-primary-fixed-variant": "#00497d",
+                    "surface-container-highest": "#dfe2ea",
+                    "tertiary-fixed": "#ffdcc2",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#9ecaff",
+                    "on-surface-variant": "#404752",
+                    "secondary-fixed-dim": "#ffb2be",
+                    "secondary": "#b80049",
+                    "surface-dim": "#d7dae2",
+                    "on-secondary-fixed": "#400014",
+                    "tertiary-container": "#db7900",
+                    "background": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#900038",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dfe2ea",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-container": "#002c4f",
+                    "secondary-container": "#e2165f",
+                    "on-tertiary-container": "#452200",
+                    "on-secondary-container": "#fffbff",
+                    "on-tertiary-fixed-variant": "#6d3900",
+                    "surface-tint": "#0061a4",
+                    "primary-fixed": "#d1e4ff",
+                    "on-primary-fixed": "#001d36",
+                    "inverse-on-surface": "#eef1f9",
+                    "secondary-fixed": "#ffd9de",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "primary": "#0061a4",
+                    "on-primary": "#ffffff",
+                    "surface": "#f8f9ff",
+                    "surface-container-high": "#e5e8f0",
+                    "inverse-primary": "#9ecaff",
+                    "tertiary-fixed-dim": "#ffb77b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "16px",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit-base": "8px",
+                    "sidebar-width": "280px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "32px",
+                    "gutter": "24px",
+                    "navbar-height": "64px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+        .sidebar-active {
+            background-color: #2196f3;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-16 bg-surface-container-lowest flex justify-between items-center px-margin-desktop z-50 shadow-sm border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">NexCore</span>
+</div>
+<div class="flex-1 max-w-xl mx-8 hidden md:block">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg text-body-md focus:ring-2 focus:ring-primary" placeholder="Buscar en el sistema..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional corporate headshot of a middle-aged executive woman with a friendly smile, wearing business attire. The background is a blurred high-end office setting with soft, natural lighting. The overall aesthetic is clean, professional, and trustworthy, matching a corporate modern UI design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAJixnc3Zdd-mcSQGtnWdeB5KeI1p2NaXjWbO2Gdr38IttnX4vtfnkMBHaLqh2vPHgQdbwR82rnu1foUQbY5msfZrpCjMiBv0cNpfTjDkBLf5WyVtrsTGPtVmuRjjl8SV41NsAJcfYh-egNg7_AN4bT9l3BR2-krcKojVy1o4B8pLp257B2X_4rwm0mQ3mbCvykcrBfwW81_q_d2Vjzkfwg26wXwsBxdIWC2WtKJ8NvdJaevTF4Y2xq8A4xVxzffo5dvNoih1Qj7fh"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-sidebar-width bg-surface-container-low flex flex-col py-4 px-4 gap-2 hidden md:flex border-r border-outline-variant">
+<div class="mb-6 px-2">
+<p class="font-label-md text-label-md text-primary font-bold uppercase tracking-wider">Administración</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">NexCore Enterprise</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-150 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-150 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md">Gestión de Usuarios</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-semibold rounded-lg transition-all duration-150 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">security_update_good</span>
+<span class="font-label-md text-label-md">Roles y Permisos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-150 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md">Logs de Auditoría</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-150 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Ayuda</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-150 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-sidebar-width pt-20 p-8 min-h-screen">
+<div class="max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Gestión de Roles</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Configura y asigna permisos jerárquicos para los usuarios de la plataforma.</p>
+</div>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md text-label-md hover:shadow-md transition-shadow active:scale-95">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                    Crear Nuevo Rol
+                </button>
+</div>
+<!-- Stats Bar (Bento style hint) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant shadow-sm flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<div>
+<p class="text-label-md text-on-surface-variant uppercase font-bold tracking-tight">Roles Totales</p>
+<p class="text-headline-md font-bold text-on-surface">12</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant shadow-sm flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<p class="text-label-md text-on-surface-variant uppercase font-bold tracking-tight">Usuarios Asignados</p>
+<p class="text-headline-md font-bold text-on-surface">458</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant shadow-sm flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">policy</span>
+</div>
+<div>
+<p class="text-label-md text-on-surface-variant uppercase font-bold tracking-tight">Permisos Activos</p>
+<p class="text-headline-md font-bold text-on-surface">86</p>
+</div>
+</div>
+</div>
+<!-- Roles Table Container -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+<h2 class="font-headline-md text-headline-md text-body-lg font-bold">Roles del Sistema</h2>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-low text-on-surface-variant">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-low text-on-surface-variant">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Nombre del Rol</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Descripción</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center">Usuarios</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Estado</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- TENANT_ADMIN -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-size: 18px;">admin_panel_settings</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-primary">TENANT_ADMIN</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-sm text-body-sm text-on-surface-variant max-w-xs">
+                                    Control total sobre la instancia del cliente, gestión de usuarios y configuraciones globales.
+                                </td>
+<td class="px-6 py-5 text-center">
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md text-on-surface">3</span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Activo
+                                    </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- EDITOR -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit_note</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-primary">EDITOR</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-sm text-body-sm text-on-surface-variant max-w-xs">
+                                    Capacidad para crear, editar y eliminar recursos específicos dentro de los proyectos asignados.
+                                </td>
+<td class="px-6 py-5 text-center">
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md text-on-surface">124</span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Activo
+                                    </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- VIEWER -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-primary">VIEWER</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-sm text-body-sm text-on-surface-variant max-w-xs">
+                                    Acceso de solo lectura a los tableros y reportes. Sin permisos de modificación.
+                                </td>
+<td class="px-6 py-5 text-center">
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md text-on-surface">331</span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Activo
+                                    </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-6 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Mostrando 3 de 12 roles definidos</p>
+<div class="flex gap-2">
+<button class="px-4 py-2 border border-outline-variant rounded-lg text-body-sm disabled:opacity-50 cursor-not-allowed" disabled="">Anterior</button>
+<button class="px-4 py-2 border border-outline-variant rounded-lg text-body-sm hover:bg-surface-container-highest transition-colors">Siguiente</button>
+</div>
+</div>
+</div>
+<!-- Permission Preview Card (Asymmetric Layout Hint) -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+<div class="lg:col-span-3 bg-surface-container-lowest p-8 rounded-lg border border-outline-variant shadow-sm relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-headline-md text-body-lg font-bold mb-4">Herramienta de Auditoría Rápida</h3>
+<p class="font-body-md text-on-surface-variant mb-6 max-w-2xl">Revisa los cambios recientes realizados en la estructura de permisos. El sistema mantiene un log inmutable de todas las asignaciones de roles para cumplir con normativas de seguridad enterprise.</p>
+<button class="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline">
+                            Ver historial completo <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+</button>
+</div>
+<!-- Abstract Background Shape -->
+<div class="absolute right-0 top-0 w-64 h-full bg-primary-fixed opacity-10 -skew-x-12 translate-x-12"></div>
+</div>
+<div class="bg-primary-container p-8 rounded-lg text-on-primary-container flex flex-col justify-between shadow-lg">
+<span class="material-symbols-outlined" style="font-size: 40px; font-variation-settings: 'FILL' 1;">security</span>
+<div>
+<h4 class="font-headline-md text-body-md font-bold leading-tight mb-2">Seguridad NexCore</h4>
+<p class="font-body-sm opacity-90">Todos los roles están protegidos por autenticación MFA obligatoria.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // In a real app, this would navigate to the role details
+                console.log('Role row clicked');
+            });
+        });
+    </script>
+</body></html>

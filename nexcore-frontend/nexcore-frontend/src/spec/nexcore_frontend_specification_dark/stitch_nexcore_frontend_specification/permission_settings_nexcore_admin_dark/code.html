@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexCore Admin - Permission Configuration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;900&amp;family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#4d2700",
+                        "outline-variant": "#404752",
+                        "on-primary-fixed-variant": "#00497d",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "surface": "#0f1419",
+                        "on-surface": "#dfe2ea",
+                        "primary-fixed-dim": "#9ecaff",
+                        "surface-bright": "#353940",
+                        "surface-container-highest": "#31353b",
+                        "secondary-fixed": "#c4e7ff",
+                        "secondary-container": "#00a6e0",
+                        "on-error": "#690005",
+                        "surface-tint": "#9ecaff",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "on-tertiary-container": "#452200",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "outline": "#89919d",
+                        "inverse-surface": "#dfe2ea",
+                        "on-primary": "#003258",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001e2c",
+                        "on-primary-container": "#002c4f",
+                        "tertiary-fixed": "#ffdcc2",
+                        "surface-container-high": "#262a30",
+                        "surface-container-lowest": "#0a0e14",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0f1419",
+                        "surface-container": "#1c2026",
+                        "surface-variant": "#31353b",
+                        "on-secondary-container": "#00374d",
+                        "inverse-primary": "#0061a4",
+                        "on-primary-fixed": "#001d36",
+                        "tertiary": "#ffb77b",
+                        "on-secondary": "#00354a",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#dfe2ea",
+                        "tertiary-container": "#db7900",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "primary-container": "#2196f3",
+                        "primary-fixed": "#d1e4ff",
+                        "surface-container-low": "#181c22",
+                        "on-surface-variant": "#bfc7d4",
+                        "on-tertiary-fixed": "#2e1500",
+                        "background": "#0f1419",
+                        "secondary": "#7bd0ff",
+                        "primary": "#9ecaff",
+                        "inverse-on-surface": "#2d3137"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "1rem",
+                        "base": "4px",
+                        "xs": "0.25rem",
+                        "xl": "2.5rem",
+                        "md": "1rem",
+                        "sm": "0.5rem",
+                        "margin-desktop": "2rem",
+                        "margin-mobile": "1rem",
+                        "lg": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "title-md": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "code-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .permission-matrix-row:nth-child(even) { background-color: rgba(49, 53, 59, 0.3); }
+        .permission-matrix-row:hover { background-color: rgba(49, 53, 59, 0.8); transition: background 0.2s ease; }
+        .custom-radio { appearance: none; width: 1.25rem; height: 1.25rem; border: 2px solid #89919d; border-radius: 50%; outline: none; transition: all 0.2s ease; cursor: pointer; position: relative; }
+        .custom-radio:checked { border-color: #9ecaff; background-color: #9ecaff; }
+        .custom-radio:checked::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #003258; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1419; }
+        ::-webkit-scrollbar-thumb { background: #31353b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #404752; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg overflow-hidden">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col border-r border-outline-variant bg-surface-container-low dark:bg-surface-container-low w-64 z-50">
+<div class="p-lg flex flex-col gap-sm">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-black text-on-surface leading-tight">NexCore</h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-70">Admin Console v2.4</p>
+</div>
+</div>
+</div>
+<nav class="mt-xl flex flex-col px-md gap-xs flex-1">
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Users</span>
+</a>
+<a class="flex items-center gap-md bg-secondary-container text-on-secondary-container rounded-xl px-md py-sm opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-md text-label-md">Roles</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-md text-label-md">Logs</span>
+</a>
+</nav>
+<div class="p-md flex flex-col gap-xs mb-md border-t border-outline-variant pt-lg mx-md">
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-md py-sm hover:bg-surface-container-highest rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="ml-64 flex flex-col h-screen">
+<!-- TopNavBar Shell -->
+<header class="flex justify-between items-center w-full px-margin-desktop py-md sticky top-0 z-50 bg-surface dark:bg-surface">
+<div class="flex items-center gap-xl flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-full py-sm pl-xl pr-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Search components or permissions..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-sm"></div>
+<div class="flex items-center gap-sm cursor-pointer group">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Administrator Profile" class="w-full h-full object-cover" data-alt="A professional corporate portrait of a tech executive in a high-contrast dark-mode setting. The lighting is dramatic and moody, highlighting sharp features and a confident expression. The color palette is composed of deep slates and cool blues, maintaining a sophisticated and authoritative enterprise aesthetic suitable for an admin profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-qB88qWVZ97foE8jtPEiLsVEMr8sVYkBT_PyikBTgICuCjocjM67sHSQw4bF-SUabWGm_BKxNZPTepvRKTPr6Iz79w8WRW2vtUytpL5jPh8_npRogN_zf0ixa-YT5sjdXv-QQAgIzl7HM1oeB_lyyQOfwoCZInc7NmSItUlNKAgxMZwHgQGaMMU40_nCORCkUYw1iHA-BKmTd-dQ7KbYbzncMsIIDaUJnBIib0Wz-l9v9aAPWYkHSIJ55ltEB_muWJVMMAq65aQxO"/>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Admin</span>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 overflow-y-auto px-margin-desktop py-lg space-y-lg">
+<!-- Breadcrumbs & Actions -->
+<div class="flex justify-between items-end">
+<div>
+<nav class="flex items-center gap-sm text-on-surface-variant font-label-md text-label-md mb-xs">
+<span>Management</span>
+<span class="material-symbols-outlined scale-75" data-icon="chevron_right">chevron_right</span>
+<span>Roles &amp; Permissions</span>
+<span class="material-symbols-outlined scale-75" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary">NexCore Enterprise Policy</span>
+</nav>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Permission Configuration</h2>
+</div>
+<div class="flex gap-md">
+<button class="flex items-center gap-sm px-lg py-sm border border-outline-variant rounded-xl text-on-surface hover:bg-surface-container-highest transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined text-[20px]" data-icon="history">history</span>
+                        Audit Logs
+                    </button>
+<button class="flex items-center gap-sm px-lg py-sm bg-primary text-on-primary rounded-xl hover:opacity-90 active:scale-95 transition-all font-label-md text-label-md shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined text-[20px]" data-icon="save">save</span>
+                        Save Changes
+                    </button>
+</div>
+</div>
+<!-- Permission Matrix Container -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden shadow-2xl">
+<!-- Table Header -->
+<div class="grid grid-cols-[1fr_repeat(3,140px)] border-b border-outline-variant bg-surface-container-high px-lg py-md">
+<div class="font-title-md text-title-md text-on-surface">Component &amp; Elements</div>
+<div class="text-center font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">View</div>
+<div class="text-center font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Hidden</div>
+<div class="text-center font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Execute</div>
+</div>
+<!-- Matrix Rows -->
+<div class="divide-y divide-outline-variant/30 max-h-[614px] overflow-y-auto">
+<!-- Section: User Management -->
+<div class="bg-surface-container-highest/20 px-lg py-sm flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="person_manage">person</span>
+<span class="font-title-md text-title-md text-primary">User Management (Angular)</span>
+</div>
+<div class="permission-matrix-row grid grid-cols-[1fr_repeat(3,140px)] px-lg py-md items-center">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="smart_button">smart_button</span>
+<div>
+<p class="text-on-surface font-body-lg">Add New User Button</p>
+<p class="text-on-surface-variant text-label-md opacity-60">ID: `btn_user_create`</p>
+</div>
+</div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_1" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_1" type="radio"/></div>
+<div class="flex justify-center"><input checked="" class="custom-radio" name="perm_1" type="radio"/></div>
+</div>
+<div class="permission-matrix-row grid grid-cols-[1fr_repeat(3,140px)] px-lg py-md items-center">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="password">password</span>
+<div>
+<p class="text-on-surface font-body-lg">Secret Key Field</p>
+<p class="text-on-surface-variant text-label-md opacity-60">ID: `inp_secure_token`</p>
+</div>
+</div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_2" type="radio"/></div>
+<div class="flex justify-center"><input checked="" class="custom-radio" name="perm_2" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_2" type="radio"/></div>
+</div>
+<div class="permission-matrix-row grid grid-cols-[1fr_repeat(3,140px)] px-lg py-md items-center">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="delete">delete</span>
+<div>
+<p class="text-on-surface font-body-lg">Bulk Delete Action</p>
+<p class="text-on-surface-variant text-label-md opacity-60">ID: `act_bulk_delete`</p>
+</div>
+</div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_3" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_3" type="radio"/></div>
+<div class="flex justify-center"><input checked="" class="custom-radio" name="perm_3" type="radio"/></div>
+</div>
+<!-- Section: Inventory Dashboard -->
+<div class="bg-surface-container-highest/20 px-lg py-sm flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary" data-icon="inventory_2">inventory_2</span>
+<span class="font-title-md text-title-md text-secondary">Inventory Dashboard (Angular)</span>
+</div>
+<div class="permission-matrix-row grid grid-cols-[1fr_repeat(3,140px)] px-lg py-md items-center">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="analytics">analytics</span>
+<div>
+<p class="text-on-surface font-body-lg">Stock Level Charts</p>
+<p class="text-on-surface-variant text-label-md opacity-60">ID: `cht_stock_volume`</p>
+</div>
+</div>
+<div class="flex justify-center"><input checked="" class="custom-radio" name="perm_4" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_4" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_4" type="radio"/></div>
+</div>
+<div class="permission-matrix-row grid grid-cols-[1fr_repeat(3,140px)] px-lg py-md items-center">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="edit">edit</span>
+<div>
+<p class="text-on-surface font-body-lg">Unit Price Override</p>
+<p class="text-on-surface-variant text-label-md opacity-60">ID: `inp_price_override`</p>
+</div>
+</div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_5" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_5" type="radio"/></div>
+<div class="flex justify-center"><input checked="" class="custom-radio" name="perm_5" type="radio"/></div>
+</div>
+<div class="permission-matrix-row grid grid-cols-[1fr_repeat(3,140px)] px-lg py-md items-center">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="file_download">file_download</span>
+<div>
+<p class="text-on-surface font-body-lg">Export CSV Module</p>
+<p class="text-on-surface-variant text-label-md opacity-60">ID: `mod_export_csv`</p>
+</div>
+</div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_6" type="radio"/></div>
+<div class="flex justify-center"><input checked="" class="custom-radio" name="perm_6" type="radio"/></div>
+<div class="flex justify-center"><input class="custom-radio" name="perm_6" type="radio"/></div>
+</div>
+</div>
+</div>
+<!-- Context Info Cards (Bento Style) -->
+<div class="grid grid-cols-3 gap-lg">
+<div class="bg-surface-container-low border border-outline-variant p-lg rounded-xl flex flex-col gap-md">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface">Configuration Rule</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Applying 'Execute' permissions automatically inherits 'View' capability. Changes will propagate across all Angular micro-frontends instantly upon saving.
+                    </p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-lg rounded-xl flex flex-col gap-md col-span-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface">Inheritance Override</h4>
+</div>
+<span class="px-md py-xs bg-outline-variant/30 rounded-full text-label-md font-label-md text-primary">Active</span>
+</div>
+<div class="flex items-center gap-xl mt-sm">
+<div class="flex flex-col">
+<span class="text-label-md text-on-surface-variant">Affected Nodes</span>
+<span class="text-headline-lg font-bold text-on-surface">2,412</span>
+</div>
+<div class="h-10 w-[1px] bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="text-label-md text-on-surface-variant">Security Level</span>
+<span class="text-headline-lg font-bold text-on-surface">EAL4+</span>
+</div>
+<div class="h-10 w-[1px] bg-outline-variant"></div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-3/4 h-full bg-primary"></div>
+</div>
+<span class="text-label-md text-on-surface-variant mt-xs">Policy Compliance: 75%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.permission-matrix-row').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if (e.target.type !== 'radio') {
+                    const radio = row.querySelector('input[type="radio"]:checked');
+                    // Just a visual feedback hint
+                    row.style.transform = 'scale(0.998)';
+                    setTimeout(() => row.style.transform = 'scale(1)', 100);
+                }
+            });
+        });
+
+        // Search highlight simulation
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.permission-matrix-row').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(term)) {
+                    row.style.opacity = '1';
+                    row.style.filter = 'none';
+                } else {
+                    row.style.opacity = '0.4';
+                    row.style.filter = 'grayscale(0.5)';
+                }
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexCore Admin | Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;900&amp;family=Inter:wght@400;500&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#4d2700",
+                    "outline-variant": "#404752",
+                    "on-primary-fixed-variant": "#00497d",
+                    "on-tertiary-fixed-variant": "#6d3900",
+                    "surface": "#0f1419",
+                    "on-surface": "#dfe2ea",
+                    "primary-fixed-dim": "#9ecaff",
+                    "surface-bright": "#353940",
+                    "surface-container-highest": "#31353b",
+                    "secondary-fixed": "#c4e7ff",
+                    "secondary-container": "#00a6e0",
+                    "on-error": "#690005",
+                    "surface-tint": "#9ecaff",
+                    "tertiary-fixed-dim": "#ffb77b",
+                    "on-tertiary-container": "#452200",
+                    "secondary-fixed-dim": "#7bd0ff",
+                    "outline": "#89919d",
+                    "inverse-surface": "#dfe2ea",
+                    "on-primary": "#003258",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#001e2c",
+                    "on-primary-container": "#002c4f",
+                    "tertiary-fixed": "#ffdcc2",
+                    "surface-container-high": "#262a30",
+                    "surface-container-lowest": "#0a0e14",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#0f1419",
+                    "surface-container": "#1c2026",
+                    "surface-variant": "#31353b",
+                    "on-secondary-container": "#00374d",
+                    "inverse-primary": "#0061a4",
+                    "on-primary-fixed": "#001d36",
+                    "tertiary": "#ffb77b",
+                    "on-secondary": "#00354a",
+                    "on-error-container": "#ffdad6",
+                    "on-background": "#dfe2ea",
+                    "tertiary-container": "#db7900",
+                    "on-secondary-fixed-variant": "#004c69",
+                    "primary-container": "#2196f3",
+                    "primary-fixed": "#d1e4ff",
+                    "surface-container-low": "#181c22",
+                    "on-surface-variant": "#bfc7d4",
+                    "on-tertiary-fixed": "#2e1500",
+                    "background": "#0f1419",
+                    "secondary": "#7bd0ff",
+                    "primary": "#9ecaff",
+                    "inverse-on-surface": "#2d3137"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "1rem",
+                    "base": "4px",
+                    "xs": "0.25rem",
+                    "xl": "2.5rem",
+                    "md": "1rem",
+                    "sm": "0.5rem",
+                    "margin-desktop": "2rem",
+                    "margin-mobile": "1rem",
+                    "lg": "1.5rem"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "body-lg": ["Inter"],
+                    "title-md": ["Hanken Grotesk"],
+                    "body-sm": ["Inter"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "code-sm": ["Geist"],
+                    "label-md": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "code-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0f1419;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(33, 150, 243, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 166, 224, 0.05) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(28, 32, 38, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(64, 71, 82, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .input-glow:focus-within {
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+    </style>
+</head>
+<body class="font-body-lg text-on-surface antialiased overflow-hidden">
+<!-- Login Container -->
+<main class="relative z-10 w-full max-w-[480px] px-margin-mobile md:px-0">
+<!-- Brand Logo Area -->
+<div class="flex flex-col items-center mb-xl">
+<div class="w-16 h-16 bg-primary-container rounded-xl flex items-center justify-center mb-md transform rotate-3 hover:rotate-0 transition-transform duration-500">
+<span class="material-symbols-outlined text-[40px] text-on-primary-container" style="font-variation-settings: 'FILL' 1;">
+                    shield_person
+                </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">NexCore Admin</h1>
+<p class="font-body-sm text-on-surface-variant mt-xs">Enterprise Security Gateway v2.4</p>
+</div>
+<!-- Login Card -->
+<div class="glass-card rounded-full p-xl md:p-12 relative overflow-hidden">
+<!-- Asymmetric accent light -->
+<div class="absolute -top-24 -right-24 w-48 h-48 bg-secondary-container opacity-10 blur-3xl rounded-full"></div>
+<form class="space-y-lg relative z-10">
+<!-- Tenant Selection -->
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest block px-xs" for="tenant">Organization Domain</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface rounded-xl px-md py-sm appearance-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all cursor-pointer" id="tenant">
+<option value="enterprise">Global Enterprise (Default)</option>
+<option value="staging">Staging Environment</option>
+<option value="compliance">Compliance Shield Branch</option>
+</select>
+<div class="absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-outline">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Email Input -->
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest block px-xs" for="email">Administrator Identity</label>
+<div class="relative input-glow rounded-xl overflow-hidden transition-all">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">alternate_email</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline rounded-xl pl-11 pr-md py-sm focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" id="email" placeholder="admin@nexcore.io" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-sm">
+<div class="flex justify-between items-center px-xs">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest" for="password">Access Key</label>
+<a class="font-label-md text-label-md text-primary hover:text-secondary-fixed transition-colors" href="#">Forgot Access Key?</a>
+</div>
+<div class="relative input-glow rounded-xl overflow-hidden transition-all">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">lock</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline rounded-xl pl-11 pr-md py-sm focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" id="password" placeholder="••••••••••••" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-md flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center space-x-sm px-xs">
+<input class="w-4 h-4 rounded bg-surface-container-lowest border-outline-variant text-primary focus:ring-primary-container" id="remember" type="checkbox"/>
+<label class="font-body-sm text-on-surface-variant" for="remember">Maintain secure session for 24 hours</label>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-primary-container hover:bg-secondary-container text-on-primary-container font-title-md text-title-md py-sm rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-sm group" type="submit">
+<span>Initialize Authentication</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">login</span>
+</button>
+</form>
+</div>
+<!-- Footer Links -->
+<footer class="mt-xl flex flex-col items-center gap-md">
+<div class="flex items-center gap-lg">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface flex items-center gap-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                    Compliance Status
+                </a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface flex items-center gap-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]">support</span>
+                    System Support
+                </a>
+</div>
+<div class="flex items-center gap-sm bg-surface-container-high px-md py-xs rounded-full border border-outline-variant/30">
+<div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">All Core Systems Operational</span>
+</div>
+</footer>
+</main>
+<!-- Background Decorative Elements -->
+<div class="fixed inset-0 pointer-events-none -z-0">
+<div class="absolute top-[10%] left-[5%] w-[40vw] h-[40vw] rounded-full bg-primary-container/5 blur-[120px]"></div>
+<div class="absolute bottom-[10%] right-[5%] w-[30vw] h-[30vw] rounded-full bg-secondary-container/5 blur-[100px]"></div>
+</div>
+<script>
+        // Simple micro-interaction for password visibility
+        const toggleBtn = document.querySelector('button[type="button"]');
+        const passInput = document.getElementById('password');
+        
+        if (toggleBtn && passInput) {
+            toggleBtn.addEventListener('click', () => {
+                const isPass = passInput.type === 'password';
+                passInput.type = isPass ? 'text' : 'password';
+                toggleBtn.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+            });
+        }
+
+        // Form focus effect logic
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.01]');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+    </script>
+</body></html>

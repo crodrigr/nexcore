@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexCore - Formularios y Datos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdcc2",
+                        "on-primary-fixed-variant": "#00497d",
+                        "surface-tint": "#0061a4",
+                        "primary": "#0061a4",
+                        "outline-variant": "#bfc7d4",
+                        "primary-fixed-dim": "#9ecaff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#ffb2be",
+                        "secondary-container": "#e2165f",
+                        "outline": "#707883",
+                        "on-tertiary-container": "#452200",
+                        "surface-variant": "#dfe2ea",
+                        "on-background": "#181c22",
+                        "surface-container-low": "#f1f3fc",
+                        "secondary": "#b80049",
+                        "inverse-surface": "#2d3137",
+                        "inverse-primary": "#9ecaff",
+                        "inverse-on-surface": "#eef1f9",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "surface-container-highest": "#dfe2ea",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d7dae2",
+                        "on-primary-container": "#002c4f",
+                        "surface-container": "#ebeef6",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#404752",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#181c22",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#400014",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e5e8f0",
+                        "on-tertiary-fixed": "#2e1500",
+                        "secondary-fixed": "#ffd9de",
+                        "tertiary-container": "#db7900",
+                        "on-secondary-fixed-variant": "#900038",
+                        "tertiary": "#904d00",
+                        "on-secondary-container": "#fffbff",
+                        "primary-fixed": "#d1e4ff",
+                        "primary-container": "#2196f3",
+                        "background": "#f8f9ff",
+                        "on-primary-fixed": "#001d36",
+                        "surface-bright": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "sidebar-width": "280px",
+                        "navbar-height": "64px",
+                        "unit-base": "8px",
+                        "gutter": "24px",
+                        "margin-desktop": "32px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bfc7d4; border-radius: 10px; }
+        .step-active { color: #0061a4; border-color: #0061a4; }
+        .step-complete { background-color: #0061a4; color: white; border-color: #0061a4; }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center h-navbar-height px-margin-desktop w-full sticky top-0 bg-surface z-40 border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-2xl font-bold text-primary">NexCore</span>
+<div class="hidden md:flex ml-8 items-center bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant w-96">
+<span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full" placeholder="Buscar módulos o ajustes..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 rounded-full transition-colors">contrast</button>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant">
+<div class="text-right hidden sm:block">
+<p class="text-label-md font-bold text-on-surface">Admin User</p>
+<p class="text-[10px] text-on-surface-variant">Super Administrador</p>
+</div>
+<img alt="User Avatar" class="w-10 h-10 rounded-full border border-primary shadow-sm" data-alt="A professional close-up portrait of a corporate administrator in a bright, modern office setting. The lighting is soft and even, highlighting a clean-shaven man with a friendly expression. The background is a blurred high-tech workspace with subtle blue and white tones, matching a professional NexCore enterprise dashboard aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSRlH5vV2wjoL_jDP009nNh8gTgnjxMURVy58IZRxtOBQI2GYM_QZZ-NMOsFukQ8vCU9BDYGnb-0RM-Tb5mXWU5b8C6NxVEm2eOabJVGCwkWttH3AKzIZIj4lg1nOLRQVOjrQKA1sh0CXCER2Jz6GU58Mj2ViD6q-VBFgmQFF7QYFPYblcJoxDyKm4-qt0hE6n_OwcMHP820zxsJ9Va3VXJfEOeVFCT8MPJYhvPUYmY3EDnDqHRwngvzhtcePVwXQ6NsKL301et_Th"/>
+</div>
+</div>
+</nav>
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 bottom-0 w-sidebar-width flex flex-col pt-navbar-height z-30 bg-surface-container border-r border-outline-variant hidden md:flex">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">corporate_fare</span>
+</div>
+<div>
+<h2 class="text-label-md font-bold text-primary">NexCore</h2>
+<p class="text-[10px] text-on-surface-variant">Enterprise Admin</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="bg-primary-container/20 text-primary font-bold border-r-4 border-primary flex items-center gap-3 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-sm">Configuración</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-sm font-medium">Menús</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Inquilinos</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 border-t border-outline-variant">
+<div class="bg-primary-container/10 p-4 rounded-xl">
+<p class="text-[11px] font-bold text-primary mb-1 uppercase tracking-wider">Plan Actual</p>
+<p class="text-sm font-bold text-on-surface mb-3">Enterprise Pro</p>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full mb-3">
+<div class="bg-primary h-full w-[85%] rounded-full"></div>
+</div>
+<button class="w-full py-2 bg-primary text-white text-xs font-bold rounded-lg hover:opacity-90 transition-opacity">Mejorar Plan</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-sidebar-width p-margin-desktop min-h-screen">
+<header class="mb-10">
+<h1 class="text-3xl font-bold text-on-surface tracking-tight mb-2">Formularios y Configuración</h1>
+<p class="text-on-surface-variant max-w-2xl">Administre los parámetros críticos de su organización, seguridad y facturación mediante nuestras interfaces de entrada de datos optimizadas.</p>
+</header>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Multi-step Organization Setup -->
+<section class="xl:col-span-8 space-y-8">
+<!-- 1. Multi-step Form: Organization Setup -->
+<div class="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant bg-surface-container-low">
+<h2 class="text-lg font-bold text-on-surface">Configuración de la Organización</h2>
+<div class="mt-6 flex items-center justify-between relative px-2">
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-outline-variant -z-0"></div>
+<!-- Step 1 -->
+<div class="relative z-10 flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-primary bg-primary text-white font-bold transition-all">1</div>
+<span class="text-xs font-bold text-primary">Identidad</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10 flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-primary bg-surface text-primary font-bold transition-all">2</div>
+<span class="text-xs font-medium text-on-surface-variant">Estructura</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-outline-variant bg-surface text-on-surface-variant font-bold transition-all">3</div>
+<span class="text-xs font-medium text-on-surface-variant">Finalizar</span>
+</div>
+</div>
+</div>
+<div class="p-8 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Nombre de la Empresa <span class="text-error">*</span></label>
+<input class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all" placeholder="Ej. NexCore Solutions S.L." type="text"/>
+<p class="text-[11px] text-on-surface-variant">Nombre legal registrado para la facturación.</p>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Dominio Corporativo</label>
+<div class="flex">
+<span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-outline bg-surface-container-high text-on-surface-variant text-sm">https://</span>
+<input class="w-full px-4 py-2.5 rounded-r-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all" placeholder="miempresa" type="text"/>
+</div>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Descripción de Actividad</label>
+<textarea class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all" placeholder="Describa brevemente el sector y actividad principal..." rows="3"></textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">País</label>
+<select class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface appearance-none">
+<option>España</option>
+<option>México</option>
+<option>Colombia</option>
+<option>Chile</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Zona Horaria</label>
+<select class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface appearance-none">
+<option>(GMT+01:00) Madrid</option>
+<option>(GMT-05:00) Bogota</option>
+<option>(GMT-06:00) Mexico City</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Moneda Base</label>
+<select class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface appearance-none">
+<option>EUR (€)</option>
+<option>USD ($)</option>
+<option>MXN ($)</option>
+</select>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant flex justify-end gap-3">
+<button class="px-6 py-2.5 rounded-lg text-sm font-bold border border-outline text-on-surface-variant hover:bg-surface-container-high transition-colors">Guardar Borrador</button>
+<button class="px-8 py-2.5 rounded-lg text-sm font-bold bg-primary text-white hover:shadow-lg transition-all flex items-center gap-2">
+                                Siguiente Paso
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 3. Billing Information Form -->
+<div class="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant">
+<h2 class="text-lg font-bold text-on-surface">Información de Facturación</h2>
+<p class="text-sm text-on-surface-variant">Métodos de pago y datos fiscales para la suscripción.</p>
+</div>
+<div class="p-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Número de Tarjeta</label>
+<div class="relative">
+<input class="w-full pl-12 pr-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all" placeholder="0000 0000 0000 0000" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">credit_card</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Vencimiento</label>
+<input class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all text-center" placeholder="MM/YY" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">CVC</label>
+<input class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all text-center" placeholder="***" type="password"/>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Identificación Fiscal (NIF/CIF)</label>
+<div class="relative">
+<input class="w-full px-4 py-2.5 rounded-lg border border-success focus:ring-2 focus:ring-success/20 focus:border-success bg-surface transition-all" placeholder="ES B12345678" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-success">check_circle</span>
+</div>
+<p class="text-[11px] text-success font-medium">Validación VIES confirmada con éxito.</p>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-on-surface">Dirección de Facturación</label>
+<input class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all" placeholder="Calle de la Tecnología, 128" type="text"/>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary">account_balance</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Transferencia Bancaria Directa</p>
+<p class="text-xs text-on-surface-variant">Disponible para facturas superiores a 500€/mes.</p>
+</div>
+</div>
+<button class="px-4 py-2 rounded-lg text-xs font-bold border border-primary text-primary hover:bg-primary-container/10 transition-colors">Configurar IBAN</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Security Settings & Multi-select -->
+<section class="xl:col-span-4 space-y-8">
+<!-- 2. Security Settings -->
+<div class="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant bg-surface-container-low">
+<h2 class="text-lg font-bold text-on-surface">Ajustes de Seguridad</h2>
+<p class="text-xs text-on-surface-variant">Gestione el acceso y la protección de su cuenta.</p>
+</div>
+<div class="p-6 space-y-8">
+<!-- Toggles -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-on-surface">Autenticación 2FA</p>
+<p class="text-xs text-on-surface-variant">Requiere código móvil al entrar.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-on-surface">Alertas de Inicio de Sesión</p>
+<p class="text-xs text-on-surface-variant">Notificar nuevos dispositivos.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<!-- Password Strength -->
+<div class="space-y-3">
+<label class="text-sm font-bold text-on-surface">Nueva Contraseña</label>
+<input class="w-full px-4 py-2.5 rounded-lg border border-outline focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface transition-all" type="password" value="S3cureP@ss"/>
+<div class="space-y-1">
+<div class="flex gap-1">
+<div class="h-1.5 w-full bg-success rounded-full"></div>
+<div class="h-1.5 w-full bg-success rounded-full"></div>
+<div class="h-1.5 w-full bg-success rounded-full"></div>
+<div class="h-1.5 w-full bg-outline-variant rounded-full"></div>
+</div>
+<p class="text-[10px] text-success font-bold">Seguridad: Alta</p>
+</div>
+</div>
+<!-- Multi-select Patterns (Simulated) -->
+<div class="space-y-3">
+<label class="text-sm font-bold text-on-surface">Roles Permitidos</label>
+<div class="p-3 border border-outline rounded-lg bg-surface flex flex-wrap gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-container/20 text-primary rounded-full text-xs font-bold">
+                                    Administrador
+                                    <span class="material-symbols-outlined text-xs cursor-pointer">close</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-container/20 text-primary rounded-full text-xs font-bold">
+                                    Editor
+                                    <span class="material-symbols-outlined text-xs cursor-pointer">close</span>
+</span>
+<span class="inline-flex items-center px-2.5 py-1 text-on-surface-variant text-xs italic">
+                                    + Añadir otro...
+                                </span>
+</div>
+</div>
+<!-- Warning State -->
+<div class="p-4 bg-error-container text-on-error-container rounded-lg border border-error/20 flex gap-3">
+<span class="material-symbols-outlined text-error">warning</span>
+<div>
+<p class="text-xs font-bold">Sesiones Activas</p>
+<p class="text-[10px]">Hay 3 dispositivos desconocidos conectados actualmente.</p>
+<button class="mt-2 text-[10px] font-bold underline">Cerrar todas las sesiones</button>
+</div>
+</div>
+<button class="w-full py-3 bg-secondary text-white font-bold rounded-lg hover:opacity-90 transition-opacity">Actualizar Seguridad</button>
+</div>
+</div>
+<!-- Ad/Banner Section -->
+<div class="relative h-64 rounded-xl overflow-hidden group shadow-md">
+<img alt="Cybersecurity Concept" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A futuristic cybersecurity concept image showing complex digital patterns and glowing blue circuit lines on a dark, sleek background. The lighting is dramatic, with neon blue accents illuminating an abstract data structure. The visual style is premium and corporate, conveying trust and advanced technological protection, perfectly fitting the security settings context of an enterprise admin panel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRrDLqNPQl99zplWfGDNkTG3cV9Mn5TKQpq5LS8sAoua4UGMzxLZk7w-qznA5Rqriv35lmpMAHs7qFh5sq7lDQZmRYoOCK7Sd19wNYJR_s2qyPOQNlBveGa2S4sSB2dPTNpY4-GnHuawexfvLJpXUOggb2QL4yqjsK6Stu6uBEVMjO9P0KJE9pxDPJLNtG7tp5XJcaaTGGTrtRxls4fYmZi6VOQ1Q0IbNg_7aPF39a1DLnuhyn9dDlvOF3iWMtzYV1isdumBxsXYKR"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end">
+<h3 class="text-white font-bold text-lg mb-1">Protección Avanzada</h3>
+<p class="text-white/80 text-xs">Descubra nuestro nuevo motor de IA para la detección de anomalías en tiempo real.</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FAB (Floating Action Button) - Contextual -->
+<div class="fixed bottom-8 right-8 flex flex-col items-end gap-4 z-50">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all group">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">help</span>
+<span class="absolute right-full mr-4 bg-inverse-surface text-inverse-on-surface px-3 py-1.5 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">Soporte NexCore</span>
+</button>
+</div>
+<!-- Mobile Bottom Nav -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-outline-variant flex items-center justify-around px-4 z-50">
+<button class="flex flex-col items-center text-on-surface-variant gap-1">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span class="text-[10px] font-medium">Panel</span>
+</button>
+<button class="flex flex-col items-center text-primary gap-1">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-[10px] font-bold">Ajustes</span>
+</button>
+<div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-full -mt-10 border-4 border-background flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined">add</span>
+</div>
+<button class="flex flex-col items-center text-on-surface-variant gap-1">
+<span class="material-symbols-outlined text-xl">menu_book</span>
+<span class="text-[10px] font-medium">Menús</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant gap-1">
+<span class="material-symbols-outlined text-xl">group</span>
+<span class="text-[10px] font-medium">Perfil</span>
+</button>
+</div>
+<script>
+        // Micro-interactions and simulation logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // Placeholder for interactions if needed
+            console.log('NexCore Admin Loaded');
+        });
+    </script>
+</body></html>

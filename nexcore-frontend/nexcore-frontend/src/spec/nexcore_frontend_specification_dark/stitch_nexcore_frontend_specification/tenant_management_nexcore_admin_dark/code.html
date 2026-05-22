@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexCore Admin - Tenant Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;900&amp;family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#00354a",
+                        "inverse-surface": "#dfe2ea",
+                        "surface-container-low": "#181c22",
+                        "surface": "#0f1419",
+                        "tertiary-fixed": "#ffdcc2",
+                        "on-primary": "#003258",
+                        "outline": "#89919d",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "inverse-primary": "#0061a4",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#00497d",
+                        "on-background": "#dfe2ea",
+                        "surface-container": "#1c2026",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "on-tertiary": "#4d2700",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#001d36",
+                        "inverse-on-surface": "#2d3137",
+                        "surface-bright": "#353940",
+                        "surface-container-lowest": "#0a0e14",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "primary-container": "#2196f3",
+                        "tertiary": "#ffb77b",
+                        "primary-fixed-dim": "#9ecaff",
+                        "background": "#0f1419",
+                        "surface-dim": "#0f1419",
+                        "outline-variant": "#404752",
+                        "on-surface": "#dfe2ea",
+                        "on-secondary-container": "#00374d",
+                        "secondary-fixed": "#c4e7ff",
+                        "surface-container-highest": "#31353b",
+                        "primary-fixed": "#d1e4ff",
+                        "secondary-container": "#00a6e0",
+                        "on-surface-variant": "#bfc7d4",
+                        "surface-variant": "#31353b",
+                        "surface-container-high": "#262a30",
+                        "on-tertiary-container": "#452200",
+                        "on-tertiary-fixed": "#2e1500",
+                        "secondary": "#7bd0ff",
+                        "primary": "#9ecaff",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#001e2c",
+                        "surface-tint": "#9ecaff",
+                        "on-primary-container": "#002c4f",
+                        "tertiary-container": "#db7900"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "1rem",
+                        "lg": "1.5rem",
+                        "gutter": "1rem",
+                        "md": "1rem",
+                        "margin-desktop": "2rem",
+                        "base": "4px",
+                        "xs": "0.25rem",
+                        "xl": "2.5rem",
+                        "sm": "0.5rem"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Hanken Grotesk"],
+                        "code-sm": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "code-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f1419;
+            color: #dfe2ea;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="font-body-lg text-body-lg">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col border-r border-outline-variant bg-surface-container-low w-64 z-50">
+<div class="px-lg py-xl">
+<h1 class="font-headline-lg text-headline-lg font-black text-on-surface">NexCore</h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-60">Admin Console v2.4</p>
+</div>
+<nav class="flex-1 px-md space-y-sm">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-highest rounded-xl px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md bg-secondary-container text-on-secondary-container rounded-xl px-md py-sm" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-md text-label-md">Users</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-highest rounded-xl px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-md text-label-md">Roles</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-highest rounded-xl px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-md text-label-md">Logs</span>
+</a>
+</nav>
+<div class="p-md border-t border-outline-variant mt-auto space-y-sm">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-highest rounded-xl px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-highest rounded-xl px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Bar -->
+<header class="flex justify-between items-center w-full px-margin-desktop py-md sticky top-0 z-40 bg-surface/80 backdrop-blur-md">
+<div class="flex items-center gap-lg">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 flex items-center pl-md text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</span>
+<input class="bg-surface-container-high border-none rounded-full pl-xl pr-lg py-sm w-80 focus:ring-2 focus:ring-primary text-on-surface transition-all" placeholder="Search tenants..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant ml-sm">
+<img alt="Administrator Profile" class="w-full h-full object-cover" data-alt="A professional close-up headshot of a middle-aged male executive in a dark-first corporate environment. He is wearing a minimalist black suit. The background is a softly blurred office with deep slate tones and subtle blue lighting accents. The lighting is high-contrast, creating a professional and authoritative atmosphere that aligns with a sophisticated dark mode UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm-rCzqpg8I9pKl7RVLiUKNsGXZjP2-hlrada1i9-cR7tfhbnc9Gtzb32dshWdevC2jYAu_IH9S67ROVhcvoX8Fiat3By2pq5rpu7K0sEHqvHylDDnPuEUzaHcqwIqo__CXZPXIQYROGnwykhVwXQkRYJDrXxPQofXZ858lhIoKRGBlJn62H-U5wYIs1U315xGsU04lNmU0A22GK8ggpP9LPmI6aI_MTB_qKLhACXfLzaveJk9JhkW_irIIaj1k8aFJDxMKHFnTl8p"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<section class="px-margin-desktop py-lg space-y-xl">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Tenant Management</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Monitor and manage all active enterprise tenants across your infrastructure.</p>
+</div>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-lg py-md rounded-xl flex items-center gap-sm hover:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                    Provision New Tenant
+                </button>
+</div>
+<!-- Stats Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="md:col-span-1 glass-card p-lg rounded-full flex flex-col justify-between h-40">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Tenants</p>
+<h3 class="font-display-lg text-display-lg text-on-surface">1,284</h3>
+</div>
+</div>
+<div class="md:col-span-1 glass-card p-lg rounded-full flex flex-col justify-between h-40">
+<span class="material-symbols-outlined text-secondary" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Active Now</p>
+<h3 class="font-display-lg text-display-lg text-on-surface">842</h3>
+</div>
+</div>
+<div class="md:col-span-2 bg-gradient-to-br from-primary-container/20 to-surface-container-high glass-card p-lg rounded-full flex items-center justify-between h-40">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">System Health</p>
+<h3 class="font-headline-lg text-headline-lg text-primary">Operational</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">All nodes report 99.98% uptime</p>
+</div>
+<div class="flex gap-xs items-end">
+<div class="w-1 bg-primary/20 h-8 rounded-full"></div>
+<div class="w-1 bg-primary/40 h-12 rounded-full"></div>
+<div class="w-1 bg-primary/60 h-16 rounded-full"></div>
+<div class="w-1 bg-primary/80 h-20 rounded-full"></div>
+<div class="w-1 bg-primary h-24 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Main Data Table Container -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant">
+<div class="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<div class="flex gap-md">
+<button class="font-label-md text-label-md text-primary px-sm py-xs border-b-2 border-primary">Active Tenants</button>
+<button class="font-label-md text-label-md text-on-surface-variant px-sm py-xs hover:text-on-surface transition-colors">Archived</button>
+<button class="font-label-md text-label-md text-on-surface-variant px-sm py-xs hover:text-on-surface transition-colors">Pending</button>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-xs text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+</div>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest">
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Tenant Name</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Status</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Plan</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Last Activity</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Users</th>
+<th class="px-lg py-md"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-highest transition-colors group cursor-pointer">
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="corporate_fare">corporate_fare</span>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface">Vortex Dynamics</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">vortex-dyn-04</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="bg-green-500/10 text-green-400 font-label-md text-label-md px-md py-xs rounded-full border border-green-500/20">Active</span>
+</td>
+<td class="px-lg py-lg">
+<span class="text-on-surface font-body-sm text-body-sm">Enterprise Gold</span>
+</td>
+<td class="px-lg py-lg text-on-surface-variant font-body-sm text-body-sm">2 mins ago</td>
+<td class="px-lg py-lg">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-slate-500 overflow-hidden">
+<img alt="User" data-alt="A close-up high-resolution portrait of a software developer with a minimalist, futuristic aesthetic. The lighting is dominated by deep blues and subtle neon highlights, reflecting off high-tech glass surfaces. The style is cinematic and dark-themed, fitting seamlessly into an Obsidian Deep design system palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRB2BfzAFxjaWKu1X488hCIwLenvKtt5MNDIPXewj8OlkFqnK4VJL2eJA3IhBv05nhhRohW0KeZwzGVcULO-ywNciOBQndTWMwcGmY2JAQNaj_VSeDx8W8fZaPJHLBsEWbDVB_Sp2x38q-UMrkvEk79tlJMxAKnM7xTkEZEUqHWpVZYctokRd4ECteO5pyamtXcWFIZbXIfzR_Tc4RzezWLj3zZ3SnRMWSujMCrWzCUlfzdq6FhEMgfjS7InjYBjcCkunu7L4E92hX"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-slate-600 overflow-hidden">
+<img alt="User" data-alt="Portrait of a female technical product manager in a high-tech lab setting. Soft, diffuse lighting with a dark slate background and subtle cyan rim light. The image captures a sense of intelligence and modern leadership, with high contrast and sharp focus on her features." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa6zOdGBp4Tv_Y26ZbDqGHSleQYNSs2O7TjBnhlNJM3oOPFltdEJk5qLHL8RtCgayq2Z_mDkJRbZz_lyXmYbBfOIB8dZCMZ86l9TcoLjKUp4UHD15XxXZvLRm7-Q3vACtiFPTW0qcRyKahm1_xTG8fjWLmnOASQ3MRdcIPdhHEx6as-TPp0gz54owxVZ5-Lwf8SweWrdDHwO-43MdpHk7n41r7yPs4xkoWElZzb0ihd9kEzjy_E7T2qOB3rp9S5-Bxsh6NUNOX8kfQ"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-on-surface-variant">+42</div>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="p-xs text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-highest transition-colors group cursor-pointer">
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="cloud">cloud</span>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface">Nebula SaaS</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">nebula-core-01</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="bg-green-500/10 text-green-400 font-label-md text-label-md px-md py-xs rounded-full border border-green-500/20">Active</span>
+</td>
+<td class="px-lg py-lg">
+<span class="text-on-surface font-body-sm text-body-sm">Standard Plus</span>
+</td>
+<td class="px-lg py-lg text-on-surface-variant font-body-sm text-body-sm">15 mins ago</td>
+<td class="px-lg py-lg">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-slate-400 overflow-hidden">
+<img alt="User" data-alt="Close-up portrait of a technology director in a data center. High-key cyan and magenta light reflects from equipment onto his face. The background is a dense array of glowing server racks in deep obsidian. Professional, sharp, and intensely technical aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOtsCT57jmehQfyQUmt8_TVfXDTQ9_u4TtjOy8qPvIrOzyHzJgmvnVv5Pn7l5IRemtbQpif9xNsgoKUJe_dqzAlULZYzfHn5erMVMIXFKSQ0owe33Kw_CzwTetrmt_GPDCVyORndVN5a0lT_80sETNZLFGHVnxSCf1vwDi4CPcrfc1fJIIjE4gNXj3wLLFTGHLBYfadIhpxPOsNDb5RKmSIAw5guEl1E_W4DVxhjye1fJKrsov3QOTVg3FKmUWcBvqdD9Rex35Iu0i"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-on-surface-variant">+15</div>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="p-xs text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-highest transition-colors group cursor-pointer">
+<td class="px-lg py-lg">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded-xl bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface">Shield SecOps</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">shield-prod-88</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="bg-yellow-500/10 text-yellow-400 font-label-md text-label-md px-md py-xs rounded-full border border-yellow-500/20">Maintenance</span>
+</td>
+<td class="px-lg py-lg">
+<span class="text-on-surface font-body-sm text-body-sm">GovCloud Pro</span>
+</td>
+<td class="px-lg py-lg text-on-surface-variant font-body-sm text-body-sm">1 hour ago</td>
+<td class="px-lg py-lg">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-slate-300 overflow-hidden">
+<img alt="User" data-alt="Headshot of a security analyst in a dark command center. The ambient lighting is deep charcoal and dark blue, with sharp focused highlights on the subject. Minimalist, high-end technical photography style with a focus on precision and digital security themes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYxnuB1f7TFCpbdD2-3-LH1XQ-DF94ta2i9iFFVvFHF8Z15e4rJQV-OdDIA_tT8ItOpR33cCoFdoorTQj0L0lOAb2Xk1Wmje8_nkHfPcpm8QUWiKHRR44IUy-5nMJ2nU7ysgAzQ48gaO9b-SRmzNFQStxDpZcBcENSf_EvhMOwkI_i6xUOnFq3OPTqhud9ey1GqGD3wjqD-ib1tuvu9lEHcdeKhP-sICQcpr-0ueKMBcYSVGmt-2V_J1p545Mx9LXkdq5-DDgobHP8"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-on-surface-variant">+2</div>
+</div>
+</td>
+<td class="px-lg py-lg text-right">
+<button class="p-xs text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-lg py-md border-t border-outline-variant flex justify-between items-center bg-surface-container-low">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Showing 1-3 of 1,284 tenants</p>
+<div class="flex items-center gap-sm">
+<button class="p-sm rounded-lg hover:bg-surface-container-highest text-on-surface-variant disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="font-label-md text-label-md text-primary bg-primary/10 px-md py-xs rounded-lg">1</span>
+<button class="p-sm rounded-lg hover:bg-surface-container-highest text-on-surface-variant">2</button>
+<button class="p-sm rounded-lg hover:bg-surface-container-highest text-on-surface-variant text-[16px]">...</button>
+<button class="p-sm rounded-lg hover:bg-surface-container-highest text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<script>
+        // Simple micro-interaction for rows
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('mousedown', () => {
+                row.style.transform = 'scale(0.998)';
+            });
+            row.addEventListener('mouseup', () => {
+                row.style.transform = 'scale(1)';
+            });
+        });
+
+        // Atmospheric mouse glow effect (optional visual candy)
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            const glow = document.createElement('div');
+            // This is just a conceptual micro-effect, wouldn't actually inject nodes 
+            // in a production app this way for performance reasons.
+        });
+    </script>
+</body></html>
