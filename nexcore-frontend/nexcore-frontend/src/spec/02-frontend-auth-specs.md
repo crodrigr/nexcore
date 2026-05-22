@@ -2,7 +2,8 @@
 **Versión:** 1.0  
 **Fecha:** 2026-05-22  
 **Estado:** En desarrollo activo  
-**Módulo:** Auth (Login & Password Recovery)
+**Módulo:** Auth (Login & Password Recovery)  
+**Fase Actual:** Frontend UI/UX (Sin integración backend)
 
 ---
 
@@ -13,7 +14,24 @@ El módulo de autenticación de NexCore proporciona las pantallas y flujos neces
 - **Recuperar Contraseña**: Flujo completo de recuperación y restablecimiento
 - **Temas Light/Dark**: Soporte nativo de cambio de tema en todas las pantallas
 
-### 1.1 Objetivos del Módulo
+### 1.1 Alcance de la Fase Actual
+
+> **⚠️ IMPORTANTE**: Esta especificación cubre únicamente la **implementación del frontend** (UI/UX) sin integración con servicios backend.
+
+**Objetivo de esta fase:**
+- 🎨 Establecer el **sistema de diseño** y estilos visuales
+- 🧩 Implementar **componentes de UI** completamente funcionales
+- 🎭 Configurar el **sistema de temas** light/dark
+- 📱 Validar **responsive design** y accesibilidad
+- 🔄 Simular flujos con **datos mock** (sin llamadas HTTP reales)
+
+**Implementación futura (Fase 2):**
+- 🔌 Integración con backend (nexcore-auth-service)
+- 🌐 HTTP Interceptors y manejo de tokens JWT
+- 🔐 Autenticación real y guards
+- 📧 Envío real de OTP por email
+
+### 1.2 Objetivos del Módulo
 
 - ✅ Interfaz limpia y moderna con branding consistente
 - ✅ Responsive design (mobile-first)
@@ -21,6 +39,7 @@ El módulo de autenticación de NexCore proporciona las pantallas y flujos neces
 - ✅ Feedback visual claro (loading, errors, success)
 - ✅ Accesibilidad WCAG 2.1 AA
 - ✅ Soporte completo de temas light/dark
+- ✅ **Simulación de flujos con datos mock** (Fase 1)
 
 ---
 
@@ -217,19 +236,53 @@ export class LoginComponent {
     try {
       const { tenantId, username, password } = this.loginForm.value;
       
-      const response = await this.authService.login({
-        tenantId,
-        username,
-        password
-      });
+      // ============================================================
+      // MOCK: Simulación de login (sin llamadas reales al backend)
+      // ============================================================
+      
+      // Simular delay de red (300ms)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Credenciales válidas para demostración
+      const validCredentials = [
+        { username: 'super.admin', password: 'NexCore@2026!' },
+        { username: 'admin', password: 'admin123' },
+        { username: 'demo', password: 'demo123' }
+      ];
+      
+      const isValidCredential = validCredentials.some(
+        cred => cred.username === username && cred.password === password
+      );
+      
+      if (!isValidCredential) {
+        throw new Error('Credenciales inválidas');
+      }
+      
+      // Simular respuesta del backend
+      const mockResponse = {
+        challengeToken: 'mock-challenge-token-' + Date.now(),
+        message: 'Código OTP enviado a tu email'
+      };
       
       // Guardar challenge token y redirigir a OTP
-      sessionStorage.setItem('challengeToken', response.challengeToken);
+      sessionStorage.setItem('challengeToken', mockResponse.challengeToken);
+      sessionStorage.setItem('mockUsername', username);
       
       this.router.navigate(['/auth/verify-otp']);
       
+      // ============================================================
+      // PRODUCCIÓN: Descomentar cuando se integre con backend
+      // ============================================================
+      // const response = await this.authService.login({
+      //   tenantId,
+      //   username,
+      //   password
+      // });
+      // sessionStorage.setItem('challengeToken', response.challengeToken);
+      // this.router.navigate(['/auth/verify-otp']);
+      
     } catch (err: any) {
-      this.error.set(err.error?.message || 'Error al iniciar sesión');
+      this.error.set(err.message || 'Error al iniciar sesión');
     } finally {
       this.loading.set(false);
     }
@@ -750,7 +803,17 @@ export class ForgotPasswordComponent {
     try {
       const { email } = this.forgotForm.value;
       
-      await this.authService.forgotPassword({ email });
+      // ============================================================
+      // MOCK: Simulación de envío de email (sin backend real)
+      // ============================================================
+      
+      // Simular delay de red (500ms)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Validar formato de email (ya validado por el formulario)
+      // En producción, el backend verificaría si el email existe
+      
+      console.log('📧 [MOCK] Email de recuperación enviado a:', email);
       
       this.success.set(true);
       
@@ -759,8 +822,14 @@ export class ForgotPasswordComponent {
         this.router.navigate(['/auth/login']);
       }, 3000);
       
+      // ============================================================
+      // PRODUCCIÓN: Descomentar cuando se integre con backend
+      // ============================================================
+      // await this.authService.forgotPassword({ email });
+      // this.success.set(true);
+      
     } catch (err: any) {
-      this.error.set(err.error?.message || 'Error al enviar instrucciones');
+      this.error.set(err.message || 'Error al enviar instrucciones');
     } finally {
       this.loading.set(false);
     }
@@ -938,6 +1007,454 @@ export class ForgotPasswordComponent {
   .alert-message {
     font-size: var(--font-size-xs);
     opacity: 0.9;
+  }
+}
+```
+
+---
+
+## 5.3 Pantalla de Verificar OTP
+
+### 5.3.1 Diseño UI
+
+**Wireframe**
+
+```
+┌──────────────────────────────────────────┐
+│                                          │
+│          [Logo NexCore]                  │
+│                                          │
+│       Verificar Código OTP               │
+│       Ingresa el código de 6 dígitos    │
+│       enviado a tu email                 │
+│                                          │
+│  ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐   │
+│  │ 1 │ │ 2 │ │ 3 │ │ 4 │ │ 5 │ │ 6 │   │
+│  └───┘ └───┘ └───┘ └───┘ └───┘ └───┘   │
+│                                          │
+│  ┌────────────────────────────────────┐ │
+│  │      VERIFICAR                     │ │
+│  └────────────────────────────────────┘ │
+│                                          │
+│  ¿No recibiste el código?               │
+│  Reenviar código (30s)                  │
+│                                          │
+│  Volver a Iniciar Sesión                │
+│                                          │
+│                                  [🌙/☀] │
+└──────────────────────────────────────────┘
+```
+
+### 5.3.2 Implementación
+
+**Archivo:** `libs/features/auth/src/lib/verify-otp/verify-otp.component.ts`
+
+```typescript
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '@nexcore/data-access/auth';
+import { ThemeToggleComponent } from '@nexcore/shared/ui/theme';
+
+@Component({
+  selector: 'nxc-verify-otp',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    ThemeToggleComponent
+  ],
+  templateUrl: './verify-otp.component.html',
+  styleUrl: './verify-otp.component.scss'
+})
+export class VerifyOtpComponent {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  
+  otpForm: FormGroup;
+  loading = signal(false);
+  error = signal<string | null>(null);
+  resendTimer = signal(30);
+  canResend = signal(false);
+  
+  constructor() {
+    // Verificar que existe challenge token
+    const challengeToken = sessionStorage.getItem('challengeToken');
+    if (!challengeToken) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+    
+    this.otpForm = this.fb.group({
+      digit1: ['', [Validators.required, Validators.pattern(/^\d$/)]],
+      digit2: ['', [Validators.required, Validators.pattern(/^\d$/)]],
+      digit3: ['', [Validators.required, Validators.pattern(/^\d$/)]],
+      digit4: ['', [Validators.required, Validators.pattern(/^\d$/)]],
+      digit5: ['', [Validators.required, Validators.pattern(/^\d$/)]],
+      digit6: ['', [Validators.required, Validators.pattern(/^\d$/)]]
+    });
+    
+    this.startResendTimer();
+  }
+  
+  startResendTimer(): void {
+    this.canResend.set(false);
+    this.resendTimer.set(30);
+    
+    const interval = setInterval(() => {
+      const current = this.resendTimer();
+      if (current <= 1) {
+        clearInterval(interval);
+        this.canResend.set(true);
+      } else {
+        this.resendTimer.set(current - 1);
+      }
+    }, 1000);
+  }
+  
+  onDigitInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    
+    // Auto-avanzar al siguiente campo
+    if (value.length === 1 && index < 6) {
+      const nextInput = input.parentElement?.parentElement
+        ?.querySelector(`#digit${index + 1}`) as HTMLInputElement;
+      nextInput?.focus();
+    }
+  }
+  
+  onDigitKeyDown(event: KeyboardEvent, index: number): void {
+    const input = event.target as HTMLInputElement;
+    
+    // Retroceder al campo anterior con Backspace
+    if (event.key === 'Backspace' && !input.value && index > 1) {
+      const prevInput = input.parentElement?.parentElement
+        ?.querySelector(`#digit${index - 1}`) as HTMLInputElement;
+      prevInput?.focus();
+    }
+  }
+  
+  async onSubmit(): Promise<void> {
+    if (this.otpForm.invalid) {
+      this.otpForm.markAllAsTouched();
+      return;
+    }
+    
+    this.loading.set(true);
+    this.error.set(null);
+    
+    try {
+      const challengeToken = sessionStorage.getItem('challengeToken')!;
+      
+      const otpCode = Object.values(this.otpForm.value).join('');
+      
+      // ============================================================
+      // MOCK: Simulación de verificación OTP (sin backend real)
+      // ============================================================
+      
+      // Simular delay de red (400ms)
+      await new Promise(resolve => setTimeout(resolve, 400));
+      
+      // En esta fase, cualquier código de 6 dígitos es válido
+      if (otpCode.length !== 6) {
+        throw new Error('Código OTP inválido');
+      }
+      
+      console.log('✅ [MOCK] OTP verificado:', otpCode);
+      
+      // Simular respuesta de sesión
+      const mockSession = {
+        accessToken: 'mock-access-token-' + Date.now(),
+        refreshToken: 'mock-refresh-token-' + Date.now(),
+        expiresIn: 3600,
+        profile: {
+          id: 'mock-user-id',
+          username: sessionStorage.getItem('mockUsername') || 'super.admin',
+          email: 'admin@nexcore.com',
+          name: 'Administrador',
+          avatar: '/assets/images/default-avatar.png',
+          tenantId: '00000000-0000-0000-0000-000000000001',
+          tenantName: 'Sistema'
+        }
+      };
+      
+      // Guardar sesión mock
+      localStorage.setItem('accessToken', mockSession.accessToken);
+      localStorage.setItem('refreshToken', mockSession.refreshToken);
+      
+      // Limpiar challenge token
+      sessionStorage.removeItem('challengeToken');
+      sessionStorage.removeItem('mockUsername');
+      
+      // Redirigir al dashboard
+      this.router.navigate(['/dashboard']);
+      
+      // ============================================================
+      // PRODUCCIÓN: Descomentar cuando se integre con backend
+      // ============================================================
+      // const response = await this.authService.verifyOtp({
+      //   challengeToken,
+      //   otpCode
+      // });
+      // sessionStorage.removeItem('challengeToken');
+      // this.router.navigate(['/dashboard']);
+      
+    } catch (err: any) {
+      this.error.set(err.message || 'Código OTP inválido');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+  
+  async resendCode(): Promise<void> {
+    if (!this.canResend()) return;
+    
+    this.loading.set(true);
+    this.error.set(null);
+    
+    try {
+      // ============================================================
+      // MOCK: Simular reenvío de código
+      // ============================================================
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      console.log('📧 [MOCK] Código OTP reenviado');
+      
+      // Reiniciar timer
+      this.startResendTimer();
+      
+      // Limpiar formulario
+      this.otpForm.reset();
+      
+      // Focus en primer input
+      setTimeout(() => {
+        const firstInput = document.querySelector('#digit1') as HTMLInputElement;
+        firstInput?.focus();
+      }, 100);
+      
+      // ============================================================
+      // PRODUCCIÓN: Descomentar cuando se integre con backend
+      // ============================================================
+      // await this.authService.resendOtp({
+      //   challengeToken: sessionStorage.getItem('challengeToken')!
+      // });
+      
+    } catch (err: any) {
+      this.error.set(err.message || 'Error al reenviar código');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+}
+```
+
+**Archivo:** `libs/features/auth/src/lib/verify-otp/verify-otp.component.html`
+
+```html
+<div class="otp-container">
+  <div class="otp-card">
+    <!-- Header -->
+    <div class="otp-header">
+      <img src="/assets/images/logo-light.svg" alt="NexCore" class="logo" />
+      <h1 class="title">Verificar Código OTP</h1>
+      <p class="subtitle">
+        Ingresa el código de 6 dígitos enviado a tu email
+      </p>
+    </div>
+    
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-wrapper">
+      <nxc-theme-toggle />
+    </div>
+    
+    <!-- Form -->
+    <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="otp-form">
+      <!-- Error Alert -->
+      @if (error()) {
+        <div class="alert alert-error">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+      
+      <!-- OTP Input Fields -->
+      <div class="otp-inputs">
+        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+          <input
+            type="text"
+            [id]="'digit' + i"
+            [formControlName]="'digit' + i"
+            class="otp-digit"
+            maxlength="1"
+            inputmode="numeric"
+            pattern="[0-9]"
+            (input)="onDigitInput($event, i)"
+            (keydown)="onDigitKeyDown($event, i)"
+            [attr.aria-label]="'Dígito ' + i"
+          />
+        }
+      </div>
+      
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-primary btn-block"
+        [disabled]="loading() || otpForm.invalid"
+      >
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Verificando...</span>
+        } @else {
+          <span>Verificar</span>
+        }
+      </button>
+      
+      <!-- Resend Code -->
+      <div class="form-footer">
+        <p class="footer-text">¿No recibiste el código?</p>
+        @if (canResend()) {
+          <button
+            type="button"
+            class="link-button"
+            (click)="resendCode()"
+            [disabled]="loading()"
+          >
+            Reenviar código
+          </button>
+        } @else {
+          <span class="timer-text">
+            Reenviar código en {{ resendTimer() }}s
+          </span>
+        }
+      </div>
+      
+      <!-- Back to Login -->
+      <div class="form-footer">
+        <a routerLink="/auth/login" class="link">
+          Volver a Iniciar Sesión
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+```
+
+**Archivo:** `libs/features/auth/src/lib/verify-otp/verify-otp.component.scss`
+
+```scss
+// Reutilizar estilos base del login
+@import '../login/login.component.scss';
+
+.otp-container {
+  @extend .login-container;
+}
+
+.otp-card {
+  @extend .login-card;
+}
+
+.otp-header {
+  @extend .login-header;
+}
+
+.otp-form {
+  @extend .login-form;
+}
+
+// Estilos específicos de OTP
+.otp-inputs {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  margin: var(--spacing-6) 0;
+}
+
+.otp-digit {
+  width: 56px;
+  height: 64px;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+  
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  
+  &:hover:not(:disabled) {
+    border-color: var(--color-border-heavy);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-interactive-primary);
+    box-shadow: var(--shadow-focus);
+  }
+  
+  &:invalid {
+    border-color: var(--color-error);
+  }
+}
+
+.footer-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-2) 0;
+  text-align: center;
+}
+
+.link-button {
+  background: transparent;
+  border: none;
+  color: var(--color-interactive-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    color: var(--color-interactive-primary-hover);
+    text-decoration: underline;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.timer-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .otp-inputs {
+    gap: var(--spacing-2);
+  }
+  
+  .otp-digit {
+    width: 44px;
+    height: 52px;
+    font-size: var(--font-size-xl);
   }
 }
 ```
@@ -1265,7 +1782,10 @@ export class AppComponent implements OnInit {
 
 ---
 
-## 8. Servicio de Autenticación
+## 8. Servicio de Autenticación (Mock)
+
+> **Nota:** Este servicio usa datos mock para simular las respuestas del backend.  
+> En la Fase 2 se implementarán las llamadas HTTP reales a nexcore-auth-service.
 
 **Archivo:** `libs/shared/data-access/auth/src/lib/auth.service.ts`
 
@@ -1274,7 +1794,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '@env/environment';
+// import { environment } from '@env/environment'; // Comentado temporalmente
 
 export interface LoginRequest {
   tenantId: string;
@@ -1325,7 +1845,8 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   
-  private readonly API_URL = environment.authUrl;
+  // Comentado para fase 1 (solo frontend)
+  // private readonly API_URL = environment.authUrl;
   
   // State signals
   userProfile = signal<UserProfile | null>(null);
@@ -1335,29 +1856,77 @@ export class AuthService {
     this.loadSessionFromStorage();
   }
   
+  // ============================================================
+  // MÉTODOS MOCK (Fase 1 - Solo Frontend)
+  // ============================================================
+  
   async login(request: LoginRequest): Promise<LoginResponse> {
-    const url = `${this.API_URL}/auth/login`;
-    return firstValueFrom(this.http.post<LoginResponse>(url, request));
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Mock: Simular respuesta exitosa
+    return {
+      challengeToken: 'mock-challenge-' + Date.now(),
+      message: 'Código OTP enviado'
+    };
+    
+    // PRODUCCIÓN: Descomentar para integración real
+    // const url = `${this.API_URL}/auth/login`;
+    // return firstValueFrom(this.http.post<LoginResponse>(url, request));
   }
   
   async verifyOtp(request: VerifyOtpRequest): Promise<SessionResponse> {
-    const url = `${this.API_URL}/auth/verify-otp`;
-    const response = await firstValueFrom(
-      this.http.post<SessionResponse>(url, request)
-    );
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 400));
     
-    this.saveSession(response);
-    return response;
+    // Mock: Simular sesión exitosa
+    const mockResponse: SessionResponse = {
+      accessToken: 'mock-access-token-' + Date.now(),
+      refreshToken: 'mock-refresh-token-' + Date.now(),
+      expiresIn: 3600,
+      profile: {
+        id: 'mock-user-id',
+        username: 'super.admin',
+        email: 'admin@nexcore.com',
+        name: 'Administrador',
+        avatar: '/assets/images/default-avatar.png',
+        tenantId: '00000000-0000-0000-0000-000000000001',
+        tenantName: 'Sistema'
+      }
+    };
+    
+    this.saveSession(mockResponse);
+    return mockResponse;
+    
+    // PRODUCCIÓN: Descomentar para integración real
+    // const url = `${this.API_URL}/auth/verify-otp`;
+    // const response = await firstValueFrom(
+    //   this.http.post<SessionResponse>(url, request)
+    // );
+    // this.saveSession(response);
+    // return response;
   }
   
   async forgotPassword(request: ForgotPasswordRequest): Promise<void> {
-    const url = `${this.API_URL}/auth/forgot-password`;
-    return firstValueFrom(this.http.post<void>(url, request));
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    console.log('📧 [MOCK] Email enviado a:', request.email);
+    
+    // PRODUCCIÓN: Descomentar para integración real
+    // const url = `${this.API_URL}/auth/forgot-password`;
+    // return firstValueFrom(this.http.post<void>(url, request));
   }
   
   async resetPassword(request: ResetPasswordRequest): Promise<void> {
-    const url = `${this.API_URL}/auth/reset-password`;
-    return firstValueFrom(this.http.post<void>(url, request));
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    console.log('🔐 [MOCK] Contraseña restablecida');
+    
+    // PRODUCCIÓN: Descomentar para integración real
+    // const url = `${this.API_URL}/auth/reset-password`;
+    // return firstValueFrom(this.http.post<void>(url, request));
   }
   
   async refreshToken(): Promise<SessionResponse> {
@@ -1367,13 +1936,27 @@ export class AuthService {
       throw new Error('No refresh token available');
     }
     
-    const url = `${this.API_URL}/auth/refresh`;
-    const response = await firstValueFrom(
-      this.http.post<SessionResponse>(url, { refreshToken })
-    );
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 200));
     
-    this.saveSession(response);
-    return response;
+    // Mock: Simular refresh exitoso
+    const mockResponse: SessionResponse = {
+      accessToken: 'mock-access-token-refreshed-' + Date.now(),
+      refreshToken: 'mock-refresh-token-refreshed-' + Date.now(),
+      expiresIn: 3600,
+      profile: this.userProfile()!
+    };
+    
+    this.saveSession(mockResponse);
+    return mockResponse;
+    
+    // PRODUCCIÓN: Descomentar para integración real
+    // const url = `${this.API_URL}/auth/refresh`;
+    // const response = await firstValueFrom(
+    //   this.http.post<SessionResponse>(url, { refreshToken })
+    // );
+    // this.saveSession(response);
+    // return response;
   }
   
   logout(): void {
@@ -1572,67 +2155,217 @@ nx test features-auth --watch
 
 ---
 
-## 11. Checklist de Implementación
+## 11. Fases de Implementación
 
-### Fase 1: Setup Base
+### 📍 FASE 1: Frontend UI/UX (ACTUAL)
+
+**Objetivo:** Establecer el diseño, estilos y componentes visuales sin integración backend.
+
+#### 1.1 Setup Base
 - [ ] Crear librería `features/auth`
 - [ ] Crear librería `shared/ui/theme`
-- [ ] Crear librería `shared/data-access/auth`
+- [ ] Crear librería `shared/data-access/auth` (con mocks)
 - [ ] Configurar tokens de diseño en `shared/ui/styles`
-- [ ] Implementar ThemeService
+- [ ] Implementar ThemeService con localStorage
 - [ ] Implementar ThemeToggleComponent
 
-### Fase 2: Login
-- [ ] Implementar LoginComponent
+#### 1.2 Componentes de Login
+- [ ] Implementar LoginComponent con diseño completo
 - [ ] Implementar formulario reactivo con validación
-- [ ] Integrar con AuthService
+- [ ] Integrar con AuthService (usando mocks)
 - [ ] Implementar feedback visual (loading, errors)
 - [ ] Agregar toggle de contraseña
-- [ ] Tests unitarios
+- [ ] Probar flujo simulado con credenciales mock
 
-### Fase 3: Recuperar Contraseña
+#### 1.3 Componentes de Recuperación
 - [ ] Implementar ForgotPasswordComponent
-- [ ] Implementar formulario de email
+- [ ] Implementar formulario de email con validación
+- [ ] Implementar VerifyOtpComponent (UI completa)
 - [ ] Implementar ResetPasswordComponent
-- [ ] Integrar con backend
-- [ ] Tests unitarios
+- [ ] Probar flujos simulados con delays
 
-### Fase 4: Temas
+#### 1.4 Sistema de Temas
 - [ ] Crear tokens SCSS para light theme
 - [ ] Crear tokens SCSS para dark theme
-- [ ] Implementar transiciones suaves
-- [ ] Probar en todas las pantallas
-- [ ] Verificar contraste de colores (WCAG)
+- [ ] Implementar transiciones suaves entre temas
+- [ ] Probar cambio de tema en todas las pantallas
+- [ ] Verificar contraste de colores (WCAG 2.1 AA)
+- [ ] Implementar persistencia de preferencia en localStorage
 
-### Fase 5: Testing
-- [ ] Tests unitarios de componentes
-- [ ] Tests de integración del flujo completo
+#### 1.5 Testing UI
+- [ ] Tests unitarios de componentes (estructura)
+- [ ] Tests de validación de formularios
 - [ ] Tests de accesibilidad (a11y)
-- [ ] Tests E2E con Cypress/Playwright
+- [ ] Pruebas manuales en diferentes dispositivos
 
 ---
 
-## 12. Notas Finales
+### 🔌 FASE 2: Integración Backend (FUTURO)
 
-### 12.1 Consideraciones de UX
+**Objetivo:** Conectar con nexcore-auth-service y nexcore-core para autenticación real.
+
+#### 2.1 Configuración HTTP
+- [ ] Configurar HttpClient y environments
+- [ ] Implementar HTTP Interceptors para tokens JWT
+- [ ] Implementar refresh token automático
+- [ ] Manejo de errores HTTP centralizados
+
+#### 2.2 Servicios Reales
+- [ ] Reemplazar métodos mock en AuthService por llamadas HTTP
+- [ ] Implementar AuthGuard para proteger rutas
+- [ ] Implementar PermissionGuard para permisos
+- [ ] Implementar token storage seguro
+
+#### 2.3 Integración Completa
+- [ ] Conectar login con POST /auth/login
+- [ ] Conectar verify-otp con POST /auth/verify-otp
+- [ ] Conectar forgot-password con POST /auth/forgot-password
+- [ ] Conectar reset-password con POST /auth/reset-password
+- [ ] Implementar refresh token flow
+- [ ] Cargar perfil desde /api/v1/me/profile
+
+#### 2.4 Testing Integración
+- [ ] Tests de integración con backend mock (MSW)
+- [ ] Tests E2E con Cypress/Playwright
+- [ ] Tests de seguridad (OWASP)
+- [ ] Load testing (opcional)
+
+---
+
+## 12. Datos Mock para Pruebas
+
+### 12.1 Credenciales Válidas (Login)
+
+Para probar el flujo de login en esta fase, usar cualquiera de estas credenciales:
+
+```typescript
+const validCredentials = [
+  { 
+    tenantId: '00000000-0000-0000-0000-000000000001',
+    username: 'super.admin', 
+    password: 'NexCore@2026!' 
+  },
+  { 
+    tenantId: '00000000-0000-0000-0000-000000000001',
+    username: 'admin', 
+    password: 'admin123' 
+  },
+  { 
+    tenantId: '00000000-0000-0000-0001-000000000001',
+    username: 'demo', 
+    password: 'demo123' 
+  }
+];
+```
+
+### 12.2 Código OTP Mock
+
+En la pantalla de Verify OTP, cualquier código de 6 dígitos será aceptado:
+- `123456` ✅
+- `000000` ✅
+- `999999` ✅
+
+### 12.3 Email para Recuperación
+
+Cualquier email con formato válido será aceptado:
+- `usuario@example.com` ✅
+- `test@nexcore.com` ✅
+
+---
+
+## 13. Notas Finales
+
+### 13.1 Consideraciones de UX
 - Todos los inputs tienen placeholders descriptivos
 - Feedback inmediato en validación de formularios
 - Estados de loading visibles durante operaciones asíncronas
 - Mensajes de error claros y accionables
 - Transiciones suaves en cambio de tema
 
-### 12.2 Accesibilidad
+### 13.2 Accesibilidad
 - Etiquetas `aria-label` en todos los botones de iconos
 - Contraste de colores >= 4.5:1 (WCAG 2.1 AA)
 - Navegación por teclado completa
 - Focus states visibles
 - Atributos `autocomplete` en inputs
 
-### 12.3 Performance
+### 13.3 Performance
 - Componentes standalone para lazy loading
 - Signals para reactividad eficiente
 - OnPush change detection
 - Transiciones CSS optimizadas
+
+---
+
+## 14. Resumen del Alcance Actual
+
+### ✅ Lo que INCLUYE esta fase (Frontend UI/UX)
+
+1. **Diseño Visual Completo**
+   - Sistema de diseño con tokens (colores, tipografía, espaciado)
+   - Temas light/dark funcionales con persistencia
+   - Componentes responsive (mobile-first)
+   - Animaciones y transiciones suaves
+
+2. **Componentes Funcionales**
+   - LoginComponent con validación completa
+   - ForgotPasswordComponent con flujo simulado
+   - VerifyOtpComponent con inputs de 6 dígitos
+   - ResetPasswordComponent (opcional en esta fase)
+   - ThemeToggleComponent con iconos dinámicos
+
+3. **Lógica de Presentación**
+   - Validación de formularios reactivos
+   - Estados de loading/error/success
+   - Navegación entre pantallas
+   - Feedback visual inmediato
+   - Manejo de eventos de UI
+
+4. **Simulación de Flujos**
+   - Login con credenciales mock
+   - Verificación OTP con cualquier código de 6 dígitos
+   - Recuperación de contraseña simulada
+   - Delays de red simulados (300-500ms)
+   - Transiciones entre pantallas
+
+### ❌ Lo que NO INCLUYE esta fase
+
+1. **Integración Backend**
+   - ❌ Llamadas HTTP reales a nexcore-auth-service
+   - ❌ Manejo de tokens JWT reales
+   - ❌ Envío de emails OTP reales
+   - ❌ Validación de credenciales contra base de datos
+
+2. **Seguridad**
+   - ❌ HTTP Interceptors para tokens
+   - ❌ Refresh token automático
+   - ❌ AuthGuards para proteger rutas
+   - ❌ Encriptación de datos sensibles
+
+3. **Funcionalidades Avanzadas**
+   - ❌ Recuperación de contraseña real
+   - ❌ Cambio de contraseña desde perfil
+   - ❌ Historial de intentos de login
+   - ❌ Bloqueo por intentos fallidos
+
+### 🎯 Objetivo de esta Fase
+
+> **Establecer una base sólida de UI/UX** que permita:
+> - Validar el diseño con stakeholders
+> - Probar la experiencia de usuario
+> - Iterar rápidamente en los estilos
+> - Documentar patrones visuales reutilizables
+> - Preparar el terreno para la integración backend
+
+### ➡️ Próximos Pasos (Fase 2)
+
+Una vez aprobado el diseño y los estilos:
+1. Configurar HttpClient y environments
+2. Implementar servicios reales con llamadas HTTP
+3. Agregar interceptors y guards
+4. Conectar con nexcore-auth-service (puerto 8081)
+5. Probar flujo completo end-to-end
+6. Agregar tests de integración
 
 ---
 
