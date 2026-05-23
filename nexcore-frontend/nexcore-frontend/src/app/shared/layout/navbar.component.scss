@@ -18,14 +18,22 @@
   will-change: transform;
 }
 
-.navbar-left { flex: 0 0 180px; display:flex; align-items:center }
+.navbar-left { flex: 0 0 auto; display:flex; align-items:center; gap:8px; min-width: 0 }
 .brand {
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  margin-left: 4px;
+  white-space: nowrap;
+  overflow: visible;
   font-weight: 800;
   color: var(--color-interactive-primary);
-  text-decoration: none;
   font-size: 20px;
   letter-spacing: -0.5px;
 }
+.logo-svg { width:40px; height:40px; display:block }
+.brand-text { font-weight:800; color:var(--color-text-primary); font-size:18px; letter-spacing:-0.4px }
 
 .hamburger-btn { display:inline-flex; align-items:center; justify-content:center; margin-right:8px; padding:8px; border-radius:8px }
 .hamburger-btn .icon { width:20px; height:20px; color:var(--color-text-tertiary) }
@@ -55,7 +63,7 @@
 
 .search .search-icon { width:14px; height:14px; color:var(--color-text-secondary) }
 
-.navbar-right { display:flex; align-items:center; gap:16px; flex:0 0 auto }
+.navbar-right { display:flex; align-items:center; gap:16px; flex:0 0 auto; position:relative }
 
 .lang-select {
   appearance: none;
@@ -93,8 +101,30 @@
   border:1px solid var(--color-border-light);
   background:var(--color-bg-primary);
   cursor:pointer;
+  position:relative;
 }
 .lang-compact:hover { background: var(--color-surface-hover) }
+
+/* Popup for compact language button */
+.lang-compact-wrap { position: relative; display:inline-block }
+
+.lang-popup {
+  position: absolute;
+  left: 50%; /* center under the button */
+  right: auto;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  padding: 6px 4px;
+  min-width: 130px;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.08);
+  z-index: 1300;
+  list-style: none;
+}
+.lang-popup-item { padding:8px 10px; cursor:pointer; display:flex; gap:8px; align-items:center; color:var(--color-text-primary); border-radius:6px }
+.lang-popup-item:hover { background: var(--color-bg-primary) }
 
 .icon-btn { background:transparent; border:none; padding:4px; cursor:pointer }
 .icon { width:16px; height:16px; color:var(--color-text-secondary) }
@@ -172,8 +202,9 @@
 .profile-meta .name { font-weight:700; font-size:13px }
 .profile-meta .email { font-size:12px; color:var(--color-text-secondary); margin-top:2px }
 .profile-actions { display:flex; flex-direction:column; padding-top:8px }
-.profile-actions .item { padding:8px 6px; color:var(--color-text-primary); text-decoration:none; cursor:pointer; border-radius:6px; display:flex; align-items:center }
-.profile-actions .item .menu-icon { width:16px; height:16px; margin-right:10px; color:var(--color-text-secondary); flex:0 0 16px }
+.profile-actions .item { padding:8px 6px; color:var(--color-text-primary); text-decoration:none; cursor:pointer; border-radius:6px; display:flex; align-items:center; gap:10px; background:transparent; border:none }
+.profile-actions .item .menu-icon { width:18px; height:18px; margin-right:6px; color:var(--color-text-secondary); flex:0 0 18px }
+.profile-actions .item .item-label { font-size:13px }
 .profile-actions .item.logout { color: var(--color-interactive-danger) }
 .profile-actions .item.logout .menu-icon { color: var(--color-interactive-danger) }
 .profile-actions .item:hover { background: var(--color-bg-primary) }

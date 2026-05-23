@@ -41,9 +41,9 @@ export class NavbarComponent implements OnInit {
 
     // Initialize language from localStorage or transloco default
     try {
-      const lang = localStorage.getItem('nexcore-lang') || this.transloco.getActiveLang() || 'en';
+      const lang = (localStorage.getItem('nexcore-lang') || (this.transloco.getActiveLang() as string) || 'en') as string;
       this.currentLang = lang;
-      this.transloco.setActiveLang(lang);
+      this.transloco.setActiveLang(lang as string);
     } catch (e) {}
   }
 
@@ -108,9 +108,9 @@ export class NavbarComponent implements OnInit {
   changeLang(lang: string) {
     try {
       if (!lang) return;
-      this.currentLang = lang;
-      try { localStorage.setItem('nexcore-lang', lang); } catch (e) {}
-      this.transloco.setActiveLang(lang);
+      this.currentLang = lang as string;
+      try { localStorage.setItem('nexcore-lang', lang as string); } catch (e) {}
+      this.transloco.setActiveLang(lang as string);
     } catch (e) {
       console.error('changeLang failed', e);
     }
