@@ -1,6 +1,21 @@
 {
   "dashboard": {
     "welcome_back": "Bienvenido de nuevo, {{name}}",
+    "title": "Panel",
+    "recentActivity": "Actividad Reciente",
+    "viewAll": "Ver todo",
+    "table": {
+      "user": "Usuario",
+      "action": "Acción",
+      "tenant": "Tenant",
+      "date": "Fecha",
+      "status": "Estado"
+    },
+    "status": {
+      "success": "ÉXITO",
+      "error": "ERROR",
+      "pending": "PENDIENTE"
+    },
     "stats": {
       "totalUsers": "USUARIOS TOTALES",
       "activeTenants": "TENANTS ACTIVOS",

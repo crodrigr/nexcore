@@ -123,8 +123,13 @@
   z-index: 1300;
   list-style: none;
 }
-.lang-popup-item { padding:8px 10px; cursor:pointer; display:flex; gap:8px; align-items:center; color:var(--color-text-primary); border-radius:6px }
+.lang-popup-item { padding:8px 10px; cursor:pointer; display:flex; gap:10px; align-items:center; color:var(--color-text-primary); border-radius:8px; min-width:160px; transition: background .15s ease, color .12s ease; }
 .lang-popup-item:hover { background: var(--color-bg-primary) }
+.lang-popup-item .flag { font-size:16px; width:22px; text-align:center }
+.lang-popup-item .label { flex: 1 1 auto }
+.lang-popup-item .check { display: none; margin-left: 8px; flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; align-items: center; justify-content: center; }
+.lang-popup-item.active { font-weight:700; /* no background, keep clean */ }
+.lang-popup-item.active .check { display: inline-flex; background: var(--color-interactive-primary); color: #fff; box-shadow: 0 6px 18px rgba(10,102,168,0.12); }
 
 .icon-btn { background:transparent; border:none; padding:4px; cursor:pointer }
 .icon { width:16px; height:16px; color:var(--color-text-secondary) }

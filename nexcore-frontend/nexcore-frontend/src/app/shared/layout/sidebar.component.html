@@ -2,21 +2,21 @@
   <!-- Profile removed: avatar and texts intentionally omitted per request -->
 
   <nav class="sidebar-nav">
-    <a routerLink="/dashboard" class="sidebar-link active" data-tooltip="Dashboard">
+    <a routerLink="/dashboard" class="sidebar-link active" [attr.data-tooltip]="'navbar.menu.dashboard' | transloco">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
-      <span>Dashboard</span>
+      <span>{{ 'navbar.menu.dashboard' | transloco }}</span>
     </a>
-    <a class="sidebar-link" data-tooltip="Tenants">
+    <a class="sidebar-link" [attr.data-tooltip]="'navbar.menu.tenants' | transloco">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M3 7h18v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/><path d="M3 7l4-4h10l4 4"/></svg>
-      <span>Tenants</span>
+      <span>{{ 'navbar.menu.tenants' | transloco }}</span>
     </a>
-    <a class="sidebar-link" data-tooltip="Menus">
+    <a class="sidebar-link" [attr.data-tooltip]="'navbar.menu.menus' | transloco">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      <span>Menus</span>
+      <span>{{ 'navbar.menu.menus' | transloco }}</span>
     </a>
-    <a class="sidebar-link" data-tooltip="Settings">
+    <a class="sidebar-link" [attr.data-tooltip]="'navbar.menu.settings' | transloco">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 2.3 16.88l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.27 3.7A2 2 0 0 1 7.1 1.88l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 11.3 1.7V1a2 2 0 0 1 4 0v.09c.2.07.39.17.56.29.6.41 1.39.26 1.8-.34l.06-.06A2 2 0 0 1 20.7 3.12l-.06.06a1.65 1.65 0 0 0-.33 1.82c.12.35.3.68.54.97.3.36.75.58 1.23.58H21a2 2 0 0 1 0 4h-.09c-.48 0-.93.22-1.23.58-.24.29-.42.62-.54.97z"/></svg>
-      <span>Settings</span>
+      <span>{{ 'navbar.menu.settings' | transloco }}</span>
     </a>
   </nav>
 

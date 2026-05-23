@@ -1,5 +1,6 @@
 import { Component, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule } from '@ngneat/transloco';
 import { NavbarComponent } from '../../shared/layout/navbar.component';
 import { SidebarComponent } from '../../shared/layout/sidebar.component';
 import { Router } from '@angular/router';
@@ -8,7 +9,7 @@ import { AuthService } from '../../shared/services/auth.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, NavbarComponent, SidebarComponent, TranslocoModule],
   template: `
 <app-navbar></app-navbar>
 
@@ -18,8 +19,8 @@ import { AuthService } from '../../shared/services/auth.service';
 
     <main class="content">
       <header class="page-header">
-        <h1>Dashboard</h1>
-        <p class="subtitle">Welcome back, Administrator</p>
+          <h1>{{ 'dashboard.title' | transloco }}</h1>
+          <p class="subtitle">{{ 'dashboard.welcome_back' | transloco: { name: 'Administrator' } }}</p>
       </header>
 
 
@@ -30,6 +31,7 @@ import { AuthService } from '../../shared/services/auth.service';
           </div>
           <div class="body">
             <div class="label">TOTAL USERS</div>
+              <div class="label">{{ 'dashboard.stats.totalUsers' | transloco }}</div>
             <div class="value">1,234</div>
           </div>
           <div class="trend positive">+12.5%</div>
@@ -41,6 +43,7 @@ import { AuthService } from '../../shared/services/auth.service';
           </div>
           <div class="body">
             <div class="label">ACTIVE TENANTS</div>
+              <div class="label">{{ 'dashboard.stats.activeTenants' | transloco }}</div>
             <div class="value">42</div>
           </div>
           <div class="trend positive">+3</div>
@@ -52,6 +55,7 @@ import { AuthService } from '../../shared/services/auth.service';
           </div>
           <div class="body">
             <div class="label">SESSIONS TODAY</div>
+              <div class="label">{{ 'dashboard.stats.sessionsToday' | transloco }}</div>
             <div class="value">567</div>
           </div>
           <div class="trend negative">-2.3%</div>
@@ -63,6 +67,7 @@ import { AuthService } from '../../shared/services/auth.service';
           </div>
           <div class="body">
             <div class="label">SUCCESS RATE</div>
+              <div class="label">{{ 'dashboard.stats.successRate' | transloco }}</div>
             <div class="value">98.5%</div>
           </div>
           <div class="trend positive">+0.5%</div>
@@ -96,19 +101,19 @@ import { AuthService } from '../../shared/services/auth.service';
 
       <section class="recent-activity-card card">
         <div class="card-header">
-          <h2>Recent Activity</h2>
-          <a class="view-all" href="#">View all</a>
+          <h2>{{ 'dashboard.recentActivity' | transloco }}</h2>
+          <a class="view-all" href="#">{{ 'dashboard.viewAll' | transloco }}</a>
         </div>
 
         <div class="table-responsive">
           <table class="activity-table">
             <thead>
               <tr>
-                <th>User</th>
-                <th>Action</th>
-                <th>Tenant</th>
-                <th>Date</th>
-                <th>Status</th>
+                <th>{{ 'dashboard.table.user' | transloco }}</th>
+                <th>{{ 'dashboard.table.action' | transloco }}</th>
+                <th>{{ 'dashboard.table.tenant' | transloco }}</th>
+                <th>{{ 'dashboard.table.date' | transloco }}</th>
+                <th>{{ 'dashboard.table.status' | transloco }}</th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +125,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Menu Update</td>
                 <td>Restaurant Alpha</td>
                 <td>5 min ago</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -131,7 +136,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>User Creation</td>
                 <td>Global Tech</td>
                 <td>12 min ago</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -142,7 +147,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Failed Login</td>
                 <td>NexCore Core</td>
                 <td>18 min ago</td>
-                <td><span class="badge error">ERROR</span></td>
+                <td><span class="badge error">{{ 'dashboard.status.error' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -153,7 +158,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>System Backup</td>
                 <td>Global Tech</td>
                 <td>45 min ago</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -164,7 +169,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>API Configuration</td>
                 <td>Restaurant Alpha</td>
                 <td>1 h ago</td>
-                <td><span class="badge pending">PENDING</span></td>
+                <td><span class="badge pending">{{ 'dashboard.status.pending' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -175,7 +180,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Password Reset</td>
                 <td>BlueMoon</td>
                 <td>2 h ago</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -186,7 +191,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Role Update</td>
                 <td>GreenFields</td>
                 <td>2 h ago</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -197,7 +202,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Tenant Creation</td>
                 <td>Global Tech</td>
                 <td>3 h ago</td>
-                <td><span class="badge pending">PENDING</span></td>
+                <td><span class="badge pending">{{ 'dashboard.status.pending' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -208,7 +213,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Export Data</td>
                 <td>NexCore Core</td>
                 <td>Today</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -219,7 +224,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Import Catalog</td>
                 <td>BlueMoon</td>
                 <td>Today</td>
-                <td><span class="badge success">SUCCESS</span></td>
+                <td><span class="badge success">{{ 'dashboard.status.success' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -263,7 +268,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>API Key Rotation</td>
                 <td>Restaurant Alpha</td>
                 <td>8 h ago</td>
-                <td><span class="badge error">ERROR</span></td>
+                <td><span class="badge error">{{ 'dashboard.status.error' | transloco }}</span></td>
               </tr>
 
               <tr>
@@ -274,7 +279,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 <td>Scheduled Job</td>
                 <td>BlueMoon</td>
                 <td>Yesterday</td>
-                <td><span class="badge pending">PENDING</span></td>
+                <td><span class="badge pending">{{ 'dashboard.status.pending' | transloco }}</span></td>
               </tr>
             </tbody>
           </table>

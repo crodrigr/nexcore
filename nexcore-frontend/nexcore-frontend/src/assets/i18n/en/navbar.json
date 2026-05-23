@@ -6,6 +6,16 @@
       "help": "Help",
       "signOut": "Sign out"
     },
+    "menu": {
+      "dashboard": "Dashboard",
+      "tenants": "Tenants",
+      "menus": "Menus",
+      "settings": "Settings"
+    },
+    "lang": {
+      "english": "English",
+      "spanish": "Español"
+    },
     "notifications": {
       "you_have": "You have {{count}} new notifications"
     }

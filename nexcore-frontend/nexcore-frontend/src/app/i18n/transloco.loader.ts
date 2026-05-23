@@ -12,16 +12,8 @@ export class TranslocoHttpLoader implements TranslocoLoader {
   constructor(private http: HttpClient) {}
 
   getTranslation(lang: string, data?: any): Observable<Translation> | Promise<Translation> {
-    // `data` can be a string (scope) or an object containing scope information.
-    let scope: string | undefined;
-    if (typeof data === 'string') {
-      scope = data;
-    } else if (data && typeof data === 'object' && (data as any).scope) {
-      scope = (data as any).scope;
-    }
-
-    const basePath = `/assets/i18n/${lang}`;
-    const path = scope ? `${basePath}/${scope}.json` : `${basePath}/shared.json`;
+    // Load the main consolidated translation file for the given language
+    const path = `/assets/i18n/${lang}.json`;
     return this.http.get<Translation>(path);
   }
 }

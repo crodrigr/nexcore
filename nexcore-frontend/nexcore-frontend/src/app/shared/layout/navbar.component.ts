@@ -108,9 +108,19 @@ export class NavbarComponent implements OnInit {
   changeLang(lang: string) {
     try {
       if (!lang) return;
-      this.currentLang = lang as string;
-      try { localStorage.setItem('nexcore-lang', lang as string); } catch (e) {}
-      this.transloco.setActiveLang(lang as string);
+      // Load translations for the selected language first, then activate it.
+      this.transloco.load(lang).subscribe({
+        next: () => {
+          this.currentLang = lang as string;
+          try { localStorage.setItem('nexcore-lang', lang as string); } catch (e) {}
+          this.transloco.setActiveLang(lang as string);
+        },
+        error: (err) => {
+          console.error('Failed to load language', lang, err);
+          // fallback to activating anyway (may reuse cached translations)
+          try { this.transloco.setActiveLang(lang as string); } catch(e) {}
+        }
+      });
     } catch (e) {
       console.error('changeLang failed', e);
     }

@@ -6,6 +6,16 @@
       "help": "Ayuda",
       "signOut": "Cerrar sesión"
     },
+    "menu": {
+      "dashboard": "Panel",
+      "tenants": "Tenants",
+      "menus": "Menus",
+      "settings": "Configuración"
+    },
+    "lang": {
+      "english": "English",
+      "spanish": "Español"
+    },
     "notifications": {
       "you_have": "Tienes {{count}} nuevas notificaciones"
     }

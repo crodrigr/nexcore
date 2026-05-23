@@ -1,6 +1,21 @@
 {
   "dashboard": {
     "welcome_back": "Welcome back, {{name}}",
+    "title": "Dashboard",
+    "recentActivity": "Recent Activity",
+    "viewAll": "View all",
+    "table": {
+      "user": "User",
+      "action": "Action",
+      "tenant": "Tenant",
+      "date": "Date",
+      "status": "Status"
+    },
+    "status": {
+      "success": "SUCCESS",
+      "error": "ERROR",
+      "pending": "PENDING"
+    },
     "stats": {
       "totalUsers": "TOTAL USERS",
       "activeTenants": "ACTIVE TENANTS",

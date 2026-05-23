@@ -1,13 +1,19 @@
 <section class="activity">
-  <div class="activity-card">
+    <div class="activity-card">
     <div class="activity-header">
-      <h3>Recent Activity</h3>
-      <a class="link">View all</a>
+      <h3>{{ 'dashboard.recentActivity' | transloco }}</h3>
+      <a class="link">{{ 'dashboard.viewAll' | transloco }}</a>
     </div>
 
     <table class="activity-table">
       <thead>
-        <tr><th>User</th><th>Action</th><th>Tenant</th><th>Date</th><th>Status</th></tr>
+        <tr>
+          <th>{{ 'dashboard.table.user' | transloco }}</th>
+          <th>{{ 'dashboard.table.action' | transloco }}</th>
+          <th>{{ 'dashboard.table.tenant' | transloco }}</th>
+          <th>{{ 'dashboard.table.date' | transloco }}</th>
+          <th>{{ 'dashboard.table.status' | transloco }}</th>
+        </tr>
       </thead>
       <tbody>
         <tr *ngFor="let a of activities">
@@ -17,7 +23,7 @@
           <td>{{ a.action }}</td>
           <td>{{ a.tenant }}</td>
           <td>{{ a.time }}</td>
-          <td><span [ngClass]="statusClass(a.status)">{{ a.status === 'success' ? 'SUCCESS' : (a.status === 'error' ? 'ERROR' : 'PENDING') }}</span></td>
+          <td><span [ngClass]="statusClass(a.status)">{{ ('dashboard.status.' + a.status) | transloco }}</span></td>
         </tr>
       </tbody>
     </table>

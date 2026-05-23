@@ -1,0 +1,91 @@
+{
+  "navbar": {
+    "profile": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "help": "Help",
+      "signOut": "Sign out"
+    },
+    "menu": {
+      "dashboard": "Dashboard",
+      "tenants": "Tenants",
+      "menus": "Menus",
+      "settings": "Settings"
+    },
+    "lang": {
+      "english": "English",
+      "spanish": "Español"
+    },
+    "notifications": {
+      "you_have": "You have {{count}} new notifications"
+    }
+  },
+  "dashboard": {
+    "welcome_back": "Welcome back, {{name}}",
+    "title": "Dashboard",
+    "recentActivity": "Recent Activity",
+    "viewAll": "View all",
+    "table": {
+      "user": "User",
+      "action": "Action",
+      "tenant": "Tenant",
+      "date": "Date",
+      "status": "Status"
+    },
+    "status": {
+      "success": "SUCCESS",
+      "error": "ERROR",
+      "pending": "PENDING"
+    },
+    "stats": {
+      "totalUsers": "TOTAL USERS",
+      "activeTenants": "ACTIVE TENANTS",
+      "sessionsToday": "SESSIONS TODAY",
+      "successRate": "SUCCESS RATE"
+    },
+    "charts": {
+      "activeUsers": "Active Users",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "distribution": "Distribution by Tenant",
+      "others": "Others"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email to reset your password",
+      "email": "Email",
+      "sendReset": "Send Reset Link",
+      "backToLogin": "Back to login"
+    },
+    "verifyOtp": {
+      "title": "Verify OTP",
+      "subtitle": "Enter the code sent to your email",
+      "verify": "Verify",
+      "resend": "Resend code",
+      "backToLogin": "Back to login"
+    }
+  },
+  "shared": {
+    "app": {
+      "name": "NexCore",
+      "welcome": "Welcome"
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "back": "Back"
+    }
+  }
+}

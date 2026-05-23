@@ -1,0 +1,91 @@
+{
+  "navbar": {
+    "profile": {
+      "profile": "Perfil",
+      "settings": "Configuración",
+      "help": "Ayuda",
+      "signOut": "Cerrar sesión"
+    },
+    "menu": {
+      "dashboard": "Panel",
+      "tenants": "Tenants",
+      "menus": "Menus",
+      "settings": "Configuración"
+    },
+    "lang": {
+      "english": "English",
+      "spanish": "Español"
+    },
+    "notifications": {
+      "you_have": "Tienes {{count}} nuevas notificaciones"
+    }
+  },
+  "dashboard": {
+    "welcome_back": "Bienvenido de nuevo, {{name}}",
+    "title": "Panel",
+    "recentActivity": "Actividad Reciente",
+    "viewAll": "Ver todo",
+    "table": {
+      "user": "Usuario",
+      "action": "Acción",
+      "tenant": "Tenant",
+      "date": "Fecha",
+      "status": "Estado"
+    },
+    "status": {
+      "success": "ÉXITO",
+      "error": "ERROR",
+      "pending": "PENDIENTE"
+    },
+    "stats": {
+      "totalUsers": "USUARIOS TOTALES",
+      "activeTenants": "TENANTS ACTIVOS",
+      "sessionsToday": "SESIONES HOY",
+      "successRate": "TASA DE ÉXITO"
+    },
+    "charts": {
+      "activeUsers": "Usuarios activos",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "distribution": "Distribución por Tenant",
+      "others": "Otros"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "rememberMe": "Recuérdame",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "signIn": "Iniciar Sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate"
+    },
+    "forgotPassword": {
+      "title": "Recuperar Contraseña",
+      "subtitle": "Ingresa tu correo para restablecer tu contraseña",
+      "email": "Correo electrónico",
+      "sendReset": "Enviar enlace",
+      "backToLogin": "Volver al inicio"
+    },
+    "verifyOtp": {
+      "title": "Verificar OTP",
+      "subtitle": "Ingresa el código enviado a tu correo",
+      "verify": "Verificar",
+      "resend": "Reenviar código",
+      "backToLogin": "Volver al inicio"
+    }
+  },
+  "shared": {
+    "app": {
+      "name": "NexCore",
+      "welcome": "Bienvenido"
+    },
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "back": "Volver"
+    }
+  }
+}

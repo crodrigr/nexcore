@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivityService, RecentActivity } from '../../services/activity.service';
+import { TranslocoModule } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-recent-activity',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: './recent-activity.component.html',
   styleUrls: ['./recent-activity.component.scss']
 })
