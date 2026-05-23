@@ -1,0 +1,24 @@
+<div class="notif-card" role="dialog" aria-label="Notifications" tabindex="-1">
+  <div class="notif-header">
+    <div class="title">Notifications</div>
+    <button class="mark-all" (click)="markAllRead()">Mark all as read</button>
+  </div>
+
+  <div class="notif-list">
+    <div *ngFor="let n of items" class="notif-item" [class.unread]="n.unread" (click)="toggleRead(n)">
+      <div class="left">
+        <div class="dot" *ngIf="n.unread"></div>
+        <div class="icon">🔔</div>
+      </div>
+      <div class="body">
+        <div class="notif-title">{{ n.title }}</div>
+        <div class="notif-text">{{ n.body }}</div>
+      </div>
+      <div class="time">{{ n.time }}</div>
+    </div>
+  </div>
+
+  <div class="notif-footer">
+    <a class="view-all" href="#">View all</a>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+.notif-card {
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.12);
+  padding: 12px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  z-index: 1100;
+}
+.notif-header { display:flex; justify-content:space-between; align-items:center; padding:6px 4px; border-bottom:1px solid var(--color-border-light); margin-bottom:8px }
+.notif-header .title { font-weight:700 }
+.notif-header .mark-all { background:transparent; border:none; color:var(--color-interactive-primary); font-size:12px; cursor:pointer }
+
+.notif-list { max-height: 320px; overflow:auto }
+.notif-item { display:flex; gap:10px; align-items:center; padding:10px 6px; border-radius:8px; cursor:pointer }
+.notif-item.unread { background: rgba(59,130,246,0.04) }
+.notif-item .left { display:flex; align-items:center; gap:8px; width:36px }
+.notif-item .dot { width:8px; height:8px; border-radius:50%; background:var(--color-interactive-primary) }
+.notif-item .icon { font-size:16px }
+.notif-item .body { flex:1 }
+.notif-item .notif-title { font-weight:700; color:var(--color-text-primary); font-size:13px }
+.notif-item .notif-text { color:var(--color-text-secondary); font-size:12px; margin-top:2px }
+.notif-item .time { font-size:11px; color:var(--color-text-secondary); margin-left:8px }
+
+.notif-footer { border-top:1px solid var(--color-border-light); margin-top:8px; padding-top:8px; text-align:center }
+.notif-footer .view-all { color:var(--color-text-secondary); font-size:13px; text-decoration:none }
+
+/* Positioning helper when placed inside navbar */
+.notification-dropdown { /* positioned by component via fixed styles */ }

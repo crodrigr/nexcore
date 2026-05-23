@@ -9,25 +9,46 @@
   <div class="navbar-center">
     <div class="search">
       <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" fill="none"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.5"></line></svg>
-      <input placeholder="Buscar..." />
+      <input placeholder="Search..." />
     </div>
   </div>
 
   <div class="navbar-right">
-    <button class="icon-btn" aria-label="Notificaciones">
-      <svg viewBox="0 0 24 24" class="icon"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h11z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+    <button #notifBtn class="icon-btn notification-btn" aria-label="Notifications" aria-haspopup="true" data-count="3" (click)="toggleNotifications(); $event.stopPropagation()">
+      <!-- Polished bell icon with subtle fill and ring animation support -->
+      <svg viewBox="0 0 24 24" class="icon" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 17H9a3 3 0 006 0z" />
+          <path d="M18.5 13.5V11a6.5 6.5 0 10-13 0v2.5L4 16h16l-1.5-2.5z" />
+        </g>
+      </svg>
+      <span class="notif-badge" aria-hidden="true">3</span>
+      <span class="notif-pulse" aria-hidden="true"></span>
+      <span class="visually-hidden">You have 3 new notifications</span>
     </button>
+    <!-- notification dropdown is created dynamically and appended to document.body -->
+    <app-notification *ngIf="showNotifications && fallbackInline" class="notification-dropdown" [anchor]="notificationAnchor" (click)="$event.stopPropagation()"></app-notification>
 
     <app-theme-toggle></app-theme-toggle>
 
     <!-- plan-info removed per request -->
 
     <!-- Moved profile into navbar (avatar + name/role) -->
-    <div class="nav-profile" title="Administrador">
+    <div class="nav-profile" title="Administrator" (click)="toggleProfile(); $event.stopPropagation()">
       <div class="avatar">NC</div>
       <div class="profile-info">
         <div class="name">NexCore Admin</div>
         <div class="role">ENTERPRISE ADMIN</div>
+      </div>
+
+      <div class="profile-dropdown" *ngIf="showProfile" (click)="$event.stopPropagation()">
+        <div class="profile-actions">
+          <a class="item">Profile</a>
+          <a class="item">Settings</a>
+          <a class="item">Help</a>
+          <div class="divider"></div>
+          <a class="item logout" role="button" (click)="signOut(); $event.stopPropagation()">Sign out</a>
+        </div>
       </div>
     </div>
   </div>
