@@ -1,0 +1,276 @@
+<app-navbar></app-navbar>
+
+<div class="page-wrap">
+  <div class="layout">
+    <app-sidebar></app-sidebar>
+
+    <main class="content">
+      <header class="page-header">
+        <h1>Dashboard</h1>
+        <p class="subtitle">Bienvenido de vuelta, Administrador</p>
+      </header>
+
+
+      <section class="top-stats">
+        <div class="stat-card">
+          <div class="left">
+            <div class="icon-circle bg-blue">👥</div>
+          </div>
+          <div class="body">
+            <div class="label">TOTAL USUARIOS</div>
+            <div class="value">1,234</div>
+          </div>
+          <div class="trend positive">+12.5%</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="left">
+            <div class="icon-circle bg-pink">🏷️</div>
+          </div>
+          <div class="body">
+            <div class="label">TENANTS ACTIVOS</div>
+            <div class="value">42</div>
+          </div>
+          <div class="trend positive">+3</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="left">
+            <div class="icon-circle bg-beige">⚡</div>
+          </div>
+          <div class="body">
+            <div class="label">SESIONES HOY</div>
+            <div class="value">567</div>
+          </div>
+          <div class="trend negative">-2.3%</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="left">
+            <div class="icon-circle bg-lightblue">✔️</div>
+          </div>
+          <div class="body">
+            <div class="label">TASA DE ÉXITO</div>
+            <div class="value">98.5%</div>
+          </div>
+          <div class="trend positive">+0.5%</div>
+        </div>
+      </section>
+
+
+      <section class="main-grid">
+        <div class="large-card chart-card">
+          <div class="card-header">Usuarios Activos
+            <div class="toggle-group"><button class="pill">Semanal</button><button class="pill active">Mensual</button></div>
+          </div>
+          <div class="chart-placeholder">
+            <canvas #barCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="small-card donut-card">
+          <div class="card-header">Distribución por Tenant</div>
+          <div class="donut-placeholder">
+            <canvas #donutCanvas></canvas>
+            <div class="donut-center">42<br><span class="small">Total</span></div>
+          </div>
+          <ul class="legend">
+            <li><span class="dot blue"></span> Enterprise <span class="percent">65%</span></li>
+            <li><span class="dot pink"></span> SMB <span class="percent">25%</span></li>
+            <li><span class="dot gray"></span> Otros <span class="percent">10%</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="recent-activity-card card">
+        <div class="card-header">
+          <h2>Recent Activity</h2>
+          <a class="view-all" href="#">View all</a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Action</th>
+                <th>Tenant</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">JD</div>
+                  <div class="user-info"><div class="name">Juan Delgado</div></div>
+                </td>
+                <td>Menu Update</td>
+                <td>Restaurant Alpha</td>
+                <td>5 min ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">MR</div>
+                  <div class="user-info"><div class="name">Maria Rivera</div></div>
+                </td>
+                <td>User Creation</td>
+                <td>Global Tech</td>
+                <td>12 min ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">AG</div>
+                  <div class="user-info"><div class="name">Andrés García</div></div>
+                </td>
+                <td>Failed Login</td>
+                <td>NexCore Core</td>
+                <td>18 min ago</td>
+                <td><span class="badge error">ERROR</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">LC</div>
+                  <div class="user-info"><div class="name">Lucía Castro</div></div>
+                </td>
+                <td>System Backup</td>
+                <td>Global Tech</td>
+                <td>45 min ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">RP</div>
+                  <div class="user-info"><div class="name">Roberto Pino</div></div>
+                </td>
+                <td>API Configuration</td>
+                <td>Restaurant Alpha</td>
+                <td>1 h ago</td>
+                <td><span class="badge pending">PENDING</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">AL</div>
+                  <div class="user-info"><div class="name">Ana López</div></div>
+                </td>
+                <td>Password Reset</td>
+                <td>BlueMoon</td>
+                <td>2 h ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">CM</div>
+                  <div class="user-info"><div class="name">Carlos Mejía</div></div>
+                </td>
+                <td>Role Update</td>
+                <td>GreenFields</td>
+                <td>2 h ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">SM</div>
+                  <div class="user-info"><div class="name">Sofía Martínez</div></div>
+                </td>
+                <td>Tenant Creation</td>
+                <td>Global Tech</td>
+                <td>3 h ago</td>
+                <td><span class="badge pending">PENDING</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">DT</div>
+                  <div class="user-info"><div class="name">Diego Torres</div></div>
+                </td>
+                <td>Export Data</td>
+                <td>NexCore Core</td>
+                <td>Today</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">ER</div>
+                  <div class="user-info"><div class="name">Elena Ruiz</div></div>
+                </td>
+                <td>Import Catalog</td>
+                <td>BlueMoon</td>
+                <td>Today</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">PG</div>
+                  <div class="user-info"><div class="name">Pablo Gómez</div></div>
+                </td>
+                <td>Permission Change</td>
+                <td>GreenFields</td>
+                <td>Today</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">MF</div>
+                  <div class="user-info"><div class="name">Mariana Flores</div></div>
+                </td>
+                <td>Invoice Generation</td>
+                <td>Global Tech</td>
+                <td>4 h ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">OV</div>
+                  <div class="user-info"><div class="name">Óscar Vega</div></div>
+                </td>
+                <td>Theme Update</td>
+                <td>NexCore Core</td>
+                <td>6 h ago</td>
+                <td><span class="badge success">SUCCESS</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">PS</div>
+                  <div class="user-info"><div class="name">Patricia Salazar</div></div>
+                </td>
+                <td>API Key Rotation</td>
+                <td>Restaurant Alpha</td>
+                <td>8 h ago</td>
+                <td><span class="badge error">ERROR</span></td>
+              </tr>
+
+              <tr>
+                <td class="user-cell">
+                  <div class="avatar">IO</div>
+                  <div class="user-info"><div class="name">Ignacio Ortega</div></div>
+                </td>
+                <td>Scheduled Job</td>
+                <td>BlueMoon</td>
+                <td>Yesterday</td>
+                <td><span class="badge pending">PENDING</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  </div>
+</div>

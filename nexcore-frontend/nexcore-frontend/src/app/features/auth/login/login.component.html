@@ -1,0 +1,134 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <h1 class="title">NexCore</h1>
+      <h2 class="subtitle-main">Iniciar Sesión</h2>
+      <p class="subtitle">Bienvenido de vuelta</p>
+    </div>
+    
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-wrapper">
+      <app-theme-toggle />
+    </div>
+    
+    <!-- Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Error Alert -->
+      @if (error()) {
+        <div class="alert alert-error">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+      
+      <!-- Tenant Select -->
+      <div class="form-field">
+        <label for="tenantId" class="form-label">Tenant</label>
+        <select
+          id="tenantId"
+          formControlName="tenantId"
+          class="form-select"
+          [class.form-field-error]="getFieldError('tenantId')"
+        >
+          @for (tenant of tenants; track tenant.id) {
+            <option [value]="tenant.id">{{ tenant.name }}</option>
+          }
+        </select>
+        @if (getFieldError('tenantId')) {
+          <span class="form-error">{{ getFieldError('tenantId') }}</span>
+        }
+      </div>
+      
+      <!-- Username Input -->
+      <div class="form-field">
+        <label for="username" class="form-label">Usuario</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          placeholder="Ingresa tu usuario"
+          class="form-input"
+          [class.form-field-error]="getFieldError('username')"
+          autocomplete="username"
+        />
+        @if (getFieldError('username')) {
+          <span class="form-error">{{ getFieldError('username') }}</span>
+        }
+      </div>
+      
+      <!-- Password Input -->
+      <div class="form-field">
+        <label for="password" class="form-label">Contraseña</label>
+        <div class="input-with-icon">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Ingresa tu contraseña"
+            class="form-input"
+            [class.form-field-error]="getFieldError('password')"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="icon-button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            @if (showPassword()) {
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            } @else {
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (getFieldError('password')) {
+          <span class="form-error">{{ getFieldError('password') }}</span>
+        }
+      </div>
+      
+      <!-- Remember Me -->
+      <div class="form-checkbox">
+        <input
+          type="checkbox"
+          id="rememberMe"
+          formControlName="rememberMe"
+          class="checkbox"
+        />
+        <label for="rememberMe" class="checkbox-label">Recordarme</label>
+      </div>
+      
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-primary btn-block"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Iniciando sesión...</span>
+        } @else {
+          <span>Iniciar Sesión</span>
+        }
+      </button>
+      
+      <!-- Forgot Password Link -->
+      <div class="form-footer">
+        <a routerLink="/auth/forgot-password" class="link">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,113 @@
+.sidebar {
+  width: 260px;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border-light);
+  padding: 14px 10px;
+  height: calc(100vh - 64px);
+  position: sticky;
+  top: 64px;
+  display:flex;
+  flex-direction:column;
+  overflow: hidden;
+}
+
+/* Collapsed sidebar (triggered by body.sidebar-collapsed) */
+body.sidebar-collapsed .sidebar {
+  width: 72px;
+  padding: 10px 6px;
+}
+/* Ensure profile text is hidden when sidebar is collapsed */
+body.sidebar-collapsed .sidebar .profile-info { display: none !important }
+body.sidebar-collapsed .sidebar .profile-info .name { display: none !important }
+body.sidebar-collapsed .sidebar .profile-info .role { display: none !important }
+/* Hide the whole profile card (avatar + texts) when collapsed */
+body.sidebar-collapsed .sidebar .profile-card { display: none !important }
+/* Hide avatar/icon when collapsed as requested */
+body.sidebar-collapsed .sidebar .avatar-square { display: none !important }
+body.sidebar-collapsed .sidebar-nav { gap:6px }
+body.sidebar-collapsed .sidebar-link { justify-content:center; padding:10px 8px }
+body.sidebar-collapsed .sidebar-link span { display:none }
+body.sidebar-collapsed .sidebar-footer .plan-card { display:none }
+
+/* Also support toggling the collapsed state directly on the sidebar element */
+.sidebar.collapsed {
+  width: 72px;
+  padding: 10px 6px;
+}
+.sidebar.collapsed .profile-info { display: none !important }
+.sidebar.collapsed .profile-card { display: none !important }
+.sidebar.collapsed .avatar-square { display: none !important }
+.sidebar.collapsed .sidebar-nav { gap:6px }
+.sidebar.collapsed .sidebar-link { justify-content:center; padding:10px 8px }
+.sidebar.collapsed .sidebar-link span { display:none }
+.sidebar.collapsed .sidebar-footer .plan-card { display:none }
+
+.profile-card { display:flex; gap:8px; align-items:center; padding:2px }
+.avatar-square { width:48px; height:48px; background:linear-gradient(180deg,var(--color-interactive-primary),var(--color-interactive-primary-active)); color:var(--color-text-inverse); display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:800; font-size:13px }
+.profile-card { align-items:center }
+
+/* When collapsed, center the avatar horizontally */
+body.sidebar-collapsed .profile-card { justify-content:center }
+.profile-info .name { font-weight:800; color:var(--color-text-primary); font-size:13px }
+.profile-info .role { font-size:9px; color:var(--color-text-secondary); margin-top:2px }
+
+.sidebar-nav { display:flex; flex-direction:column; gap:10px; margin-top:10px; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 14px 10px 10px; color:var(--color-text-secondary); text-decoration:none; border-radius:8px; font-weight:600; position:relative }
+.sidebar-link.active {
+  /* Full-width solid highlight for active item (strong contrast in dark & light) */
+  background: var(--color-interactive-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+  border-radius: 10px;
+}
+
+/* Remove old right-side indicator in favor of full pill */
+.sidebar-link.active::after { display: none; }
+.sidebar-link .icon { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; opacity:0.95; border-radius:6px }
+
+/* Ensure svg strokes/fills inherit color so icons switch to inverse on active */
+.sidebar-link svg { color: inherit; stroke: currentColor; fill: none }
+
+.sidebar-footer { padding-top:12px; flex-shrink: 0; }
+.plan-card { background: var(--color-surface); padding:10px; border-radius:10px; box-shadow: var(--shadow-md) }
+.plan-title { font-weight:700; margin-bottom:6px; color:var(--color-text-primary); font-size:13px }
+.progress { height:8px; background: var(--color-bg-tertiary); border-radius:8px; overflow:hidden }
+.progress .bar { height:100%; background: linear-gradient(90deg,var(--color-interactive-primary),var(--color-interactive-primary-active)); border-radius:8px }
+.small { font-size:12px; color:var(--color-text-secondary); margin-top:6px }
+
+/* Collapsed state: keep icon sizes consistent and show active icon background */
+body.sidebar-collapsed .sidebar-link .icon { width:32px; height:32px; border-radius:8px; background: transparent }
+body.sidebar-collapsed .sidebar-link.active { background: transparent; color: var(--color-text-secondary); }
+body.sidebar-collapsed .sidebar-link.active .icon {
+  background: linear-gradient(180deg, var(--color-interactive-primary), var(--color-interactive-primary-active));
+  color: var(--color-text-inverse);
+  box-shadow: 0 4px 10px rgba(10,102,168,0.18);
+}
+body.sidebar-collapsed .sidebar-link:hover .icon { background: rgba(255,255,255,0.03) }
+
+/* Tooltip for collapsed sidebar items */
+.sidebar-link[data-tooltip] { position: relative }
+body.sidebar-collapsed .sidebar-link[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 84px; /* sidebar width (72) + gap */
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  transform-origin: left center;
+}
+body.sidebar-collapsed .sidebar-link[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(4px);
+}
+
+

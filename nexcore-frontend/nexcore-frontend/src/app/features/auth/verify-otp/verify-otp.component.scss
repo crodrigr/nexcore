@@ -1,0 +1,106 @@
+// Reutilizar estilos base del login (módulo)
+@use '../login/login.component' as *;
+
+.otp-container {
+  @extend .login-container;
+}
+
+.otp-card {
+  @extend .login-card;
+}
+
+.otp-header {
+  @extend .login-header;
+}
+
+.otp-form {
+  @extend .login-form;
+}
+
+// Estilos específicos de OTP
+.otp-inputs {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  margin: var(--spacing-6) 0;
+}
+
+.otp-digit {
+  width: 56px;
+  height: 64px;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+  
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  
+  &:hover:not(:disabled) {
+    border-color: var(--color-border-heavy);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-interactive-primary);
+    box-shadow: var(--shadow-focus);
+  }
+  
+  &:invalid {
+    border-color: var(--color-error);
+  }
+}
+
+.footer-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-2) 0;
+  text-align: center;
+}
+
+.link-button {
+  background: transparent;
+  border: none;
+  color: var(--color-interactive-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    color: var(--color-interactive-primary-hover);
+    text-decoration: underline;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.timer-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .otp-inputs {
+    gap: var(--spacing-2);
+  }
+  
+  .otp-digit {
+    width: 44px;
+    height: 52px;
+    font-size: var(--font-size-xl);
+  }
+}

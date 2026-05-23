@@ -1,1 +1,63 @@
-/* You can add global styles to this file, and also import other style files */
+// Importar tokens de diseño (usar @use para evitar deprecación)
+@use 'styles/tokens/colors' as *;
+@use 'styles/tokens/typography' as *;
+@use 'styles/tokens/spacing' as *;
+@use 'styles/tokens/borders' as *;
+
+// Importar temas
+@use 'styles/themes/_light' as *;
+@use 'styles/themes/_dark' as *;
+
+/* Font loaded via index.html to improve performance */
+
+// Reset básico
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root {
+  --navbar-height: 64px;
+}
+
+// Smooth transitions para cambio de tema
+body[data-theme] {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  
+  * {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease,
+                box-shadow 0.3s ease;
+  }
+}
+
+/* Global collapsed sidebar rules (applied when body has .sidebar-collapsed) */
+body.sidebar-collapsed .sidebar {
+  width: 72px !important;
+  padding: 10px 6px !important;
+  transition: width 200ms ease, padding 200ms ease;
+}
+body.sidebar-collapsed .sidebar .profile-info { display: none !important }
+body.sidebar-collapsed .sidebar .avatar-square { width:40px; height:40px; font-size:12px }
+body.sidebar-collapsed .sidebar-nav { gap:6px }
+body.sidebar-collapsed .sidebar-link { justify-content:center; padding:10px 8px }
+body.sidebar-collapsed .sidebar-link span { display:none }
+body.sidebar-collapsed .sidebar-footer .plan-card { display:none }
+
+/* Smooth expand back */
+.sidebar { transition: width 200ms ease, padding 200ms ease }
+
+
+

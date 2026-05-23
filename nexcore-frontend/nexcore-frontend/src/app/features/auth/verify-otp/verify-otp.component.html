@@ -1,0 +1,90 @@
+<div class="otp-container">
+  <div class="otp-card">
+    <!-- Header -->
+    <div class="otp-header">
+      <h1 class="title">NexCore</h1>
+      <h2 class="subtitle-main">Verificar Código OTP</h2>
+      <p class="subtitle">
+        Ingresa el código de 6 dígitos enviado a tu email
+      </p>
+    </div>
+    
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-wrapper">
+      <app-theme-toggle />
+    </div>
+    
+    <!-- Form -->
+    <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="otp-form">
+      <!-- Error Alert -->
+      <div *ngIf="error()" class="alert alert-error">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ error() }}</span>
+      </div>
+      
+      <!-- OTP Input Fields -->
+      <div class="otp-inputs">
+        <ng-container *ngFor="let i of [1,2,3,4,5,6]">
+          <input
+            type="text"
+            [id]="'digit' + i"
+            [formControlName]="'digit' + i"
+            class="otp-digit"
+            maxlength="1"
+            inputmode="numeric"
+            pattern="[0-9]"
+            (input)="onDigitInput($event, i)"
+            (keydown)="onDigitKeyDown($event, i)"
+            [attr.aria-label]="'Dígito ' + i"
+          />
+        </ng-container>
+      </div>
+      
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-primary btn-block"
+        [disabled]="loading() || otpForm.invalid"
+      >
+        <ng-container *ngIf="loading(); else notLoading">
+          <span class="spinner"></span>
+          <span>Verificando...</span>
+        </ng-container>
+        <ng-template #notLoading>
+          <span>Verificar</span>
+        </ng-template>
+      </button>
+      
+      <!-- Resend Code -->
+      <div class="form-footer">
+        <p class="footer-text">¿No recibiste el código?</p>
+        <ng-container *ngIf="canResend(); else showTimer">
+          <button
+            type="button"
+            class="link-button"
+            (click)="resendCode()"
+            [disabled]="loading()"
+          >
+            Reenviar código
+          </button>
+        </ng-container>
+        <ng-template #showTimer>
+          <span class="timer-text">
+            Reenviar código en {{ resendTimer() }}s
+          </span>
+        </ng-template>
+      </div>
+      
+      <!-- Back to Login -->
+      <div class="form-footer">
+        <a routerLink="/auth/login" class="link">
+          Volver a Iniciar Sesión
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

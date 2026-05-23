@@ -1,0 +1,35 @@
+@use '../tokens/colors' as *;
+
+[data-theme='light'] {
+  // Backgrounds
+  --color-bg-primary: #{$color-neutral-0};
+  --color-bg-secondary: #{$color-neutral-50};
+  --color-bg-tertiary: #{$color-neutral-100};
+  --color-bg-elevated: #{$color-neutral-0};
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+  
+  // Surfaces
+  --color-surface: #{$color-neutral-0};
+  --color-surface-hover: #{$color-neutral-50};
+  --color-surface-active: #{$color-neutral-100};
+  
+  // Texts
+  --color-text-primary: #{$color-neutral-900};
+  --color-text-secondary: #{$color-neutral-700};
+  --color-text-tertiary: #{$color-neutral-600};
+  --color-text-disabled: #{$color-neutral-400};
+  --color-text-inverse: #{$color-neutral-0};
+  
+  // Borders
+  --color-border-light: #{$color-neutral-200};
+  --color-border-medium: #{$color-neutral-300};
+  --color-border-heavy: #{$color-neutral-400};
+  
+  // Shadows
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-focus: 0 0 0 3px rgba(66, 153, 225, 0.5);
+  --shadow-focus-error: 0 0 0 3px rgba(245, 101, 101, 0.5);
+}

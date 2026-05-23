@@ -1,0 +1,55 @@
+@use '../tokens/colors' as *;
+
+[data-theme='dark'] {
+  // Backgrounds (invertidos)
+  --color-bg-primary: #{$color-neutral-900};
+  --color-bg-secondary: #{$color-neutral-800};
+  --color-bg-tertiary: #{$color-neutral-700};
+  --color-bg-elevated: #{$color-neutral-800};
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+  
+  // Surfaces
+  --color-surface: #{$color-neutral-800};
+  --color-surface-hover: #{$color-neutral-700};
+  --color-surface-active: #{$color-neutral-600};
+  
+  // Texts (invertidos)
+  --color-text-primary: #{$color-neutral-50};
+  --color-text-secondary: #{$color-neutral-300};
+  --color-text-tertiary: #{$color-neutral-400};
+  --color-text-disabled: #{$color-neutral-600};
+  --color-text-inverse: #{$color-neutral-900};
+  
+  // Borders (más sutiles)
+  --color-border-light: #{$color-neutral-700};
+  --color-border-medium: #{$color-neutral-600};
+  --color-border-heavy: #{$color-neutral-500};
+  
+  // Shadows (más sutiles en dark)
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-focus: 0 0 0 3px rgba(66, 153, 225, 0.4);
+  --shadow-focus-error: 0 0 0 3px rgba(245, 101, 101, 0.4);
+  
+  // Ajustar colores primarios para mejor contraste
+  --color-interactive-primary: #{$color-primary-400};
+  --color-interactive-primary-hover: #{$color-primary-300};
+  --color-interactive-primary-active: #{$color-primary-200};
+
+  // Chart & gradient overrides for dark theme
+  --chart-bar-light: rgba(10,102,168,0.12);
+  --chart-primary: var(--color-interactive-primary);
+  --chart-pink: #b80f5a;
+  --chart-gray: var(--color-border-medium);
+
+  --bg-blue-start: rgba(13,71,161,0.06);
+  --bg-blue-end: rgba(13,71,161,0.03);
+  --bg-pink-start: rgba(184,15,90,0.04);
+  --bg-pink-end: rgba(184,15,90,0.02);
+  --bg-beige-start: rgba(250,240,230,0.02);
+  --bg-beige-end: rgba(250,240,230,0.01);
+  --bg-lightblue-start: rgba(14,100,170,0.05);
+  --bg-lightblue-end: rgba(14,100,170,0.02);
+}

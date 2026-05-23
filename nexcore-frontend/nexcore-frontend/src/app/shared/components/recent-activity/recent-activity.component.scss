@@ -1,0 +1,20 @@
+.activity-card { background:var(--color-surface); border-radius:10px; box-shadow:var(--shadow-sm); padding:0; border:1px solid var(--color-border-light) }
+.activity-header { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--color-border-light) }
+.activity-table { width:100%; border-collapse:collapse }
+.activity-table thead th { text-align:left; padding:12px; background:transparent; color:var(--color-text-secondary); font-weight:700 }
+
+/* Dark theme: make the table header darker for better contrast */
+body[data-theme='dark'] .activity-table thead th {
+	/* Use a darker surface in dark mode for stronger contrast */
+	background: var(--ColorOverride, var(--color-bg-secondary));
+	color: var(--color-text-primary);
+	border-bottom: 1px solid var(--color-border-heavy);
+}
+.activity-table tbody td { padding:14px; border-top:1px solid rgba(15,23,42,0.04) }
+.avatar-sm { width:44px; height:44px; border-radius:22px; background:var(--color-bg-secondary); display:inline-flex; align-items:center; justify-content:center; margin-right:12px; color:var(--color-interactive-primary); font-weight:700 }
+.user { display:flex; align-items:center }
+.user-name { font-weight:700; margin-left:6px }
+.badge { padding:6px 12px; border-radius:14px; font-weight:700; font-size:12px }
+.badge.success { background: var(--color-success-bg); color: var(--color-success) }
+.badge.error { background: var(--color-error-bg); color: var(--color-error) }
+.badge.pending { background: var(--color-warning-bg); color: var(--color-warning-700) }
