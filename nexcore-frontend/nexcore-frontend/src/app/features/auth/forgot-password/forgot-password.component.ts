@@ -4,14 +4,17 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.component';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
+  standalone: true,
   selector: 'app-forgot-password',
   imports: [
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    ThemeToggleComponent
+    ThemeToggleComponent,
+    TranslocoModule
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss'
@@ -20,6 +23,7 @@ export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
   
   forgotForm: FormGroup;
   loading = signal(false);
@@ -54,7 +58,7 @@ export class ForgotPasswordComponent {
       }, 3000);
       
     } catch (err: any) {
-      this.error.set(err.message || 'Error sending instructions');
+      this.error.set(err.message || this.transloco.translate('auth.forgotPassword.errorGeneric'));
     } finally {
       this.loading.set(false);
     }
@@ -68,11 +72,11 @@ export class ForgotPasswordComponent {
     }
     
     if (control.errors['required']) {
-      return 'This field is required';
+      return this.transloco.translate('validation.required');
     }
     
     if (control.errors['email']) {
-      return 'Invalid email';
+      return this.transloco.translate('validation.invalidEmail');
     }
     
     return null;

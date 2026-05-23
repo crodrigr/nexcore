@@ -35,8 +35,9 @@
 .logo-svg { width:40px; height:40px; display:block }
 .brand-text { font-weight:800; color:var(--color-text-primary); font-size:18px; letter-spacing:-0.4px }
 
-.hamburger-btn { display:inline-flex; align-items:center; justify-content:center; margin-right:8px; padding:8px; border-radius:8px }
-.hamburger-btn .icon { width:20px; height:20px; color:var(--color-text-tertiary) }
+.hamburger-btn { display:inline-flex; align-items:center; justify-content:center; margin-right:8px; padding:8px; border-radius:8px; transition: background 160ms ease, transform 120ms ease }
+.hamburger-btn .icon { width:20px; height:20px; color:var(--color-text-tertiary); transition: color 160ms ease }
+.hamburger-btn:hover { background: var(--hover-bg); transform: translateY(-1px) }
 .hamburger-btn:hover .icon { color:var(--color-text-primary) }
 
 .navbar-center { flex: 1 1 auto; display:flex; justify-content:center }
@@ -103,7 +104,7 @@
   cursor:pointer;
   position:relative;
 }
-.lang-compact:hover { background: var(--color-surface-hover) }
+.lang-compact:hover { background: var(--hover-bg) }
 
 /* Popup for compact language button */
 .lang-compact-wrap { position: relative; display:inline-block }
@@ -123,8 +124,8 @@
   z-index: 1300;
   list-style: none;
 }
-.lang-popup-item { padding:8px 10px; cursor:pointer; display:flex; gap:10px; align-items:center; color:var(--color-text-primary); border-radius:8px; min-width:160px; transition: background .15s ease, color .12s ease; }
-.lang-popup-item:hover { background: var(--color-bg-primary) }
+.lang-popup-item { padding:8px 10px; cursor:pointer; display:flex; gap:10px; align-items:center; color:var(--color-text-primary); border-radius:8px; min-width:160px; transition: background .18s cubic-bezier(.2,.8,.2,1), color .12s ease, transform .14s ease; }
+.lang-popup-item:hover { background: var(--hover-bg); transform: translateX(2px) }
 .lang-popup-item .flag { font-size:16px; width:22px; text-align:center }
 .lang-popup-item .label { flex: 1 1 auto }
 .lang-popup-item .check { display: none; margin-left: 8px; flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; align-items: center; justify-content: center; }
@@ -137,6 +138,7 @@
 /* Notification bell improvements */
 .notification-btn { position: relative; padding:8px; border-radius:8px }
 .notification-btn .icon { width:22px; height:22px; color:var(--color-text-tertiary); transition: color 150ms ease }
+.notification-btn:hover { background: var(--hover-bg); border-radius:8px }
 .notification-btn:hover .icon { color:var(--color-text-primary) }
 .notification-btn:active { transform: translateY(1px) }
 
@@ -186,8 +188,9 @@
 
 /* Profile dropdown */
 .nav-profile { position: relative }
-.profile-trigger { background: transparent; border: none; padding: 6px; border-radius: 6px; cursor: pointer; display:inline-flex; align-items:center }
-.profile-trigger .chev { color: var(--color-text-secondary) }
+.profile-trigger { background: transparent; border: none; padding: 6px; border-radius: 8px; cursor: pointer; display:inline-flex; align-items:center; transition: background 160ms ease, box-shadow 160ms ease }
+.profile-trigger:hover { background: var(--hover-bg); box-shadow: var(--shadow-sm) }
+.profile-trigger .chev { color: var(--color-text-secondary); transition: color 140ms ease }
 .profile-trigger:hover .chev { color: var(--color-text-primary) }
 .profile-dropdown {
   position: absolute;
@@ -212,7 +215,7 @@
 .profile-actions .item .item-label { font-size:13px }
 .profile-actions .item.logout { color: var(--color-interactive-danger) }
 .profile-actions .item.logout .menu-icon { color: var(--color-interactive-danger) }
-.profile-actions .item:hover { background: var(--color-bg-primary) }
+.profile-actions .item:hover { background: var(--hover-bg); box-shadow: var(--shadow-sm); transform: translateX(2px) }
 .profile-actions .divider { height:1px; background:var(--color-border-light); margin:6px 0 }
 .profile-actions .logout { color: var(--color-interactive-danger) }
 

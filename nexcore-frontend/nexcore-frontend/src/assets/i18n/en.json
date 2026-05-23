@@ -54,27 +54,44 @@
   "auth": {
     "login": {
       "title": "Sign In",
+      "brand": "NexCore",
+      "subtitle": "Welcome back",
+      "tenant": "Tenant",
+      "username": "Username",
       "email": "Email",
       "password": "Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot password?",
       "signIn": "Sign In",
+      "signingIn": "Signing in...",
       "noAccount": "Don't have an account?",
       "signUp": "Sign up"
     },
+    "errorGeneric": "Error signing in",
     "forgotPassword": {
       "title": "Forgot Password",
       "subtitle": "Enter your email to reset your password",
       "email": "Email",
       "sendReset": "Send Reset Link",
-      "backToLogin": "Back to login"
+      "sending": "Sending...",
+      "backToLogin": "Back to login",
+      "successTitle": "Instructions sent!",
+      "successMessage": "Check your email. You will be redirected to the login shortly..."
     },
+    "errorGeneric": "Error sending instructions",
     "verifyOtp": {
       "title": "Verify OTP",
       "subtitle": "Enter the code sent to your email",
       "verify": "Verify",
+      "verifying": "Verifying...",
       "resend": "Resend code",
-      "backToLogin": "Back to login"
+      "didntReceive": "Didn't receive the code?",
+      "resendIn": "Resend code in {{s}}s",
+      "backToLogin": "Back to login",
+      "errorInvalid": "Invalid OTP code",
+      "errorResend": "Error resending code"
     }
   },
   "shared": {
@@ -87,5 +104,10 @@
       "cancel": "Cancel",
       "back": "Back"
     }
+  },
+  "validation": {
+    "required": "This field is required",
+    "minLength": "Minimum {{min}} characters",
+    "invalidEmail": "Invalid email"
   }
 }

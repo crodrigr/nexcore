@@ -2,9 +2,9 @@
   <div class="login-card">
     <!-- Header -->
     <div class="login-header">
-      <h1 class="title">NexCore</h1>
-      <h2 class="subtitle-main">Sign In</h2>
-      <p class="subtitle">Welcome back</p>
+      <h1 class="title">{{ 'shared.app.name' | transloco }}</h1>
+      <h2 class="subtitle-main">{{ 'auth.login.title' | transloco }}</h2>
+      <p class="subtitle">{{ 'auth.login.subtitle' | transloco }}</p>
     </div>
     
     <!-- Theme Toggle -->
@@ -28,7 +28,7 @@
       
       <!-- Tenant Select -->
       <div class="form-field">
-        <label for="tenantId" class="form-label">Tenant</label>
+        <label for="tenantId" class="form-label">{{ 'auth.login.tenant' | transloco }}</label>
         <select
           id="tenantId"
           formControlName="tenantId"
@@ -46,12 +46,12 @@
       
       <!-- Username Input -->
       <div class="form-field">
-        <label for="username" class="form-label">Username</label>
+          <label for="username" class="form-label">{{ 'auth.login.username' | transloco }}</label>
         <input
           type="text"
           id="username"
           formControlName="username"
-          placeholder="Enter your username"
+          [placeholder]="'auth.login.username' | transloco"
           class="form-input"
           [class.form-field-error]="getFieldError('username')"
           autocomplete="username"
@@ -63,13 +63,13 @@
       
       <!-- Password Input -->
       <div class="form-field">
-        <label for="password" class="form-label">Password</label>
+        <label for="password" class="form-label">{{ 'auth.login.password' | transloco }}</label>
         <div class="input-with-icon">
           <input
             [type]="showPassword() ? 'text' : 'password'"
             id="password"
             formControlName="password"
-            placeholder="Enter your password"
+            [placeholder]="'auth.login.password' | transloco"
             class="form-input"
             [class.form-field-error]="getFieldError('password')"
             autocomplete="current-password"
@@ -78,7 +78,7 @@
             type="button"
             class="icon-button"
             (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-label]="showPassword() ? ('auth.login.hidePassword' | transloco) : ('auth.login.showPassword' | transloco)"
           >
             @if (showPassword()) {
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -106,7 +106,7 @@
           formControlName="rememberMe"
           class="checkbox"
         />
-        <label for="rememberMe" class="checkbox-label">Remember me</label>
+        <label for="rememberMe" class="checkbox-label">{{ 'auth.login.rememberMe' | transloco }}</label>
       </div>
       
       <!-- Submit Button -->
@@ -117,16 +117,16 @@
       >
           @if (loading()) {
           <span class="spinner"></span>
-          <span>Signing in...</span>
+          <span>{{ 'auth.login.signingIn' | transloco }}</span>
         } @else {
-          <span>Sign In</span>
+          <span>{{ 'auth.login.signIn' | transloco }}</span>
         }
       </button>
       
       <!-- Forgot Password Link -->
       <div class="form-footer">
         <a routerLink="/auth/forgot-password" class="link">
-          Forgot your password?
+          {{ 'auth.login.forgotPassword' | transloco }}
         </a>
       </div>
     </form>

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.component';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 interface Tenant {
   id: string;
@@ -11,12 +12,14 @@ interface Tenant {
 }
 
 @Component({
+  standalone: true,
   selector: 'app-login',
   imports: [
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    ThemeToggleComponent
+    ThemeToggleComponent,
+    TranslocoModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -25,6 +28,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
   
   loginForm: FormGroup;
   loading = signal(false);
@@ -76,7 +80,7 @@ export class LoginComponent {
       this.router.navigate(['/auth/verify-otp']);
       
     } catch (err: any) {
-      this.error.set(err.message || 'Error signing in');
+      this.error.set(err.message || this.transloco.translate('auth.login.errorGeneric'));
     } finally {
       this.loading.set(false);
     }
@@ -90,12 +94,12 @@ export class LoginComponent {
     }
     
     if (control.errors['required']) {
-      return 'This field is required';
+      return this.transloco.translate('validation.required');
     }
     
     if (control.errors['minlength']) {
       const minLength = control.errors['minlength'].requiredLength;
-      return `Minimum ${minLength} characters`;
+      return this.transloco.translate('validation.minLength', { min: minLength });
     }
     
     return null;

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.component';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-verify-otp',
@@ -13,6 +14,7 @@ import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.compone
     ReactiveFormsModule,
     RouterModule,
     ThemeToggleComponent
+    ,TranslocoModule
   ],
   templateUrl: './verify-otp.component.html',
   styleUrls: ['./verify-otp.component.scss']
@@ -22,6 +24,7 @@ export class VerifyOtpComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private transloco = inject(TranslocoService);
   
   otpForm!: FormGroup;
   loading = signal(false);
@@ -121,7 +124,7 @@ export class VerifyOtpComponent {
       await this.router.navigateByUrl('/dashboard');
       
     } catch (err: any) {
-      this.error.set(err.message || 'Invalid OTP code');
+      this.error.set(err.message || this.transloco.translate('auth.verifyOtp.errorInvalid'));
     } finally {
       this.loading.set(false);
     }
@@ -151,7 +154,7 @@ export class VerifyOtpComponent {
       }
       
     } catch (err: any) {
-      this.error.set(err.message || 'Error resending code');
+      this.error.set(err.message || this.transloco.translate('auth.verifyOtp.errorResend'));
     } finally {
       this.loading.set(false);
     }

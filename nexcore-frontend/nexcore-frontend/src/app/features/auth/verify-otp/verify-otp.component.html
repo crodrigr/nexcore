@@ -2,10 +2,10 @@
   <div class="otp-card">
     <!-- Header -->
     <div class="otp-header">
-      <h1 class="title">NexCore</h1>
-      <h2 class="subtitle-main">Verify OTP Code</h2>
+      <h1 class="title">{{ 'shared.app.name' | transloco }}</h1>
+      <h2 class="subtitle-main">{{ 'auth.verifyOtp.title' | transloco }}</h2>
       <p class="subtitle">
-        Enter the 6-digit code sent to your email
+        {{ 'auth.verifyOtp.subtitle' | transloco }}
       </p>
     </div>
     
@@ -52,16 +52,16 @@
       >
           <ng-container *ngIf="loading(); else notLoading">
           <span class="spinner"></span>
-          <span>Verifying...</span>
+          <span>{{ 'auth.verifyOtp.verifying' | transloco }}</span>
         </ng-container>
         <ng-template #notLoading>
-          <span>Verify</span>
+          <span>{{ 'auth.verifyOtp.verify' | transloco }}</span>
         </ng-template>
       </button>
       
       <!-- Resend Code -->
       <div class="form-footer">
-        <p class="footer-text">Didn't receive the code?</p>
+        <p class="footer-text">{{ 'auth.verifyOtp.didntReceive' | transloco }}</p>
         <ng-container *ngIf="canResend(); else showTimer">
           <button
             type="button"
@@ -69,12 +69,12 @@
             (click)="resendCode()"
             [disabled]="loading()"
           >
-            Resend code
+            {{ 'auth.verifyOtp.resend' | transloco }}
           </button>
         </ng-container>
         <ng-template #showTimer>
           <span class="timer-text">
-            Resend code in {{ resendTimer() }}s
+            {{ 'auth.verifyOtp.resendIn' | transloco: { s: resendTimer() } }}
           </span>
         </ng-template>
       </div>
@@ -82,7 +82,7 @@
       <!-- Back to Login -->
       <div class="form-footer">
         <a routerLink="/auth/login" class="link">
-          Back to Sign In
+          {{ 'auth.verifyOtp.backToLogin' | transloco }}
         </a>
       </div>
     </form>

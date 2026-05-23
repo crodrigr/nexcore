@@ -32,4 +32,11 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-focus: 0 0 0 3px rgba(66, 153, 225, 0.5);
   --shadow-focus-error: 0 0 0 3px rgba(245, 101, 101, 0.5);
+  // Hover / interaction tuning (light)
+  // Increased contrast so hover states are more visible in light theme
+  --hover-bg: rgba(33,150,243,0.12); /* stronger blue-tinted hover */
+  --hover-text: var(--color-text-primary);
+  --collapsed-hover-icon-bg: rgba(33,150,243,0.14);
+  --tooltip-bg: #ffffff; /* tooltip on light should be white with subtle border */
+  --tooltip-text: var(--color-text-primary);
 }

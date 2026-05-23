@@ -54,27 +54,44 @@
   "auth": {
     "login": {
       "title": "Iniciar Sesión",
+      "brand": "NexCore",
+      "subtitle": "Bienvenido de nuevo",
+      "tenant": "Tenant",
+      "username": "Nombre de usuario",
       "email": "Correo electrónico",
       "password": "Contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
       "rememberMe": "Recuérdame",
       "forgotPassword": "¿Olvidaste tu contraseña?",
       "signIn": "Iniciar Sesión",
+      "signingIn": "Iniciando sesión...",
       "noAccount": "¿No tienes cuenta?",
       "signUp": "Regístrate"
     },
+    "errorGeneric": "Error al iniciar sesión",
     "forgotPassword": {
       "title": "Recuperar Contraseña",
       "subtitle": "Ingresa tu correo para restablecer tu contraseña",
       "email": "Correo electrónico",
       "sendReset": "Enviar enlace",
-      "backToLogin": "Volver al inicio"
+      "sending": "Enviando...",
+      "backToLogin": "Volver al inicio",
+      "successTitle": "¡Instrucciones enviadas!",
+      "successMessage": "Revisa tu correo. Serás redirigido al inicio en breve..."
     },
+    "errorGeneric": "Error al enviar instrucciones",
     "verifyOtp": {
       "title": "Verificar OTP",
       "subtitle": "Ingresa el código enviado a tu correo",
       "verify": "Verificar",
+      "verifying": "Verificando...",
       "resend": "Reenviar código",
-      "backToLogin": "Volver al inicio"
+      "didntReceive": "¿No recibiste el código?",
+      "resendIn": "Reenviar código en {{s}}s",
+      "backToLogin": "Volver al inicio",
+      "errorInvalid": "Código OTP inválido",
+      "errorResend": "Error al reenviar el código"
     }
   },
   "shared": {
@@ -87,5 +104,10 @@
       "cancel": "Cancelar",
       "back": "Volver"
     }
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "minLength": "Mínimo {{min}} caracteres",
+    "invalidEmail": "Correo inválido"
   }
 }
