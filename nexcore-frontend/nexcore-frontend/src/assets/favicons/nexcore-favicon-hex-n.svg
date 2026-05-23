@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <!-- Hexagon base -->
+  <polygon points="32 4 54 16 54 48 32 60 10 48 10 16" fill="#7C3AED" />
+  <!-- Inner core hex slightly smaller for subtle depth -->
+  <polygon points="32 10 48 19 48 45 32 54 16 45 16 19" fill="rgba(0,0,0,0.06)" />
+  <!-- Uppercase 'N' centered inside hex - filled white for contrast -->
+  <!-- Slightly reduced uppercase 'N' for improved spacing inside hex -->
+  <rect x="24" y="16" width="5" height="32" rx="1" fill="#FFFFFF" />
+  <rect x="35" y="16" width="5" height="32" rx="1" fill="#FFFFFF" />
+  <polygon points="28,16 36,48 33,48 25,16" fill="#FFFFFF" />
+</svg>

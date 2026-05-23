@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <!-- Central ring with radial ticks to suggest event-driven core -->
+  <circle cx="32" cy="32" r="18" stroke="#00D1FF" stroke-width="4" fill="none" stroke-linecap="round" />
+  <circle cx="32" cy="32" r="6" fill="#0EA5FF" />
+  <!-- radial ticks -->
+  <rect x="31" y="8" width="2" height="6" rx="1" fill="#00D1FF" transform="translate(0 0)" />
+  <rect x="50" y="31" width="6" height="2" rx="1" fill="#00D1FF" />
+  <rect x="31" y="50" width="2" height="6" rx="1" fill="#00D1FF" />
+  <rect x="8" y="31" width="6" height="2" rx="1" fill="#00D1FF" />
+</svg>
