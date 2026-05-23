@@ -2,7 +2,7 @@ import { Component, inject, signal, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../shared/services/auth.service';
+import { AuthService } from '../service/auth.service';
 import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.component';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 

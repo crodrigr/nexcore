@@ -213,6 +213,7 @@ AuthService métodos recomendados:
 - Verificar con el equipo backend si pueden devolver `refreshToken` como `HttpOnly` cookie para mejorar seguridad.
 - Agregar las claves i18n en `src/assets/i18n/es/auth.json` y `en/auth.json` (scaffold) con entradas mínimas: `login.title`, `login.username`, `login.password`, `otp.title`, `forgot.title`, `messages.otpSent`, `errors.invalidCredentials`, `errors.invalidOtp`.
 - Implementar `AuthService` y `AuthInterceptor` y añadir tests unitarios.
+- Nota: en este repositorio `AuthService` se ubicó en `src/app/features/auth/service/auth.service.ts` (mover desde `shared/services`).
 
 ---
 

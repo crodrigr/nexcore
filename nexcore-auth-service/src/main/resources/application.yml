@@ -62,7 +62,9 @@ nexcore:
       
     password-reset:
       expiry-minutes: 30
-      max-requests-per-hour: 3
+      # Máximo de solicitudes por usuario por hora. Poner un valor alto para relajar límite.
+      # Para desactivar el límite, establecer a 0 o un valor negativo (el código trata <=0 como desactivado).
+      max-requests-per-hour: 0
     
     email:
       from: crodrigr@gmail.com
@@ -93,3 +95,12 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+# CORS configuration (can be overridden via env var CORS_ALLOWED_ORIGINS)
+app:
+  cors:
+    # Comma-separated list of allowed origins. Default: Angular dev server
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  # Frontend base URL used when building links in emails (password reset, etc.)
+  frontend:
+    base-url: ${APP_FRONTEND_URL:http://localhost:4200}

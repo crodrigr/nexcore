@@ -93,6 +93,19 @@
       "errorInvalid": "Código OTP inválido",
       "errorResend": "Error al reenviar el código"
     }
+    ,
+    "resetPassword": {
+      "title": "Cambiar contraseña",
+      "subtitle": "Actualiza la contraseña de tu cuenta",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "change": "Cambiar contraseña",
+      "backToLogin": "Volver al inicio",
+      "successMessage": "Contraseña cambiada correctamente. Redirigiendo...",
+      "passwordsMismatch": "Las contraseñas no coinciden",
+      "errorGeneric": "Error al cambiar la contraseña"
+    }
   },
   "shared": {
     "app": {

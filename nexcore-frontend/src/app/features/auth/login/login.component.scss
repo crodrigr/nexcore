@@ -103,34 +103,46 @@
 
 .input-with-icon {
   position: relative;
-  
+  display: block;
+  width: 100%;
+
   .form-input {
-    padding-right: 48px;
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 52px; /* leave room for icon inside */
   }
   
   .icon-button {
     position: absolute;
-    right: var(--spacing-2);
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: var(--spacing-2);
+    padding: 6px;
     color: var(--color-text-tertiary);
     border-radius: var(--radius-md);
     transition: all 0.2s ease;
-    
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 8px);
+
     &:hover {
       background: var(--color-surface-hover);
       color: var(--color-text-primary);
     }
-    
+
     .icon {
       width: 20px;
       height: 20px;
       stroke-width: 2;
+      display: block;
+      overflow: visible;
     }
+    line-height: 0;
+    height: 36px;
   }
 }
 

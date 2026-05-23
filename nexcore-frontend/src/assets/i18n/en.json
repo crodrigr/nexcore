@@ -93,6 +93,19 @@
       "errorInvalid": "Invalid OTP code",
       "errorResend": "Error resending code"
     }
+    ,
+    "resetPassword": {
+      "title": "Change Password",
+      "subtitle": "Update your account password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "change": "Change password",
+      "backToLogin": "Back to login",
+      "successMessage": "Password changed successfully. Redirecting...",
+      "passwordsMismatch": "Passwords do not match",
+      "errorGeneric": "Failed to change password"
+    }
   },
   "shared": {
     "app": {

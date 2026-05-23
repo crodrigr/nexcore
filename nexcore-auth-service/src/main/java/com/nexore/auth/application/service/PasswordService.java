@@ -71,12 +71,12 @@ public class PasswordService {
                     .build();
         }
         
-        // Verificar límite de solicitudes
+        // Verificar límite de solicitudes. Si `maxRequestsPerHour` <= 0 entonces el límite está desactivado.
         long recentRequests = passwordResetRepository.countResetRequestsByUserSinceLastHour(user.getId());
-        if (recentRequests >= maxRequestsPerHour) {
+        if (maxRequestsPerHour > 0 && recentRequests >= maxRequestsPerHour) {
             log.warn("Too many password reset requests for user {}", user.getId());
             throw new TooManyPasswordResetAttemptsException(
-                    "Too many password reset requests. Please try again later");
+                "Too many password reset requests. Please try again later");
         }
         
         // Invalidar todos los tokens anteriores del usuario

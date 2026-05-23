@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../shared/services/auth.service';
+import { AuthService } from '../service/auth.service';
 import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.component';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
@@ -17,7 +17,7 @@ import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
     TranslocoModule
   ],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.scss'
+  styleUrls: ['./forgot-password.component.scss']
 })
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
@@ -47,8 +47,13 @@ export class ForgotPasswordComponent {
     
     try {
       const { email } = this.forgotForm.value;
-      
-      await this.authService.forgotPassword({ email });
+      // Read tenantId persisted from login selection, fallback to undefined
+      let tenantId: string | undefined = undefined;
+      if (typeof window !== 'undefined') {
+        tenantId = sessionStorage.getItem('tenantId') || undefined;
+      }
+
+      await this.authService.forgotPassword({ email, tenantId } as any);
       
       this.success.set(true);
       

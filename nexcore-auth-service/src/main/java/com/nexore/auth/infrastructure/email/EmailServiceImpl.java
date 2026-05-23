@@ -32,6 +32,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${nexcore.auth.password-reset.expiry-minutes}")
     private int passwordResetExpiryMinutes;
     
+    @Value("${app.frontend.base-url}")
+    private String frontendBaseUrl;
+    
     @Override
     public void sendOtpEmail(String toEmail, String username, OtpCode otpCode) {
         String subject = "Your OTP Code - NexCore Platform";
@@ -191,7 +194,10 @@ public class EmailServiceImpl implements EmailService {
     }
     
     private String buildPasswordResetUrl(String token) {
-        // En producción, esto debería ser configurable
-        return String.format("https://app.nexcore.com/reset-password?token=%s", token);
+        // Use configured frontend base URL from application.yml
+        String base = frontendBaseUrl != null && !frontendBaseUrl.isBlank() ? frontendBaseUrl : "https://app.nexcore.com";
+        // Ensure no trailing slash
+        if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
+        return String.format("%s/reset-password?token=%s", base, token);
     }
 }

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexCore Admin - Error Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eef1f9",
+                        "on-primary-container": "#002c4f",
+                        "primary-container": "#2196f3",
+                        "on-tertiary-container": "#452200",
+                        "error": "#ba1a1a",
+                        "secondary": "#b80049",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#ebeef6",
+                        "surface": "#f8f9ff",
+                        "tertiary": "#904d00",
+                        "secondary-container": "#e2165f",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed": "#2e1500",
+                        "on-surface-variant": "#404752",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#fffbff",
+                        "on-primary-fixed": "#001d36",
+                        "inverse-primary": "#9ecaff",
+                        "secondary-fixed": "#ffd9de",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#9ecaff",
+                        "primary-fixed": "#d1e4ff",
+                        "on-secondary-fixed-variant": "#900038",
+                        "surface-container-highest": "#dfe2ea",
+                        "surface-container-low": "#f1f3fc",
+                        "outline-variant": "#bfc7d4",
+                        "tertiary-container": "#db7900",
+                        "on-surface": "#181c22",
+                        "tertiary-fixed": "#ffdcc2",
+                        "inverse-surface": "#2d3137",
+                        "primary": "#0061a4",
+                        "on-secondary-fixed": "#400014",
+                        "on-background": "#181c22",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#707883",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "on-secondary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#d7dae2",
+                        "on-primary-fixed-variant": "#00497d",
+                        "secondary-fixed-dim": "#ffb2be",
+                        "surface-variant": "#dfe2ea",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "surface-tint": "#0061a4",
+                        "surface-container-high": "#e5e8f0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "unit-base": "8px",
+                        "navbar-height": "64px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "32px",
+                        "sidebar-width": "280px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-xl-mobile": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-xl-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .error-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-0 h-navbar-height flex items-center justify-between px-margin-desktop z-50 bg-surface-container-lowest border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">NexCore</span>
+<div class="hidden md:flex items-center bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md placeholder-on-surface-variant w-64" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 transition-transform text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 transition-transform text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline">
+<img alt="User profile" data-alt="A professional headshot of a software engineer with a neutral expression, set against a clean, corporate background with soft, diffused office lighting. The aesthetic is modern and professional, utilizing a bright, light-mode color palette that complements the NexCore system's clean design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA27mgXJi_8aYfbSY7w8xq5t3-F7J2fypNDZ-2AuDdiWOlEsU--shW89DEfAEqY7YaEnHkgLbGJXAeT7e8Po90-jp1U4NLmw-E3TesjLB4eUUz6QHhBY2qkttz_rhpbtgtNS4NdX_F2ZPxUNUlawKvidw1s-uxlgCzdZpCOQBKtEnY5BTkcKfKqlFJa2rF9U_Z41rWz1c6nVstFEEGhKhWwQCVFFI9rXsP6qTUe_HMPa436tFWSANexZb9NQBhHjmypARAccL1ef4jQ"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width flex flex-col p-4 z-40 bg-surface-container-low">
+<div class="mt-16 mb-8 flex items-center gap-3 px-2">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" data-icon="domain" style="font-variation-settings: 'FILL' 1;">domain</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-primary leading-tight">NexCore</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Admin Portal</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-bold transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="font-label-md text-label-md">Tenants</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-md text-label-md">Menus</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-label-md text-label-md">Preferences</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width mt-navbar-height p-gutter min-h-[calc(100vh-64px)] relative">
+<!-- Global Toast Notification (Absolute Top Right) -->
+<div class="absolute top-6 right-8 w-96 bg-surface-container-lowest border border-error/20 rounded-xl shadow-xl z-[60] overflow-hidden transform transition-all duration-300 translate-y-0 opacity-100" id="error-toast">
+<div class="p-4 flex gap-4">
+<div class="flex-shrink-0 w-12 h-12 bg-error-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-icon="report" style="font-variation-settings: 'FILL' 1;">report</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-md text-body-md font-bold text-on-surface mb-1 leading-tight">Database Connection Failed</h3>
+<button class="text-on-surface-variant hover:text-on-surface" onclick="document.getElementById('error-toast').style.display='none'">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">The system was unable to establish a secure handshake with the primary PostgreSQL cluster.</p>
+<button class="flex items-center gap-2 text-primary font-label-md text-label-md hover:underline" onclick="toggleDetails()">
+<span>View Details</span>
+<span class="material-symbols-outlined transition-transform duration-200" data-icon="expand_more" id="detail-chevron">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Collapsible Stack Trace -->
+<div class="hidden bg-surface-container border-t border-outline-variant p-4" id="stack-trace">
+<code class="font-mono text-[11px] leading-relaxed text-error block max-h-32 overflow-y-auto">
+                    [ERROR] ERR_CONN_TIMEOUT_504<br/>
+                    at Pool._connect (pg/lib/pool.js:142:18)<br/>
+                    at async Client._handshake (pg/lib/client.js:84:5)<br/>
+                    at Connection.verifyTLS (pg/lib/connection.js:201:10)<br/>
+                    -- Transaction ID: 0xf2a19934
+                </code>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Quick Tenant Provisioning (Inline Form Errors) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest p-6 rounded-lg border border-outline-variant shadow-sm h-fit">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface">Quick Tenant Provisioning</h2>
+<span class="px-3 py-1 bg-surface-container rounded-full text-label-md font-label-md text-on-surface-variant">Step 1 of 3</span>
+</div>
+<form class="space-y-6">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block">Legal Entity Name</label>
+<input class="w-full bg-white border-outline-variant rounded-lg p-3 text-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-all" type="text" value="Acme Cloud Solutions"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block">Region</label>
+<select class="w-full bg-white border-outline-variant rounded-lg p-3 text-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+<option>US-East (Virginia)</option>
+<option>EU-West (Ireland)</option>
+</select>
+</div>
+</div>
+<div class="space-y-2 error-shake">
+<label class="font-label-md text-label-md text-on-surface block">Tenant Domain</label>
+<div class="relative">
+<input class="w-full bg-white border-error rounded-lg p-3 pr-10 text-body-md focus:ring-0 transition-all border-2" type="text" value="acme.nexcore.io"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-error" data-icon="error">error</span>
+</div>
+<p class="font-body-sm text-body-sm text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="info">info</span>
+                            This domain is already registered.
+                        </p>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block">Primary Admin Email</label>
+<input class="w-full bg-white border-outline-variant rounded-lg p-3 text-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="admin@acme.com" type="email"/>
+</div>
+<div class="pt-4 flex gap-3">
+<button class="px-6 py-2 bg-primary text-on-primary rounded-lg font-bold hover:brightness-110 active:scale-95 transition-all" type="button">Create Tenant</button>
+<button class="px-6 py-2 bg-transparent border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container transition-all" type="button">Discard Draft</button>
+</div>
+</form>
+</div>
+<!-- System Status (Empty State / Error Boundary) -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-lowest p-6 rounded-lg border border-outline-variant shadow-sm flex flex-col items-center justify-center text-center min-h-[400px]">
+<div class="mb-6 relative">
+<!-- Abstract Error Graphic -->
+<div class="w-48 h-48 bg-surface-container rounded-full flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-error/5 to-transparent"></div>
+<img alt="Data Unavailable" class="w-full h-full object-cover opacity-30 grayscale" data-alt="A sophisticated abstract 3D visualization of a digital network with broken, fragmented connections and floating geometric shards. The lighting is low-key with a moody atmosphere, featuring deep blues and stark red light accents. The style is cinematic and technical, reflecting a high-end system error state in a corporate environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqh_NX8cpJHOawVSYNq47B5U5JsS9VkTFgAM612FzmE0krSAK8w6vQ28Es5DnRqA1npiB3QxSeL2fRt1U89DLQQ1LbKD0MDguAPvOKv73rIX7C77gckHhhntuInEsHgzIS13i0lkqODQzV1TcdkPJxtKnRnQpBCWUIvf9dAF95c5ydY5KeVOyUYVTCDDNh36rISvDLPVUW-Go9fF_Xdax48GdYXW_ZHxzUo1cP8DlyhCbzPTfeaNZj9wHquatciaOy7FIJUn_v4aXx"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-error opacity-80" data-icon="cloud_off" style="font-size: 64px; font-variation-settings: 'FILL' 1;">cloud_off</span>
+</div>
+</div>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Data Unavailable</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs mb-8">
+                    The health monitoring service is currently unreachable. Real-time telemetry could not be loaded.
+                </p>
+<button class="flex items-center gap-2 px-8 py-3 bg-secondary text-on-secondary rounded-lg font-bold hover:brightness-110 active:scale-95 transition-all shadow-md group">
+<span class="material-symbols-outlined group-active:rotate-180 transition-transform duration-500" data-icon="refresh">refresh</span>
+<span>Retry Connection</span>
+</button>
+</div>
+<!-- Footer Stats (Placeholder to fill space) -->
+<div class="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="storage">storage</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Active Nodes</p>
+<p class="font-headline-md text-headline-md font-bold">12 / 14</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="router">router</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">API Latency</p>
+<p class="font-headline-md text-headline-md font-bold">42ms</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Auth Health</p>
+<p class="font-headline-md text-headline-md font-bold">99.9%</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function toggleDetails() {
+            const details = document.getElementById('stack-trace');
+            const chevron = document.getElementById('detail-chevron');
+            const toast = document.getElementById('error-toast');
+            
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+                toast.classList.add('shadow-2xl');
+            } else {
+                details.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+                toast.classList.remove('shadow-2xl');
+            }
+        }
+
+        // Auto-hide toast after a long duration for demo (30 seconds)
+        setTimeout(() => {
+            const toast = document.getElementById('error-toast');
+            if(toast) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => toast.style.display = 'none', 300);
+            }
+        }, 30000);
+    </script>
+</body></html>

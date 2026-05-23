@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../shared/services/auth.service';
+import { AuthService } from '../service/auth.service';
 import { ThemeToggleComponent } from '../../../shared/theme/theme-toggle.component';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
@@ -22,7 +22,7 @@ interface Tenant {
     TranslocoModule
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
@@ -46,6 +46,21 @@ export class LoginComponent {
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
+    });
+
+    // Persist selected tenantId to sessionStorage so other auth flows (forgot password)
+    // can reuse the tenant selected in the login form.
+    if (typeof window !== 'undefined') {
+      const current = sessionStorage.getItem('tenantId');
+      if (current) {
+        this.loginForm.get('tenantId')?.setValue(current);
+      }
+    }
+
+    this.loginForm.get('tenantId')?.valueChanges.subscribe((tid: string) => {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('tenantId', tid);
+      }
     });
   }
   
@@ -75,6 +90,8 @@ export class LoginComponent {
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('challengeToken', response.challengeToken);
         sessionStorage.setItem('mockUsername', username);
+        // Ensure tenantId is persisted for flows like forgot-password
+        sessionStorage.setItem('tenantId', tenantId);
       }
       
       this.router.navigate(['/auth/verify-otp']);

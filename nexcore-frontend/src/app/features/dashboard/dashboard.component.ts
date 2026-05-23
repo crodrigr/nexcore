@@ -4,7 +4,7 @@ import { TranslocoModule } from '@ngneat/transloco';
 import { NavbarComponent } from '../../shared/layout/navbar.component';
 import { SidebarComponent } from '../../shared/layout/sidebar.component';
 import { Router } from '@angular/router';
-import { AuthService } from '../../shared/services/auth.service';
+import { AuthService } from '../auth/service/auth.service';
 
 @Component({
   selector: 'app-dashboard',

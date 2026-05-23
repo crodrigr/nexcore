@@ -13,6 +13,12 @@ export const routes: Routes = [
     title: 'Dashboard'
   },
   {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    title: 'Reset Password'
+  },
+  {
     path: 'auth',
     children: [
       {
@@ -32,6 +38,12 @@ export const routes: Routes = [
         loadComponent: () => 
           import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
         title: 'Reset Password'
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+        title: 'Change Password'
       },
       {
         path: '',
