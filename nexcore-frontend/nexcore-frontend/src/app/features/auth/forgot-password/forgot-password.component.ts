@@ -48,13 +48,13 @@ export class ForgotPasswordComponent {
       
       this.success.set(true);
       
-      // Redirigir al login después de 3 segundos
+      // Redirect to login after 3 seconds
       setTimeout(() => {
         this.router.navigate(['/auth/login']);
       }, 3000);
       
     } catch (err: any) {
-      this.error.set(err.message || 'Error al enviar instrucciones');
+      this.error.set(err.message || 'Error sending instructions');
     } finally {
       this.loading.set(false);
     }
@@ -68,11 +68,11 @@ export class ForgotPasswordComponent {
     }
     
     if (control.errors['required']) {
-      return 'Este campo es requerido';
+      return 'This field is required';
     }
     
     if (control.errors['email']) {
-      return 'Email inválido';
+      return 'Invalid email';
     }
     
     return null;

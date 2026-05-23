@@ -19,19 +19,19 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => 
           import('./features/auth/login/login.component').then(m => m.LoginComponent),
-        title: 'Iniciar Sesión'
+        title: 'Sign In'
       },
       {
         path: 'verify-otp',
         loadComponent: () => 
           import('./features/auth/verify-otp/verify-otp.component').then(m => m.VerifyOtpComponent),
-        title: 'Verificar Código'
+        title: 'Verify OTP'
       },
       {
         path: 'forgot-password',
         loadComponent: () => 
           import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
-        title: 'Recuperar Contraseña'
+        title: 'Reset Password'
       },
       {
         path: '',

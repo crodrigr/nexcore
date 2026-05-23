@@ -76,7 +76,7 @@ export class LoginComponent {
       this.router.navigate(['/auth/verify-otp']);
       
     } catch (err: any) {
-      this.error.set(err.message || 'Error al iniciar sesión');
+      this.error.set(err.message || 'Error signing in');
     } finally {
       this.loading.set(false);
     }
@@ -90,12 +90,12 @@ export class LoginComponent {
     }
     
     if (control.errors['required']) {
-      return 'Este campo es requerido';
+      return 'This field is required';
     }
     
     if (control.errors['minlength']) {
       const minLength = control.errors['minlength'].requiredLength;
-      return `Mínimo ${minLength} caracteres`;
+      return `Minimum ${minLength} characters`;
     }
     
     return null;

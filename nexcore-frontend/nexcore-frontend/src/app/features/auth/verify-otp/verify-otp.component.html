@@ -3,9 +3,9 @@
     <!-- Header -->
     <div class="otp-header">
       <h1 class="title">NexCore</h1>
-      <h2 class="subtitle-main">Verificar Código OTP</h2>
+      <h2 class="subtitle-main">Verify OTP Code</h2>
       <p class="subtitle">
-        Ingresa el código de 6 dígitos enviado a tu email
+        Enter the 6-digit code sent to your email
       </p>
     </div>
     
@@ -39,7 +39,7 @@
             pattern="[0-9]"
             (input)="onDigitInput($event, i)"
             (keydown)="onDigitKeyDown($event, i)"
-            [attr.aria-label]="'Dígito ' + i"
+            [attr.aria-label]="'Digit ' + i"
           />
         </ng-container>
       </div>
@@ -50,18 +50,18 @@
         class="btn-primary btn-block"
         [disabled]="loading() || otpForm.invalid"
       >
-        <ng-container *ngIf="loading(); else notLoading">
+          <ng-container *ngIf="loading(); else notLoading">
           <span class="spinner"></span>
-          <span>Verificando...</span>
+          <span>Verifying...</span>
         </ng-container>
         <ng-template #notLoading>
-          <span>Verificar</span>
+          <span>Verify</span>
         </ng-template>
       </button>
       
       <!-- Resend Code -->
       <div class="form-footer">
-        <p class="footer-text">¿No recibiste el código?</p>
+        <p class="footer-text">Didn't receive the code?</p>
         <ng-container *ngIf="canResend(); else showTimer">
           <button
             type="button"
@@ -69,12 +69,12 @@
             (click)="resendCode()"
             [disabled]="loading()"
           >
-            Reenviar código
+            Resend code
           </button>
         </ng-container>
         <ng-template #showTimer>
           <span class="timer-text">
-            Reenviar código en {{ resendTimer() }}s
+            Resend code in {{ resendTimer() }}s
           </span>
         </ng-template>
       </div>
@@ -82,7 +82,7 @@
       <!-- Back to Login -->
       <div class="form-footer">
         <a routerLink="/auth/login" class="link">
-          Volver a Iniciar Sesión
+          Back to Sign In
         </a>
       </div>
     </form>

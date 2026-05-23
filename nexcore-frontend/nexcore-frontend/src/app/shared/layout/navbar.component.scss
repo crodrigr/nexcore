@@ -133,7 +133,10 @@
 .profile-meta .name { font-weight:700; font-size:13px }
 .profile-meta .email { font-size:12px; color:var(--color-text-secondary); margin-top:2px }
 .profile-actions { display:flex; flex-direction:column; padding-top:8px }
-.profile-actions .item { padding:8px 6px; color:var(--color-text-primary); text-decoration:none; cursor:pointer; border-radius:6px }
+.profile-actions .item { padding:8px 6px; color:var(--color-text-primary); text-decoration:none; cursor:pointer; border-radius:6px; display:flex; align-items:center }
+.profile-actions .item .menu-icon { width:16px; height:16px; margin-right:10px; color:var(--color-text-secondary); flex:0 0 16px }
+.profile-actions .item.logout { color: var(--color-interactive-danger) }
+.profile-actions .item.logout .menu-icon { color: var(--color-interactive-danger) }
 .profile-actions .item:hover { background: var(--color-bg-primary) }
 .profile-actions .divider { height:1px; background:var(--color-border-light); margin:6px 0 }
 .profile-actions .logout { color: var(--color-interactive-danger) }

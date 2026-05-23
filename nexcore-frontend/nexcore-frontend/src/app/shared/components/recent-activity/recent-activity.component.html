@@ -1,13 +1,13 @@
 <section class="activity">
   <div class="activity-card">
     <div class="activity-header">
-      <h3>Actividad Reciente</h3>
-      <a class="link">Ver todo</a>
+      <h3>Recent Activity</h3>
+      <a class="link">View all</a>
     </div>
 
     <table class="activity-table">
       <thead>
-        <tr><th>Usuario</th><th>Acción</th><th>Tenant</th><th>Fecha</th><th>Estado</th></tr>
+        <tr><th>User</th><th>Action</th><th>Tenant</th><th>Date</th><th>Status</th></tr>
       </thead>
       <tbody>
         <tr *ngFor="let a of activities">
@@ -17,7 +17,7 @@
           <td>{{ a.action }}</td>
           <td>{{ a.tenant }}</td>
           <td>{{ a.time }}</td>
-          <td><span [ngClass]="statusClass(a.status)">{{ a.status === 'success' ? 'ÉXITO' : (a.status === 'error' ? 'ERROR' : 'PENDIENTE') }}</span></td>
+          <td><span [ngClass]="statusClass(a.status)">{{ a.status === 'success' ? 'SUCCESS' : (a.status === 'error' ? 'ERROR' : 'PENDING') }}</span></td>
         </tr>
       </tbody>
     </table>

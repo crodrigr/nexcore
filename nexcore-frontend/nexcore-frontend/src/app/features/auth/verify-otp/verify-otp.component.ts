@@ -30,7 +30,7 @@ export class VerifyOtpComponent {
   canResend = signal(false);
   
   constructor() {
-    // Verificar que existe challenge token
+    // Verify that a challenge token exists
     if (isPlatformBrowser(this.platformId)) {
       const challengeToken = sessionStorage.getItem('challengeToken');
       if (!challengeToken) {
@@ -70,7 +70,7 @@ export class VerifyOtpComponent {
     const input = event.target as HTMLInputElement;
     const value = input.value;
     
-    // Auto-avanzar al siguiente campo
+    // Auto-advance to the next field
     if (value.length === 1 && index < 6 && isPlatformBrowser(this.platformId)) {
       const nextInput = document.querySelector(`#digit${index + 1}`) as HTMLInputElement;
       nextInput?.focus();
@@ -80,7 +80,7 @@ export class VerifyOtpComponent {
   onDigitKeyDown(event: KeyboardEvent, index: number): void {
     const input = event.target as HTMLInputElement;
     
-    // Retroceder al campo anterior con Backspace
+    // Move focus to previous field on Backspace
     if (event.key === 'Backspace' && !input.value && index > 1 && isPlatformBrowser(this.platformId)) {
       const prevInput = document.querySelector(`#digit${index - 1}`) as HTMLInputElement;
       prevInput?.focus();
@@ -111,17 +111,17 @@ export class VerifyOtpComponent {
       });
       console.log('OTP verification succeeded');
       
-      // Limpiar challenge token
+      // Clear challenge token
       if (isPlatformBrowser(this.platformId)) {
         sessionStorage.removeItem('challengeToken');
         sessionStorage.removeItem('mockUsername');
       }
       
-      // Redirigir al dashboard tras verificación exitosa
+      // Redirect to dashboard after successful verification
       await this.router.navigateByUrl('/dashboard');
       
     } catch (err: any) {
-      this.error.set(err.message || 'Código OTP inválido');
+      this.error.set(err.message || 'Invalid OTP code');
     } finally {
       this.loading.set(false);
     }
@@ -134,15 +134,15 @@ export class VerifyOtpComponent {
     this.error.set(null);
     
     try {
-      console.log('📧 [MOCK] Código OTP reenviado');
+      console.log('📧 [MOCK] OTP code resent');
       
-      // Reiniciar timer
+      // Reset timer
       this.startResendTimer();
       
       // Limpiar formulario
       this.otpForm.reset();
       
-      // Focus en primer input
+      // Focus on first input
       if (isPlatformBrowser(this.platformId)) {
         setTimeout(() => {
           const firstInput = document.querySelector('#digit1') as HTMLInputElement;
@@ -151,7 +151,7 @@ export class VerifyOtpComponent {
       }
       
     } catch (err: any) {
-      this.error.set(err.message || 'Error al reenviar código');
+      this.error.set(err.message || 'Error resending code');
     } finally {
       this.loading.set(false);
     }

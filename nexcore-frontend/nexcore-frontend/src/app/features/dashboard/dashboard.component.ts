@@ -19,7 +19,7 @@ import { AuthService } from '../../shared/services/auth.service';
     <main class="content">
       <header class="page-header">
         <h1>Dashboard</h1>
-        <p class="subtitle">Bienvenido de vuelta, Administrador</p>
+        <p class="subtitle">Welcome back, Administrator</p>
       </header>
 
 
@@ -29,7 +29,7 @@ import { AuthService } from '../../shared/services/auth.service';
             <div class="icon-circle bg-blue">👥</div>
           </div>
           <div class="body">
-            <div class="label">TOTAL USUARIOS</div>
+            <div class="label">TOTAL USERS</div>
             <div class="value">1,234</div>
           </div>
           <div class="trend positive">+12.5%</div>
@@ -40,7 +40,7 @@ import { AuthService } from '../../shared/services/auth.service';
             <div class="icon-circle bg-pink">🏷️</div>
           </div>
           <div class="body">
-            <div class="label">TENANTS ACTIVOS</div>
+            <div class="label">ACTIVE TENANTS</div>
             <div class="value">42</div>
           </div>
           <div class="trend positive">+3</div>
@@ -51,7 +51,7 @@ import { AuthService } from '../../shared/services/auth.service';
             <div class="icon-circle bg-beige">⚡</div>
           </div>
           <div class="body">
-            <div class="label">SESIONES HOY</div>
+            <div class="label">SESSIONS TODAY</div>
             <div class="value">567</div>
           </div>
           <div class="trend negative">-2.3%</div>
@@ -62,7 +62,7 @@ import { AuthService } from '../../shared/services/auth.service';
             <div class="icon-circle bg-lightblue">✔️</div>
           </div>
           <div class="body">
-            <div class="label">TASA DE ÉXITO</div>
+            <div class="label">SUCCESS RATE</div>
             <div class="value">98.5%</div>
           </div>
           <div class="trend positive">+0.5%</div>
@@ -72,8 +72,8 @@ import { AuthService } from '../../shared/services/auth.service';
 
       <section class="main-grid">
         <div class="large-card chart-card">
-          <div class="card-header">Usuarios Activos
-            <div class="toggle-group"><button class="pill">Semanal</button><button class="pill active">Mensual</button></div>
+          <div class="card-header">Active Users
+            <div class="toggle-group"><button class="pill">Weekly</button><button class="pill active">Monthly</button></div>
           </div>
           <div class="chart-placeholder">
             <canvas #barCanvas></canvas>
@@ -81,7 +81,7 @@ import { AuthService } from '../../shared/services/auth.service';
         </div>
 
         <div class="small-card donut-card">
-          <div class="card-header">Distribución por Tenant</div>
+          <div class="card-header">Distribution by Tenant</div>
           <div class="donut-placeholder">
             <canvas #donutCanvas></canvas>
             <div class="donut-center">42<br><span class="small">Total</span></div>
@@ -89,7 +89,7 @@ import { AuthService } from '../../shared/services/auth.service';
           <ul class="legend">
             <li><span class="dot blue"></span> Enterprise <span class="percent">65%</span></li>
             <li><span class="dot pink"></span> SMB <span class="percent">25%</span></li>
-            <li><span class="dot gray"></span> Otros <span class="percent">10%</span></li>
+            <li><span class="dot gray"></span> Others <span class="percent">10%</span></li>
           </ul>
         </div>
       </section>
@@ -526,9 +526,9 @@ export class DashboardComponent {
         new Chart(ctx, {
           type: 'bar',
           data: {
-            labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+            labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
             datasets: [{
-              label: 'Usuarios',
+              label: 'Users',
               data: barValues,
               backgroundColor: bgColors,
               borderRadius: 10,
@@ -558,7 +558,7 @@ export class DashboardComponent {
         new Chart(ctxD, {
           type: 'doughnut',
           data: {
-            labels: ['Enterprise','SMB','Otros'],
+            labels: ['Enterprise','SMB','Others'],
             datasets: [{ data: [65,25,10], backgroundColor: [chartPrimary,chartPink,chartGray], cutout: '72%' }]
           },
           options: {

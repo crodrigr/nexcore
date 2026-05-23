@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="login-header">
       <h1 class="title">NexCore</h1>
-      <h2 class="subtitle-main">Iniciar Sesión</h2>
-      <p class="subtitle">Bienvenido de vuelta</p>
+      <h2 class="subtitle-main">Sign In</h2>
+      <p class="subtitle">Welcome back</p>
     </div>
     
     <!-- Theme Toggle -->
@@ -46,12 +46,12 @@
       
       <!-- Username Input -->
       <div class="form-field">
-        <label for="username" class="form-label">Usuario</label>
+        <label for="username" class="form-label">Username</label>
         <input
           type="text"
           id="username"
           formControlName="username"
-          placeholder="Ingresa tu usuario"
+          placeholder="Enter your username"
           class="form-input"
           [class.form-field-error]="getFieldError('username')"
           autocomplete="username"
@@ -63,13 +63,13 @@
       
       <!-- Password Input -->
       <div class="form-field">
-        <label for="password" class="form-label">Contraseña</label>
+        <label for="password" class="form-label">Password</label>
         <div class="input-with-icon">
           <input
             [type]="showPassword() ? 'text' : 'password'"
             id="password"
             formControlName="password"
-            placeholder="Ingresa tu contraseña"
+            placeholder="Enter your password"
             class="form-input"
             [class.form-field-error]="getFieldError('password')"
             autocomplete="current-password"
@@ -78,7 +78,7 @@
             type="button"
             class="icon-button"
             (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
           >
             @if (showPassword()) {
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -106,7 +106,7 @@
           formControlName="rememberMe"
           class="checkbox"
         />
-        <label for="rememberMe" class="checkbox-label">Recordarme</label>
+        <label for="rememberMe" class="checkbox-label">Remember me</label>
       </div>
       
       <!-- Submit Button -->
@@ -115,18 +115,18 @@
         class="btn-primary btn-block"
         [disabled]="loading()"
       >
-        @if (loading()) {
+          @if (loading()) {
           <span class="spinner"></span>
-          <span>Iniciando sesión...</span>
+          <span>Signing in...</span>
         } @else {
-          <span>Iniciar Sesión</span>
+          <span>Sign In</span>
         }
       </button>
       
       <!-- Forgot Password Link -->
       <div class="form-footer">
         <a routerLink="/auth/forgot-password" class="link">
-          ¿Olvidaste tu contraseña?
+          Forgot your password?
         </a>
       </div>
     </form>
