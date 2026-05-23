@@ -112,18 +112,16 @@
 .dot.gray { background: var(--color-border-medium) }
 .percent { color:var(--color-text-secondary) }
 
+/* Toggle pills for weekly/monthly */
+.toggle-group { display:inline-flex; gap:8px; align-items:center; background: var(--toggle-bg, rgba(15,23,42,0.04)); padding:4px; border-radius:999px }
+.pill { background: transparent; border: none; padding:6px 12px; border-radius:999px; cursor:pointer; font-weight:700; color:var(--color-text-primary); font-size:13px }
+.pill:hover { filter:brightness(0.98) }
+.pill.active { background: var(--color-interactive-primary); color: #fff; box-shadow: 0 6px 18px rgba(10,66,140,0.12) }
+
 .activity-card { margin-top:18px }
 .activity-header { display:flex; justify-content:space-between; align-items:center }
 .activity-table { width:100%; border-collapse:collapse; margin-top:12px }
-    .activity-table thead th { text-align:left; padding:12px 16px; background: var(--color-surface-elevated); color:var(--color-text-secondary); font-weight:700; font-size:13px; border-bottom: 1px solid rgba(15,23,42,0.06); }
-
-/* Dark theme override for Recent Activity header */
-body[data-theme='dark'] .activity-table thead th {
-  /* Darker header background for better contrast in dark mode */
-  background: var(--ColorOverride, var(--color-bg-secondary));
-  color: var(--color-text-primary);
-  border-bottom: 1px solid var(--color-border-heavy);
-}
+.activity-table thead th { text-align:left; padding:12px; background:transparent; color:var(--color-text-secondary); font-weight:700 }
 .activity-table tbody td { padding:14px; border-top:1px solid rgba(15,23,42,0.04) }
 .avatar-sm { width:44px; height:44px; border-radius:22px; background:var(--color-bg-secondary); display:inline-flex; align-items:center; justify-content:center; margin-right:12px; color:var(--color-interactive-primary); font-weight:700 }
 .user { display:flex; align-items:center }

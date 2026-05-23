@@ -1,0 +1,28 @@
+.theme-toggle {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-medium);
+  }
+  
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-primary);
+  stroke-width: 2;
+}
