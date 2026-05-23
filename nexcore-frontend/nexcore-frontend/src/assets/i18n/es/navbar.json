@@ -1,0 +1,13 @@
+{
+  "navbar": {
+    "profile": {
+      "profile": "Perfil",
+      "settings": "Configuración",
+      "help": "Ayuda",
+      "signOut": "Cerrar sesión"
+    },
+    "notifications": {
+      "you_have": "Tienes {{count}} nuevas notificaciones"
+    }
+  }
+}

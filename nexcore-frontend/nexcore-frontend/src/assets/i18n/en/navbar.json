@@ -1,0 +1,13 @@
+{
+  "navbar": {
+    "profile": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "help": "Help",
+      "signOut": "Sign out"
+    },
+    "notifications": {
+      "you_have": "You have {{count}} new notifications"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "dashboard": {
+    "welcome_back": "Welcome back, {{name}}",
+    "stats": {
+      "totalUsers": "TOTAL USERS",
+      "activeTenants": "ACTIVE TENANTS",
+      "sessionsToday": "SESSIONS TODAY",
+      "successRate": "SUCCESS RATE"
+    },
+    "charts": {
+      "activeUsers": "Active Users",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "distribution": "Distribution by Tenant",
+      "others": "Others"
+    }
+  }
+}

@@ -3,7 +3,7 @@
     <button class="icon-btn hamburger-btn" aria-label="Toggle sidebar" (click)="toggleSidebar()" [attr.aria-pressed]="isCollapsed" type="button">
       <svg viewBox="0 0 24 24" class="icon"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
     </button>
-    <a routerLink="/dashboard" class="brand">NexCore</a>
+    <a routerLink="/dashboard" class="brand">{{ 'shared.app.name' | transloco }}</a>
   </div>
 
   <div class="navbar-center">
@@ -24,12 +24,30 @@
       </svg>
       <span class="notif-badge" aria-hidden="true">3</span>
       <span class="notif-pulse" aria-hidden="true"></span>
-      <span class="visually-hidden">You have 3 new notifications</span>
+      <span class="visually-hidden">{{ 'navbar.notifications.you_have' | transloco: { count: 3 } }}</span>
     </button>
     <!-- notification dropdown is created dynamically and appended to document.body -->
     <app-notification *ngIf="showNotifications && fallbackInline" class="notification-dropdown" [anchor]="notificationAnchor" (click)="$event.stopPropagation()"></app-notification>
 
     <app-theme-toggle></app-theme-toggle>
+
+    <!-- Compact language button (always visible) -->
+    <button class="lang-compact" aria-label="Change language" (click)="toggleLangMenu(); $event.stopPropagation()">🌐</button>
+
+    <!-- Language selector (custom dropdown) -->
+    <div class="lang-dropdown" [class.open]="showLangMenu">
+      <button class="lang-trigger" aria-haspopup="menu" [attr.aria-expanded]="showLangMenu" (click)="toggleLangMenu(); $event.stopPropagation()">
+        <span class="lang-flag">{{ currentLang === 'en' ? '🇬🇧' : (currentLang === 'es' ? '🇪🇸' : '') }}</span>
+        <span class="lang-label">{{ currentLang === 'en' ? 'English' : (currentLang === 'es' ? 'Español' : currentLang) }}</span>
+        <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <ul class="lang-list" role="menu" *ngIf="showLangMenu">
+        <li class="lang-item" role="menuitem" *ngFor="let l of availableLangs" (click)="selectLang(l); $event.stopPropagation()">
+          <span class="lang-flag">{{ l === 'en' ? '🇬🇧' : (l === 'es' ? '🇪🇸' : '') }}</span>
+          <span class="lang-label">{{ l === 'en' ? 'English' : (l === 'es' ? 'Español' : l) }}</span>
+        </li>
+      </ul>
+    </div>
 
     <!-- plan-info removed per request -->
 
@@ -43,22 +61,22 @@
 
       <div class="profile-dropdown" *ngIf="showProfile" (click)="$event.stopPropagation()">
         <div class="profile-actions">
-          <a class="item" role="button">
+          <a class="item" role="button"> 
             <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            Profile
+            {{ 'navbar.profile.profile' | transloco }}
           </a>
           <a class="item" role="button">
             <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 2.41 16.88l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.7 0 1.34-.37 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 6.88 2.41l.06.06c.48.48 1.19.65 1.82.33.63-.32 1-1 1-1.51V2a2 2 0 1 1 4 0v.09c0 .61.37 1.19 1 1.51.63.32 1.34.15 1.82-.33l.06-.06A2 2 0 1 1 21.59 7.12l-.06.06c-.48.48-.65 1.19-.33 1.82.32.63 1 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.61 0-1.19.37-1.51 1z"></path></svg>
-            Settings
+            {{ 'navbar.profile.settings' | transloco }}
           </a>
           <a class="item" role="button">
             <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
-            Help
+            {{ 'navbar.profile.help' | transloco }}
           </a>
           <div class="divider"></div>
           <a class="item logout" role="button" (click)="signOut(); $event.stopPropagation()">
             <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path><path d="M8 5v14"></path></svg>
-            Sign out
+            {{ 'navbar.profile.signOut' | transloco }}
           </a>
         </div>
       </div>

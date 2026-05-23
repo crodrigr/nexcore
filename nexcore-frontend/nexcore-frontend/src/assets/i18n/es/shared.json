@@ -1,0 +1,13 @@
+{
+  "shared": {
+    "app": {
+      "name": "NexCore",
+      "welcome": "Bienvenido"
+    },
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "back": "Volver"
+    }
+  }
+}

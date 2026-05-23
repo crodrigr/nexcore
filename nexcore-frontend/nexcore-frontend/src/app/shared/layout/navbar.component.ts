@@ -1,14 +1,15 @@
-import { Component, OnInit, HostListener, ElementRef, ViewChild, createComponent, ApplicationRef, Injector, ComponentRef, EnvironmentInjector } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, ViewChild, createComponent, ApplicationRef, Injector, ComponentRef, EnvironmentInjector, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ThemeToggleComponent } from '../theme/theme-toggle.component';
 import { NotificationComponent } from '../components/notification/notification.component';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, ThemeToggleComponent, NotificationComponent],
+  imports: [CommonModule, RouterModule, ThemeToggleComponent, NotificationComponent, TranslocoModule],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
@@ -19,6 +20,12 @@ export class NavbarComponent implements OnInit {
   notificationAnchor: DOMRect | null = null;
   @ViewChild('notifBtn', { read: ElementRef, static: false }) notifBtn?: ElementRef<HTMLElement>;
   private notifRef: ComponentRef<NotificationComponent> | null = null;
+  // TranslocoService injected for language switching
+  private transloco = inject(TranslocoService);
+  availableLangs = ['en', 'es'];
+  currentLang = 'en';
+  showLangMenu = false;
+
   constructor(private hostRef: ElementRef, private injector: Injector, private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private router: Router) {}
 
   ngOnInit(): void {
@@ -31,6 +38,13 @@ export class NavbarComponent implements OnInit {
     } catch (e) {
       // ignore (e.g., SSR or blocked storage)
     }
+
+    // Initialize language from localStorage or transloco default
+    try {
+      const lang = localStorage.getItem('nexcore-lang') || this.transloco.getActiveLang() || 'en';
+      this.currentLang = lang;
+      this.transloco.setActiveLang(lang);
+    } catch (e) {}
   }
 
   toggleSidebar() {
@@ -89,6 +103,26 @@ export class NavbarComponent implements OnInit {
       // fallback to full reload if router navigation fails
       window.location.href = '/auth/login';
     }
+  }
+
+  changeLang(lang: string) {
+    try {
+      if (!lang) return;
+      this.currentLang = lang;
+      try { localStorage.setItem('nexcore-lang', lang); } catch (e) {}
+      this.transloco.setActiveLang(lang);
+    } catch (e) {
+      console.error('changeLang failed', e);
+    }
+  }
+
+  toggleLangMenu() {
+    this.showLangMenu = !this.showLangMenu;
+  }
+
+  selectLang(lang: string) {
+    this.changeLang(lang);
+    this.showLangMenu = false;
   }
 
   fallbackInline = false;

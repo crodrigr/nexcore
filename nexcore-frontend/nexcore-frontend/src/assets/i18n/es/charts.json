@@ -1,0 +1,8 @@
+{
+  "charts": {
+    "weekdays": ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],
+    "datasets": {
+      "users": "Usuarios"
+    }
+  }
+}
