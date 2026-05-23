@@ -38,7 +38,7 @@ Los menús se pueden ubicar en diferentes áreas de la interfaz:
 | Location | Descripción | Uso Típico |
 |----------|-------------|------------|
 | **navbar** | Barra de navegación principal | Menús principales de la aplicación |
-| **header-dropdown** | Menú desplegable del header | Opciones de perfil y administración |
+| **profile** | Menú desplegable del perfil | Opciones de perfil y administración |
 | **sidebar** | Barra lateral (si existe) | Navegación secundaria |
 | **footer** | Pie de página | Enlaces secundarios o legales |
 
@@ -79,21 +79,52 @@ Grupo que contiene submenús. No tiene ruta propia.
 
 ```json
 {
+  "id": "37bbc70f-6d2d-463a-8714-ded61c4d0596",
   "name": "ProfileMenu",
   "title": "Perfil",
+  "icon": "user-circle",
+  "icon_type": "tabler",
   "route": null,                 ← Sin ruta
-  "location": "header-dropdown",
+  "location": "profile",
   "item_type": "GROUP",          ← Agrupa otros menús
+  "access": "execute",
+  "order_index": 50,
   "children": [
     {
+      "id": "d0fca44e-9948-4d0c-895b-24d5050f967f",
       "name": "Profile",
       "title": "Mi Perfil",
-      "route": "/profile"
+      "icon": "user",
+      "icon_type": "tabler",
+      "route": "/profile",
+      "location": "profile",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 10
     },
     {
+      "id": "ef6859b4-4e05-4f57-8e0f-096004207940",
       "name": "Settings",
       "title": "Configuración",
-      "route": "/admin/settings"
+      "icon": "settings",
+      "icon_type": "tabler",
+      "route": "/admin/settings",
+      "location": "profile",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 20
+    },
+    {
+      "id": "49e50200-30b6-464f-8a8e-14579d8e77d6",
+      "name": "Logout",
+      "title": "Cerrar Sesión",
+      "icon": "logout",
+      "icon_type": "tabler",
+      "route": "/auth/login",
+      "location": "profile",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 30
     }
   ]
 }
@@ -121,14 +152,422 @@ this.profileService.setProfile(profileData);
 // 4. Los componentes de UI consumen los menús
 this.profileService.menus$.subscribe(menus => {
   this.navbarMenus = menus.filter(m => m.location === 'navbar');
-  this.headerMenus = menus.filter(m => m.location === 'header-dropdown');
+  this.profileMenus = menus.filter(m => m.location === 'profile');
 });
 ```
 
 **Componentes que consumen menús:**
 - `navbar.component.ts` - Muestra menús con `location: 'navbar'`
-- `header.component.ts` - Muestra menús con `location: 'header-dropdown'`
+- `header.component.ts` - Muestra menús con `location: 'profile'`
 - `sidebar.component.ts` - Muestra menús con `location: 'sidebar'`
+
+### 📄 Ejemplo Real: Respuesta del Backend (super.admin)
+
+Cuando el usuario `super.admin` hace login, el backend retorna el siguiente perfil completo:
+
+```json
+{
+  "user": {
+    "iduser": "00000000-0000-0000-0001-000000000001",
+    "username": "super.admin",
+    "name": "Super Administrador NexCore",
+    "email": "super.admin@nexcore.io",
+    "phone": null,
+    "photo": null,
+    "roles": ["SUPER_ADMIN", "VIEWER"]
+  },
+  "menus": [
+    {
+      "id": "4337a18f-c20d-422e-a828-db3fb3d45a7c",
+      "name": "Dashboard",
+      "title": "Panel Principal",
+      "icon": "layout-dashboard",
+      "icon_type": "tabler",
+      "route": "/graphics",
+      "location": "navbar",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 10,
+      "children": []
+    },
+    {
+      "id": "02b1f6cc-c4e3-49da-98ec-f7c2118ba9d0",
+      "name": "Alerts",
+      "title": "Alertas",
+      "icon": "bell",
+      "icon_type": "tabler",
+      "route": "/alerts",
+      "location": "navbar",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 20,
+      "children": []
+    },
+    {
+      "id": "4681f5bd-c718-48f1-9b42-b14a5e1f1ad0",
+      "name": "Incidents",
+      "title": "Incidentes",
+      "icon": "alert-circle",
+      "icon_type": "tabler",
+      "route": "/incidents",
+      "location": "navbar",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 30,
+      "children": []
+    },
+    {
+      "id": "1ea0d8eb-bbf9-4953-81fc-26e82d0c0521",
+      "name": "Traps",
+      "title": "Traps SNMP",
+      "icon": "radar",
+      "icon_type": "tabler",
+      "route": "/traps",
+      "location": "navbar",
+      "item_type": "ITEM",
+      "access": "execute",
+      "order_index": 40,
+      "children": []
+    },
+    {
+      "id": "37bbc70f-6d2d-463a-8714-ded61c4d0596",
+      "name": "ProfileMenu",
+      "title": "Perfil",
+      "icon": "user-circle",
+      "icon_type": "tabler",
+      "route": null,
+      "location": "profile",
+      "item_type": "GROUP",
+      "access": "execute",
+      "order_index": 50,
+      "children": [
+        {
+          "id": "d0fca44e-9948-4d0c-895b-24d5050f967f",
+          "name": "Profile",
+          "title": "Mi Perfil",
+          "icon": "user",
+          "icon_type": "tabler",
+          "route": "/profile",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 10,
+          "children": []
+        },
+        {
+          "id": "ef6859b4-4e05-4f57-8e0f-096004207940",
+          "name": "Settings",
+          "title": "Configuración",
+          "icon": "settings",
+          "icon_type": "tabler",
+          "route": "/admin/settings",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 20,
+          "children": []
+        },
+        {
+          "id": "49e50200-30b6-464f-8a8e-14579d8e77d6",
+          "name": "Logout",
+          "title": "Cerrar Sesión",
+          "icon": "logout",
+          "icon_type": "tabler",
+          "route": "/auth/login",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 30,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "aaeee5e3-71d9-49a9-a3c6-5383b2952420",
+      "name": "Administration",
+      "title": "Administración",
+      "icon": "shield",
+      "icon_type": "tabler",
+      "route": null,
+      "location": "profile",
+      "item_type": "GROUP",
+      "access": "hidden",
+      "order_index": 60,
+      "children": [
+        {
+          "id": "c644bf4b-412a-4051-95f2-a89d2ca4c637",
+          "name": "Users",
+          "title": "Usuarios",
+          "icon": "users",
+          "icon_type": "tabler",
+          "route": "/admin/users",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 10,
+          "children": []
+        },
+        {
+          "id": "f27b26a3-067c-4683-a0bf-de5ad843e9ca",
+          "name": "Roles",
+          "title": "Roles",
+          "icon": "lock",
+          "icon_type": "tabler",
+          "route": "/admin/roles",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 20,
+          "children": []
+        },
+        {
+          "id": "33483115-e90e-4fb3-abee-4632899e4fa8",
+          "name": "Menus",
+          "title": "Menús",
+          "icon": "layout-navbar",
+          "icon_type": "tabler",
+          "route": "/admin/menus",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 30,
+          "children": []
+        },
+        {
+          "id": "75f7f9fb-ceea-4cd6-9075-7fde5ba2deb9",
+          "name": "Audit",
+          "title": "Auditoría",
+          "icon": "history",
+          "icon_type": "tabler",
+          "route": "/admin/audit",
+          "location": "profile",
+          "item_type": "ITEM",
+          "access": "execute",
+          "order_index": 40,
+          "children": []
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "component": "dashboard",
+      "route": "/graphics",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "filterButton",
+          "access": "hidden"
+        },
+        {
+          "element_key": "refreshButton",
+          "access": "hidden"
+        },
+        {
+          "element_key": "cityFilterSelect#cityFilter",
+          "access": "hidden"
+        },
+        {
+          "element_key": "hostFilterSelect#hostFilter",
+          "access": "hidden"
+        },
+        {
+          "element_key": "timeFilterSelect#timeFilter",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "alerts",
+      "route": "/alerts",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "searchInput",
+          "access": "hidden"
+        },
+        {
+          "element_key": "columnsMenuBtn",
+          "access": "hidden"
+        },
+        {
+          "element_key": "paginator",
+          "access": "hidden"
+        },
+        {
+          "element_key": "resetColumnsBtn",
+          "access": "hidden"
+        },
+        {
+          "element_key": "toggleColumnItem",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "incidents",
+      "route": "/incidents",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "app-alert-groups[groupSelected]",
+          "access": "hidden"
+        },
+        {
+          "element_key": "app-incident-detail[incidentUpdated]",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "traps",
+      "route": "/traps",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "searchInput",
+          "access": "hidden"
+        },
+        {
+          "element_key": "columnsMenuBtn",
+          "access": "hidden"
+        },
+        {
+          "element_key": "paginator",
+          "access": "hidden"
+        },
+        {
+          "element_key": "matSortHeader",
+          "access": "hidden"
+        },
+        {
+          "element_key": "resetColumnsBtn",
+          "access": "hidden"
+        },
+        {
+          "element_key": "rowClickToggle",
+          "access": "hidden"
+        },
+        {
+          "element_key": "toggleColumnItem",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "auth",
+      "route": "/auth",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "loginButton",
+          "access": "hidden"
+        },
+        {
+          "element_key": "togglePasswordButton",
+          "access": "hidden"
+        },
+        {
+          "element_key": "goBackButton",
+          "access": "hidden"
+        },
+        {
+          "element_key": "resendCodeButton",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "user-management",
+      "route": "/admin/users",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "btn-create-user",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-edit-user",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-delete-user",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-invite-user",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-suspend-user",
+          "access": "hidden"
+        },
+        {
+          "element_key": "searchInput",
+          "access": "hidden"
+        },
+        {
+          "element_key": "paginator",
+          "access": "hidden"
+        },
+        {
+          "element_key": "tab-roles",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "role-management",
+      "route": "/admin/roles",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "btn-create-role",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-edit-role",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-delete-role",
+          "access": "hidden"
+        },
+        {
+          "element_key": "btn-assign-role",
+          "access": "hidden"
+        }
+      ]
+    },
+    {
+      "component": "menu-management",
+      "route": "/admin/menus",
+      "access": "execute",
+      "elements": []
+    },
+    {
+      "component": "audit-viewer",
+      "route": "/admin/audit",
+      "access": "execute",
+      "elements": []
+    },
+    {
+      "component": "tenant-settings",
+      "route": "/admin/settings",
+      "access": "execute",
+      "elements": []
+    }
+  ],
+  "token": null
+}
+```
+
+**Análisis de esta respuesta:**
+
+- **6 menús principales**: 4 en navbar (Dashboard, Alertas, Incidentes, Traps) + 2 grupos en profile (Perfil, Administración)
+- **Grupo "Perfil"**: `access: "execute"` → Se muestra con 3 opciones
+- **Grupo "Administración"**: `access: "hidden"` → NO se muestra en la UI
+- **10 componentes con permisos**: Cada uno con diferentes elementos ocultos o habilitados
 
 ### 🎯 Niveles de Acceso en Menús
 
@@ -553,21 +992,25 @@ export class DashboardComponent implements OnInit {
 
 Todos tienen `access: "execute"` y `location: "navbar"`.
 
-### Header Dropdown (location: header-dropdown)
+### Profile Dropdown (location: profile)
 
 ```
 ┌────────────────────────┐
-│  👤 Perfil             │  ← GROUP (sin ruta)
+│  👤 Perfil             │  ← GROUP (sin ruta, access: execute)
 │  ├─ Mi Perfil          │  ← ITEM (route: /profile)
 │  ├─ Configuración      │  ← ITEM (route: /admin/settings)
 │  └─ Cerrar Sesión      │  ← ITEM (route: /auth/login)
 │                        │
 │  🛡️ Administración     │  ← GROUP con access: "hidden"
 │  (No se muestra)       │     (solo visible si access: execute)
+│  ├─ Usuarios           │  ← ITEM (route: /admin/users)
+│  ├─ Roles              │  ← ITEM (route: /admin/roles)
+│  ├─ Menús              │  ← ITEM (route: /admin/menus)
+│  └─ Auditoría          │  ← ITEM (route: /admin/audit)
 └────────────────────────┘
 ```
 
-**Nota:** El grupo "Administración" tiene `access: "hidden"`, por lo que aunque esté en el perfil, no se muestra en la UI.
+**Nota:** El grupo "Administración" tiene `access: "hidden"`, por lo que aunque esté en el perfil, no se muestra en la UI para roles sin privilegios administrativos.
 
 ---
 
@@ -723,6 +1166,1025 @@ JSON.parse(localStorage.getItem('profile')).permissions
 
 // Filtrar menús por ubicación
 JSON.parse(localStorage.getItem('profile')).menus.filter(m => m.location === 'navbar')
+```
+
+---
+
+## 🎓 Guía Paso a Paso: Cómo Implementar Menús y Permisos
+
+Esta sección explica de forma clara y práctica cómo agregar menús y permisos a un nuevo componente en NexCore.
+
+---
+
+### 📝 Escenario: Crear un nuevo módulo "Reportes"
+
+Vamos a crear un módulo completo de reportes con su menú, permisos y elementos controlados.
+
+---
+
+### 🗂️ PASO 1: Crear el Componente en la Base de Datos
+
+#### 1.1. Crear el Componente
+
+```sql
+-- Tabla: nxc_config.components
+-- Registrar el componente principal
+INSERT INTO nxc_config.components (
+    id,
+    component_key,
+    component_name,
+    description,
+    is_active,
+    created_at,
+    created_by
+) VALUES (
+    gen_random_uuid(),
+    'reports',                    -- ← Identificador único del componente
+    'Reportes',                   -- ← Nombre descriptivo
+    'Módulo de generación y visualización de reportes',
+    true,
+    NOW(),
+    '00000000-0000-0000-0001-000000000001'  -- Super Admin
+);
+```
+
+#### 1.2. Crear los Elementos del Componente
+
+```sql
+-- Tabla: nxc_config.component_elements
+-- Definir los elementos que se pueden controlar dentro del componente
+INSERT INTO nxc_config.component_elements (
+    id,
+    component_id,
+    element_key,
+    element_name,
+    description,
+    is_active
+) VALUES 
+-- Botones
+(gen_random_uuid(), 
+ (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+ 'btn-create-report',          -- ← ID del botón de crear
+ 'Botón Crear Reporte',
+ 'Permite crear un nuevo reporte',
+ true),
+
+(gen_random_uuid(),
+ (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+ 'btn-export-pdf',             -- ← ID del botón de exportar PDF
+ 'Botón Exportar PDF',
+ 'Permite exportar reporte a PDF',
+ true),
+
+(gen_random_uuid(),
+ (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+ 'btn-export-excel',           -- ← ID del botón de exportar Excel
+ 'Botón Exportar Excel',
+ 'Permite exportar reporte a Excel',
+ true),
+
+-- Inputs y filtros
+(gen_random_uuid(),
+ (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+ 'searchInput',                -- ← ID del input de búsqueda
+ 'Input de Búsqueda',
+ 'Permite buscar reportes',
+ true),
+
+(gen_random_uuid(),
+ (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+ 'dateRangeFilter',            -- ← ID del filtro de fechas
+ 'Filtro de Rango de Fechas',
+ 'Permite filtrar por rango de fechas',
+ true),
+
+-- Secciones
+(gen_random_uuid(),
+ (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+ 'section-charts',             -- ← ID de la sección de gráficos
+ 'Sección de Gráficos',
+ 'Muestra gráficos estadísticos',
+ true);
+```
+
+---
+
+### 🎯 PASO 2: Crear el Menú
+
+#### 2.1. Crear el Item de Menú
+
+```sql
+-- Tabla: nxc_menu.menu_items
+-- Crear el menú que aparecerá en la navegación
+INSERT INTO nxc_menu.menu_items (
+    id,
+    tenant_id,
+    parent_id,                    -- NULL = menú de nivel superior
+    name,
+    title,
+    icon,
+    icon_type,
+    route,
+    location,
+    item_type,
+    order_index,
+    is_active
+) VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',  -- Tenant sistema
+    NULL,                         -- Sin padre (nivel superior)
+    'Reports',                    -- ← Identificador técnico
+    'Reportes',                   -- ← Texto visible en la UI
+    'file-analytics',             -- ← Icono de Tabler Icons
+    'tabler',
+    '/reports',                   -- ← Ruta de navegación
+    'navbar',                     -- ← Ubicación: aparece en navbar principal
+    'ITEM',                       -- ← Tipo: enlace directo
+    50,                           -- ← Orden de visualización
+    true
+);
+```
+
+#### 2.2. Alternativa: Crear Menú dentro de un Grupo
+
+Si quieres que aparezca en el dropdown de perfil:
+
+```sql
+INSERT INTO nxc_menu.menu_items (
+    id,
+    tenant_id,
+    parent_id,                    -- ← Asignar al grupo "ProfileMenu"
+    name,
+    title,
+    icon,
+    icon_type,
+    route,
+    location,
+    item_type,
+    order_index,
+    is_active
+) VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    (SELECT id FROM nxc_menu.menu_items WHERE name = 'ProfileMenu'),  -- ← Hijo de ProfileMenu
+    'Reports',
+    'Mis Reportes',
+    'file-analytics',
+    'tabler',
+    '/reports',
+    'profile',                    -- ← Ubicación: dropdown de perfil
+    'ITEM',
+    35,
+    true
+);
+```
+
+---
+
+### 🔐 PASO 3: Asignar Permisos al Rol
+
+#### 3.1. Dar acceso al componente completo
+
+```sql
+-- Tabla: nxc_menu.role_component_permissions
+-- Dar permiso de acceso al componente para un rol específico
+INSERT INTO nxc_menu.role_component_permissions (
+    id,
+    tenant_id,
+    role_id,
+    component_id,
+    access_level,
+    created_at,
+    created_by
+) VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),  -- ← Rol
+    (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),  -- ← Componente
+    'EXECUTE',                    -- ← Nivel de acceso: execute, view, hidden
+    NOW(),
+    '00000000-0000-0000-0001-000000000001'
+);
+```
+
+**Niveles de acceso:**
+- `EXECUTE`: Puede acceder y ejecutar todas las acciones
+- `VIEW`: Solo puede ver, sin ejecutar acciones
+- `HIDDEN`: No puede acceder al componente
+
+#### 3.2. Dar permisos a elementos específicos
+
+```sql
+-- Tabla: nxc_menu.role_element_permissions
+-- Controlar qué elementos (botones, inputs) puede usar el rol
+INSERT INTO nxc_menu.role_element_permissions (
+    id,
+    tenant_id,
+    role_id,
+    element_id,
+    access_level,
+    created_at,
+    created_by
+) VALUES 
+-- Puede crear reportes
+(gen_random_uuid(),
+ '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-create-report'),
+ 'EXECUTE',                       -- ← Botón visible y clickeable
+ NOW(),
+ '00000000-0000-0000-0001-000000000001'),
+
+-- Puede exportar a PDF
+(gen_random_uuid(),
+ '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-export-pdf'),
+ 'EXECUTE',
+ NOW(),
+ '00000000-0000-0000-0001-000000000001'),
+
+-- NO puede exportar a Excel
+(gen_random_uuid(),
+ '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-export-excel'),
+ 'HIDDEN',                        -- ← Botón oculto
+ NOW(),
+ '00000000-0000-0000-0001-000000000001'),
+
+-- Puede buscar
+(gen_random_uuid(),
+ '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'searchInput'),
+ 'EXECUTE',
+ NOW(),
+ '00000000-0000-0000-0001-000000000001'),
+
+-- Puede filtrar por fechas
+(gen_random_uuid(),
+ '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'dateRangeFilter'),
+ 'EXECUTE',
+ NOW(),
+ '00000000-0000-0000-0001-000000000001'),
+
+-- Puede ver gráficos
+(gen_random_uuid(),
+ '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'section-charts'),
+ 'VIEW',                          -- ← Solo ver, no interactuar
+ NOW(),
+ '00000000-0000-0000-0001-000000000001');
+```
+
+#### 3.3. Asignar el menú al rol
+
+```sql
+-- Tabla: nxc_menu.role_menu_items
+-- Asignar el menú al rol para que aparezca en la UI
+INSERT INTO nxc_menu.role_menu_items (
+    id,
+    tenant_id,
+    role_id,
+    menu_item_id,
+    access_level,
+    created_at,
+    created_by
+) VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+    (SELECT id FROM nxc_menu.menu_items WHERE name = 'Reports'),
+    'EXECUTE',                    -- ← Menú visible y clickeable
+    NOW(),
+    '00000000-0000-0000-0001-000000000001'
+);
+```
+
+---
+
+### 🎨 PASO 4: Implementar en el Frontend (Angular)
+
+#### 4.1. Crear el Componente
+
+```bash
+ng generate component features/reports
+```
+
+#### 4.2. Configurar la Ruta con Protección
+
+```typescript
+// app.routes.ts
+import { ReportsComponent } from './features/reports/reports.component';
+import { permissionGuard } from './core/guards/permission.guard';
+
+export const routes: Routes = [
+  // ... otras rutas
+  {
+    path: 'reports',
+    component: ReportsComponent,
+    canActivate: [permissionGuard],      // ← Guard de permisos
+    data: { component: 'reports' }       // ← Nombre del componente a validar
+  }
+];
+```
+
+#### 4.3. Implementar el Componente TypeScript
+
+```typescript
+// reports.component.ts
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Observable, firstValueFrom } from 'rxjs';
+import { PermissionService } from '@core/services/permission.service';
+
+@Component({
+  selector: 'app-reports',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './reports.component.html',
+  styleUrls: ['./reports.component.scss']
+})
+export class ReportsComponent implements OnInit {
+  
+  // Observables para controlar permisos de elementos
+  canCreate$: Observable<boolean>;
+  canExportPDF$: Observable<boolean>;
+  canExportExcel$: Observable<boolean>;
+  canSearch$: Observable<boolean>;
+  canFilterDate$: Observable<boolean>;
+  canViewCharts$: Observable<boolean>;
+
+  // Propiedades del componente
+  searchTerm: string = '';
+  reports: any[] = [];
+  displayedColumns: string[] = ['name', 'date'];
+
+  constructor(private permissionService: PermissionService) {
+    // Inicializar permisos de elementos
+    this.canCreate$ = this.permissionService.canExecute$('reports', 'btn-create-report');
+    this.canExportPDF$ = this.permissionService.canExecute$('reports', 'btn-export-pdf');
+    this.canExportExcel$ = this.permissionService.canExecute$('reports', 'btn-export-excel');
+    this.canSearch$ = this.permissionService.canExecute$('reports', 'searchInput');
+    this.canFilterDate$ = this.permissionService.canExecute$('reports', 'dateRangeFilter');
+    this.canViewCharts$ = this.permissionService.canView$('reports', 'section-charts');
+  }
+
+  ngOnInit(): void {
+    this.loadReports();
+  }
+
+  async createReport() {
+    // Validar permiso antes de ejecutar acción crítica
+    const canCreate = await firstValueFrom(this.canCreate$);
+    if (!canCreate) {
+      this.showError('No tienes permiso para crear reportes');
+      return;
+    }
+    
+    // Lógica para crear reporte
+    console.log('Creando reporte...');
+  }
+
+  async exportPDF() {
+    const canExport = await firstValueFrom(this.canExportPDF$);
+    if (!canExport) {
+      this.showError('No tienes permiso para exportar a PDF');
+      return;
+    }
+    
+    console.log('Exportando a PDF...');
+  }
+
+  async exportExcel() {
+    const canExport = await firstValueFrom(this.canExportExcel$);
+    if (!canExport) {
+      this.showError('No tienes permiso para exportar a Excel');
+      return;
+    }
+    
+    console.log('Exportando a Excel...');
+  }
+
+  loadReports() {
+    // Lógica para cargar reportes
+  }
+
+  showError(message: string) {
+    // Mostrar mensaje de error
+  }
+}
+```
+
+#### 4.4. Implementar el Template HTML
+
+```html
+<!-- reports.component.html -->
+<div class="reports-container">
+  
+  <!-- Header con título y acciones -->
+  <div class="reports-header">
+    <h1>Reportes</h1>
+    
+    <div class="actions">
+      <!-- Botón Crear (solo si tiene permiso) -->
+      <button *ngIf="canCreate$ | async"
+              class="btn btn-primary"
+              (click)="createReport()">
+        <mat-icon>add</mat-icon>
+        Crear Reporte
+      </button>
+
+      <!-- Botón Exportar PDF (solo si tiene permiso) -->
+      <button *ngIf="canExportPDF$ | async"
+              class="btn btn-secondary"
+              (click)="exportPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Exportar PDF
+      </button>
+
+      <!-- Botón Exportar Excel (solo si tiene permiso) -->
+      <button *ngIf="canExportExcel$ | async"
+              class="btn btn-secondary"
+              (click)="exportExcel()">
+        <mat-icon>table_chart</mat-icon>
+        Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros (solo si tiene permiso) -->
+  <div class="reports-filters" *ngIf="(canSearch$ | async) || (canFilterDate$ | async)">
+    
+    <!-- Input de búsqueda -->
+    <input *ngIf="canSearch$ | async"
+           type="text"
+           placeholder="Buscar reportes..."
+           class="search-input"
+           [(ngModel)]="searchTerm">
+
+    <!-- Filtro de rango de fechas -->
+    <mat-date-range-input *ngIf="canFilterDate$ | async">
+      <input matStartDate placeholder="Fecha inicio">
+      <input matEndDate placeholder="Fecha fin">
+    </mat-date-range-input>
+  </div>
+
+  <!-- Lista de reportes -->
+  <div class="reports-list">
+    <table mat-table [dataSource]="reports">
+      <!-- Columnas de la tabla -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let report">{{ report.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let report">{{ report.date | date }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Sección de gráficos (solo si tiene permiso VIEW o EXECUTE) -->
+  <div class="reports-charts" *ngIf="canViewCharts$ | async">
+    <h2>Estadísticas</h2>
+    <app-chart-stats></app-chart-stats>
+  </div>
+
+</div>
+```
+
+---
+
+### 🔄 PASO 5: Verificar el Flujo Completo
+
+#### 5.1. Backend: Verificar que se retorna en el perfil
+
+Después de hacer login, el endpoint `/api/profile` debe retornar:
+
+```json
+{
+  "user": { ... },
+  "menus": [
+    {
+      "id": "...",
+      "name": "Reports",
+      "title": "Reportes",
+      "route": "/reports",
+      "location": "navbar",
+      "item_type": "ITEM",
+      "access": "execute"
+    }
+  ],
+  "permissions": [
+    {
+      "component": "reports",
+      "route": "/reports",
+      "access": "execute",
+      "elements": [
+        {
+          "element_key": "btn-create-report",
+          "access": "execute"
+        },
+        {
+          "element_key": "btn-export-pdf",
+          "access": "execute"
+        },
+        {
+          "element_key": "btn-export-excel",
+          "access": "hidden"
+        },
+        {
+          "element_key": "searchInput",
+          "access": "execute"
+        },
+        {
+          "element_key": "dateRangeFilter",
+          "access": "execute"
+        },
+        {
+          "element_key": "section-charts",
+          "access": "view"
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### 5.2. Frontend: Verificar en navegador
+
+1. **Hacer login** como usuario con rol TENANT_ADMIN
+2. **Verificar en navbar**: Debe aparecer el menú "Reportes"
+3. **Hacer clic** en "Reportes"
+4. **Verificar elementos visibles:**
+   - ✅ Botón "Crear Reporte" → visible
+   - ✅ Botón "Exportar PDF" → visible
+   - ❌ Botón "Exportar Excel" → oculto (access: hidden)
+   - ✅ Input de búsqueda → visible
+   - ✅ Filtro de fechas → visible
+   - ✅ Sección de gráficos → visible (pero sin interacción, solo VIEW)
+
+#### 5.3. Consola del navegador: Verificar localStorage
+
+```javascript
+// Ver perfil completo
+JSON.parse(localStorage.getItem('profile'))
+
+// Ver el menú de reportes
+JSON.parse(localStorage.getItem('profile')).menus.find(m => m.name === 'Reports')
+
+// Ver permisos de reportes
+JSON.parse(localStorage.getItem('profile')).permissions.find(p => p.component === 'reports')
+```
+
+---
+
+### ✅ Checklist Completo
+
+#### Base de Datos
+- [ ] ✅ Componente creado en `nxc_config.components`
+- [ ] ✅ Elementos creados en `nxc_config.component_elements`
+- [ ] ✅ Menú creado en `nxc_menu.menu_items`
+- [ ] ✅ Permiso de componente asignado en `nxc_menu.role_component_permissions`
+- [ ] ✅ Permisos de elementos asignados en `nxc_menu.role_element_permissions`
+- [ ] ✅ Menú asignado al rol en `nxc_menu.role_menu_items`
+
+#### Backend
+- [ ] ✅ Endpoint `/api/profile` retorna el menú
+- [ ] ✅ Endpoint `/api/profile` retorna los permisos
+
+#### Frontend
+- [ ] ✅ Componente Angular creado
+- [ ] ✅ Ruta configurada con `permissionGuard`
+- [ ] ✅ Permisos de elementos inicializados en constructor
+- [ ] ✅ Template usa `*ngIf` con Observables
+- [ ] ✅ Validación de permisos en métodos críticos
+
+#### Verificación
+- [ ] ✅ Menú aparece en navbar/profile
+- [ ] ✅ Clic en menú navega a la ruta correcta
+- [ ] ✅ Elementos con `access: execute` son visibles y funcionales
+- [ ] ✅ Elementos con `access: hidden` están ocultos
+- [ ] ✅ Elementos con `access: view` son visibles pero deshabilitados
+
+---
+
+### 🎯 Resultado Final
+
+**Para el rol TENANT_ADMIN:**
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Navbar                                             │
+│  Dashboard │ Alertas │ Incidentes │ Traps │ Reportes │
+└─────────────────────────────────────────────────────┘
+
+Página de Reportes:
+┌─────────────────────────────────────────────────────┐
+│  📊 Reportes                                        │
+│  [+ Crear Reporte] [📄 Exportar PDF]                │  ← Exportar Excel oculto
+├─────────────────────────────────────────────────────┤
+│  🔍 [Buscar...]  📅 [Fecha inicio - Fecha fin]      │
+├─────────────────────────────────────────────────────┤
+│  Tabla de reportes...                               │
+├─────────────────────────────────────────────────────┤
+│  📈 Estadísticas (solo visualización)               │  ← access: VIEW
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### 📊 Diagrama de Flujo Completo
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        BASE DE DATOS                              │
+├──────────────────────────────────────────────────────────────────┤
+│  1. nxc_config.components                                        │
+│     └─ 'reports' component                                       │
+│                                                                  │
+│  2. nxc_config.component_elements                                │
+│     ├─ 'btn-create-report'                                       │
+│     ├─ 'btn-export-pdf'                                          │
+│     ├─ 'btn-export-excel'                                        │
+│     ├─ 'searchInput'                                             │
+│     ├─ 'dateRangeFilter'                                         │
+│     └─ 'section-charts'                                          │
+│                                                                  │
+│  3. nxc_menu.menu_items                                          │
+│     └─ 'Reports' menu (navbar)                                   │
+│                                                                  │
+│  4. nxc_menu.role_menu_items                                     │
+│     └─ TENANT_ADMIN → 'Reports' menu [EXECUTE]                  │
+│                                                                  │
+│  5. nxc_menu.role_component_permissions                          │
+│     └─ TENANT_ADMIN → 'reports' component [EXECUTE]             │
+│                                                                  │
+│  6. nxc_menu.role_element_permissions                            │
+│     ├─ TENANT_ADMIN → 'btn-create-report' [EXECUTE]             │
+│     ├─ TENANT_ADMIN → 'btn-export-pdf' [EXECUTE]                │
+│     ├─ TENANT_ADMIN → 'btn-export-excel' [HIDDEN]               │
+│     ├─ TENANT_ADMIN → 'searchInput' [EXECUTE]                   │
+│     ├─ TENANT_ADMIN → 'dateRangeFilter' [EXECUTE]               │
+│     └─ TENANT_ADMIN → 'section-charts' [VIEW]                   │
+└──────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────┐
+│                         BACKEND API                               │
+├──────────────────────────────────────────────────────────────────┤
+│  GET /api/profile                                                │
+│  └─ Consulta vistas:                                             │
+│      ├─ v_user_menu_access (menús)                               │
+│      └─ v_user_permissions (permisos)                            │
+│                                                                  │
+│  Respuesta JSON:                                                 │
+│  {                                                               │
+│    "user": { ... },                                              │
+│    "menus": [                                                    │
+│      {                                                           │
+│        "name": "Reports",                                        │
+│        "route": "/reports",                                      │
+│        "location": "navbar",                                     │
+│        "access": "execute"                                       │
+│      }                                                           │
+│    ],                                                            │
+│    "permissions": [                                              │
+│      {                                                           │
+│        "component": "reports",                                   │
+│        "access": "execute",                                      │
+│        "elements": [                                             │
+│          { "element_key": "btn-create-report", "access": "execute" },│
+│          { "element_key": "btn-export-excel", "access": "hidden" }  │
+│        ]                                                         │
+│      }                                                           │
+│    ]                                                             │
+│  }                                                               │
+└──────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────┐
+│                      FRONTEND (ANGULAR)                           │
+├──────────────────────────────────────────────────────────────────┤
+│  1. AuthService.login()                                          │
+│     └─ Recibe perfil completo del backend                        │
+│                                                                  │
+│  2. ProfileService.setProfile(data)                              │
+│     ├─ Guarda menus$ BehaviorSubject                             │
+│     └─ Guarda permissions$ BehaviorSubject                       │
+│                                                                  │
+│  3. NavbarComponent                                              │
+│     └─ Filtra menus con location: 'navbar'                       │
+│        → Muestra "Reportes" en navbar                            │
+│                                                                  │
+│  4. Usuario hace clic en "Reportes"                              │
+│     └─ Router navega a /reports                                  │
+│                                                                  │
+│  5. permissionGuard                                              │
+│     └─ Valida si user tiene permiso del component 'reports'     │
+│        ✅ access: 'execute' → Permite acceso                     │
+│                                                                  │
+│  6. ReportsComponent carga                                       │
+│     └─ Constructor inicializa Observables:                       │
+│        ├─ canCreate$ = canExecute$('reports', 'btn-create')     │
+│        ├─ canExportPDF$ = canExecute$('reports', 'btn-export-pdf')│
+│        └─ canExportExcel$ = canExecute$('reports', 'btn-export-excel')│
+│                                                                  │
+│  7. Template renderiza                                           │
+│     ├─ *ngIf="canCreate$ | async" → ✅ Muestra botón            │
+│     ├─ *ngIf="canExportPDF$ | async" → ✅ Muestra botón         │
+│     └─ *ngIf="canExportExcel$ | async" → ❌ Oculta botón        │
+│                                                                  │
+│  8. Usuario hace clic en "Crear Reporte"                         │
+│     └─ Método createReport() valida permiso nuevamente           │
+│        ✅ Permiso OK → Ejecuta lógica                            │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 💡 Puntos Clave
+
+1. **Base de Datos es la fuente de verdad**
+   - Todo se define primero en PostgreSQL
+   - Componentes, elementos, menús, roles, permisos
+
+2. **Backend unifica los datos**
+   - Endpoint `/api/profile` retorna todo junto
+   - Usa vistas SQL para optimizar consultas
+
+3. **Frontend es reactivo**
+   - Usa Observables para permisos
+   - Componentes se suscriben y reaccionan automáticamente
+   - Template usa `*ngIf` con `async pipe`
+
+4. **Validación en múltiples capas**
+   - Guard: Valida acceso a la ruta
+   - Componente: Valida acceso a elementos
+   - Métodos: Valida antes de ejecutar acciones críticas
+
+5. **Sin hard-coding**
+   - Ningún permiso está hardcodeado en el frontend
+   - Todo viene del backend dinámicamente
+   - Cambios en BD se reflejan automáticamente
+
+---
+
+### 🎯 Casos de Uso Prácticos
+
+#### Caso 1: Dar acceso a un nuevo rol
+
+**Situación:** El rol "EDITOR" necesita acceso al módulo de reportes pero sin poder crear ni exportar.
+
+```sql
+-- 1. Asignar el menú (para que aparezca en navbar)
+INSERT INTO nxc_menu.role_menu_items (id, tenant_id, role_id, menu_item_id, access_level)
+VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'EDITOR'),
+    (SELECT id FROM nxc_menu.menu_items WHERE name = 'Reports'),
+    'EXECUTE'  -- Menú visible
+);
+
+-- 2. Dar acceso VIEW al componente (puede ver pero no modificar)
+INSERT INTO nxc_menu.role_component_permissions (id, tenant_id, role_id, component_id, access_level)
+VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'EDITOR'),
+    (SELECT id FROM nxc_config.components WHERE component_key = 'reports'),
+    'VIEW'  -- Solo lectura
+);
+
+-- 3. Ocultar botones de acción
+INSERT INTO nxc_menu.role_element_permissions (id, tenant_id, role_id, element_id, access_level)
+VALUES 
+(gen_random_uuid(), '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'EDITOR'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-create-report'),
+ 'HIDDEN'),  -- No puede crear
+(gen_random_uuid(), '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'EDITOR'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-export-pdf'),
+ 'HIDDEN'),  -- No puede exportar
+(gen_random_uuid(), '00000000-0000-0000-0000-000000000001',
+ (SELECT id FROM nxc_tenant.roles WHERE role_name = 'EDITOR'),
+ (SELECT id FROM nxc_config.component_elements WHERE element_key = 'searchInput'),
+ 'EXECUTE');  -- Sí puede buscar
+```
+
+**Resultado:** EDITOR ve el menú "Reportes", puede entrar y buscar, pero no ve botones de crear/exportar.
+
+---
+
+#### Caso 2: Quitar acceso temporal a un componente
+
+**Situación:** Necesitas deshabilitar temporalmente el acceso a "Reportes" para todos los VIEWERS.
+
+```sql
+-- Opción 1: Cambiar a HIDDEN (más rápido)
+UPDATE nxc_menu.role_component_permissions
+SET access_level = 'HIDDEN'
+WHERE role_id = (SELECT id FROM nxc_tenant.roles WHERE role_name = 'VIEWER')
+  AND component_id = (SELECT id FROM nxc_config.components WHERE component_key = 'reports');
+
+-- Opción 2: Desactivar el menú para ese rol
+UPDATE nxc_menu.role_menu_items
+SET access_level = 'HIDDEN'
+WHERE role_id = (SELECT id FROM nxc_tenant.roles WHERE role_name = 'VIEWER')
+  AND menu_item_id = (SELECT id FROM nxc_menu.menu_items WHERE name = 'Reports');
+```
+
+**Resultado:** VIEWER ya no ve el menú "Reportes" en navbar ni puede acceder a `/reports`.
+
+---
+
+#### Caso 3: Mover menú de navbar a profile dropdown
+
+**Situación:** El menú "Reportes" debe moverse del navbar principal al dropdown de perfil.
+
+```sql
+-- Actualizar la ubicación del menú
+UPDATE nxc_menu.menu_items
+SET location = 'profile',
+    parent_id = (SELECT id FROM nxc_menu.menu_items WHERE name = 'ProfileMenu')
+WHERE name = 'Reports';
+```
+
+**Resultado:** "Reportes" desaparece del navbar y aparece en el dropdown de perfil.
+
+---
+
+#### Caso 4: Crear un submenú
+
+**Situación:** Quieres crear un grupo "Gestión" en navbar con submenús "Reportes" y "Configuración".
+
+```sql
+-- 1. Crear el grupo padre
+INSERT INTO nxc_menu.menu_items (id, tenant_id, parent_id, name, title, icon, icon_type, route, location, item_type, order_index, is_active)
+VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    NULL,  -- Sin padre
+    'Management',
+    'Gestión',
+    'settings',
+    'tabler',
+    NULL,  -- Los grupos no tienen ruta
+    'navbar',
+    'GROUP',  -- Es un grupo
+    60,
+    true
+);
+
+-- 2. Actualizar "Reportes" para que sea hijo de "Gestión"
+UPDATE nxc_menu.menu_items
+SET parent_id = (SELECT id FROM nxc_menu.menu_items WHERE name = 'Management'),
+    location = 'navbar'  -- Heredará del padre
+WHERE name = 'Reports';
+
+-- 3. Asignar el grupo al rol
+INSERT INTO nxc_menu.role_menu_items (id, tenant_id, role_id, menu_item_id, access_level)
+VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+    (SELECT id FROM nxc_menu.menu_items WHERE name = 'Management'),
+    'EXECUTE'
+);
+```
+
+**Resultado:** En navbar aparece "Gestión ▼" con un dropdown que contiene "Reportes".
+
+---
+
+#### Caso 5: Condicionar elemento según tenant
+
+**Situación:** Solo el tenant con id específico debe ver el botón "Exportar Excel".
+
+```sql
+-- Opción 1: Crear permiso específico para un tenant
+INSERT INTO nxc_menu.role_element_permissions (id, tenant_id, role_id, element_id, access_level)
+VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000002',  -- ← Tenant específico
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+    (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-export-excel'),
+    'EXECUTE'
+);
+
+-- Para otros tenants, usar HIDDEN
+INSERT INTO nxc_menu.role_element_permissions (id, tenant_id, role_id, element_id, access_level)
+VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',  -- ← Otro tenant
+    (SELECT id FROM nxc_tenant.roles WHERE role_name = 'TENANT_ADMIN'),
+    (SELECT id FROM nxc_config.component_elements WHERE element_key = 'btn-export-excel'),
+    'HIDDEN'
+);
+```
+
+**Resultado:** Solo usuarios del tenant específico ven el botón "Exportar Excel".
+
+---
+
+### ⚠️ Errores Comunes y Soluciones
+
+#### Error 1: "El menú no aparece en navbar"
+
+**Causas:**
+1. No se asignó el menú al rol en `role_menu_items`
+2. `access_level` está en `HIDDEN`
+3. El usuario no tiene ese rol asignado
+
+**Solución:**
+```sql
+-- Verificar asignación
+SELECT rmi.*, mi.name, mi.title, r.role_name
+FROM nxc_menu.role_menu_items rmi
+JOIN nxc_menu.menu_items mi ON mi.id = rmi.menu_item_id
+JOIN nxc_tenant.roles r ON r.id = rmi.role_id
+WHERE mi.name = 'Reports';
+
+-- Si no existe, crear
+INSERT INTO nxc_menu.role_menu_items (id, tenant_id, role_id, menu_item_id, access_level)
+VALUES (gen_random_uuid(), '...', '...', '...', 'EXECUTE');
+```
+
+---
+
+#### Error 2: "El componente no carga (guard bloquea)"
+
+**Causas:**
+1. No existe permiso del componente para ese rol
+2. `access_level` está en `HIDDEN`
+3. Nombre del componente no coincide con `data.component` en rutas
+
+**Solución:**
+```sql
+-- Verificar permiso del componente
+SELECT rcp.*, c.component_key, r.role_name, rcp.access_level
+FROM nxc_menu.role_component_permissions rcp
+JOIN nxc_config.components c ON c.id = rcp.component_id
+JOIN nxc_tenant.roles r ON r.id = rcp.role_id
+WHERE c.component_key = 'reports';
+
+-- Si no existe, crear con EXECUTE o VIEW
+INSERT INTO nxc_menu.role_component_permissions (id, tenant_id, role_id, component_id, access_level)
+VALUES (gen_random_uuid(), '...', '...', '...', 'EXECUTE');
+```
+
+---
+
+#### Error 3: "Todos los botones aparecen aunque deberían estar ocultos"
+
+**Causas:**
+1. No se crearon permisos de elementos
+2. El componente no está usando `*ngIf` con permisos
+3. Falta importar `PermissionService`
+
+**Solución en Frontend:**
+```typescript
+// ❌ MAL: Sin validación
+<button (click)="export()">Exportar</button>
+
+// ✅ BIEN: Con validación
+<button *ngIf="canExport$ | async" (click)="export()">Exportar</button>
+
+// En el componente
+canExport$: Observable<boolean>;
+
+constructor(private permissionService: PermissionService) {
+  this.canExport$ = this.permissionService.canExecute$('reports', 'btn-export-excel');
+}
+```
+
+---
+
+#### Error 4: "El perfil no se actualiza después de cambiar permisos en BD"
+
+**Causa:** El perfil se carga al hacer login y se guarda en localStorage.
+
+**Solución:**
+```typescript
+// Opción 1: Hacer logout y login nuevamente
+this.authService.logout();
+
+// Opción 2: Forzar recarga del perfil
+this.profileService.loadProfile().subscribe();
+
+// Opción 3: Limpiar localStorage y refrescar
+localStorage.clear();
+window.location.reload();
 ```
 
 ---

@@ -541,7 +541,7 @@ BEGIN
 
     RAISE NOTICE '=== BLOQUE 4: Árbol de menú ===';
 
-    -- Navbar principal (location implícita: navbar)
+    -- Navbar principal (location: navbar)
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
         name, title, route, icon, icon_type, location,
@@ -550,7 +550,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_dashboard, NULL,
         'Dashboard', 'Panel Principal', '/graphics',
-        'layout-dashboard', 'tabler', 'navbar'::nxc_menu.menu_location,
+        'layout-dashboard', 'tabler', 'navbar',
         'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -567,7 +567,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_alerts, NULL,
         'Alerts', 'Alertas', '/alerts',
-        'bell', 'tabler', 'navbar'::nxc_menu.menu_location,
+        'bell', 'tabler', 'navbar',
         'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -584,7 +584,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_incidents, NULL,
         'Incidents', 'Incidentes', '/incidents',
-        'alert-circle', 'tabler', 'navbar'::nxc_menu.menu_location,
+        'alert-circle', 'tabler', 'navbar',
         'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -601,7 +601,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_traps, NULL,
         'Traps', 'Traps SNMP', '/traps',
-        'radar', 'tabler', 'navbar'::nxc_menu.menu_location,
+        'radar', 'tabler', 'navbar',
         'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -610,7 +610,7 @@ BEGIN
         SELECT id INTO v_menu_traps FROM nxc_menu.menu_items WHERE tenant_id = v_tid_system AND name = 'Traps' AND parent_id IS NULL;
     END IF;
 
-    -- Grupo dropdown de perfil (header-dropdown) — sin ruta propia
+    -- Grupo dropdown de perfil (profile) — sin ruta propia
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
         name, title, route, icon, icon_type, location,
@@ -619,7 +619,7 @@ BEGIN
     ) VALUES (
         v_tid_system, NULL, NULL,
         'ProfileMenu', 'Perfil', NULL,
-        'user-circle', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'user-circle', 'tabler', 'profile',
         'GROUP', 50, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -637,7 +637,7 @@ BEGIN
     ) VALUES (
         v_tid_system, NULL, v_menu_profile_group,
         'Profile', 'Mi Perfil', '/profile',
-        'user', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'user', 'tabler', 'profile',
         'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -651,7 +651,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_settings, v_menu_profile_group,
         'Settings', 'Configuración', '/admin/settings',
-        'settings', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'settings', 'tabler', 'profile',
         'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -665,7 +665,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_auth, v_menu_profile_group,
         'Logout', 'Cerrar Sesión', '/auth/login',
-        'logout', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'logout', 'tabler', 'profile',
         'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -680,7 +680,7 @@ BEGIN
     ) VALUES (
         v_tid_system, NULL, NULL,
         'Administration', 'Administración', NULL,
-        'shield', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'shield', 'tabler', 'profile',
         'GROUP', 60, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -697,7 +697,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_users, v_menu_admin_group,
         'Users', 'Usuarios', '/admin/users',
-        'users', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'users', 'tabler', 'profile',
         'ITEM', 10, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -711,7 +711,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_roles, v_menu_admin_group,
         'Roles', 'Roles', '/admin/roles',
-        'lock', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'lock', 'tabler', 'profile',
         'ITEM', 20, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -725,7 +725,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_menus, v_menu_admin_group,
         'Menus', 'Menús', '/admin/menus',
-        'layout-navbar', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'layout-navbar', 'tabler', 'profile',
         'ITEM', 30, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING
@@ -739,7 +739,7 @@ BEGIN
     ) VALUES (
         v_tid_system, v_comp_audit, v_menu_admin_group,
         'Audit', 'Auditoría', '/admin/audit',
-        'history', 'tabler', 'header-dropdown'::nxc_menu.menu_location,
+        'history', 'tabler', 'profile',
         'ITEM', 40, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level,
         v_uid_super_admin, NOW(), NOW(), 0
     ) ON CONFLICT DO NOTHING

@@ -5,14 +5,21 @@
 
 DO $$
 DECLARE
-    v_tenant_id      UUID := '00000000-0000-0000-0000-000000000001';
-    v_admin_id       UUID := '00000000-0000-0000-0000-000000000002';
+    v_tenant_id      UUID := '10000000-0000-0000-0000-000000000001';  -- UUID diferente al tenant 'system'
+    v_admin_id       UUID := '10000000-0000-0000-0000-000000000002';
     v_role_admin_id  UUID;
     v_role_editor_id UUID;
     v_role_viewer_id UUID;
 BEGIN
 
-    -- 0. Limpiar datos previos del tenant demo (ON DELETE CASCADE limpia usuarios, roles y user_roles)
+    -- 0. Limpiar datos previos del tenant demo
+    -- Eliminar registros de login_attempts primero (no tiene ON DELETE CASCADE)
+    DELETE FROM nxc_auth.login_attempts WHERE tenant_id = v_tenant_id OR tenant_id IN (
+        SELECT id FROM nxc_tenant.tenants WHERE slug = 'demo'
+    );
+    RAISE NOTICE 'Login attempts del tenant demo eliminados (si existían).';
+    
+    -- Ahora sí eliminar el tenant (ON DELETE CASCADE limpia usuarios, roles, user_roles, etc.)
     DELETE FROM nxc_tenant.tenants WHERE id = v_tenant_id OR slug = 'demo';
     RAISE NOTICE 'Datos previos del tenant demo eliminados (si existían).';
 

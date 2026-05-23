@@ -24,11 +24,19 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";    -- índices GIN para búsqueda ILIK
 -- ---------------------------------------------------------------------------
 -- 1. Schemas
 -- ---------------------------------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS nxc_tenant;
-CREATE SCHEMA IF NOT EXISTS nxc_auth;
-CREATE SCHEMA IF NOT EXISTS nxc_menu;
-CREATE SCHEMA IF NOT EXISTS nxc_preference;
-CREATE SCHEMA IF NOT EXISTS nxc_config;
+-- Eliminar schemas existentes (CASCADE borra todas las tablas, vistas, funciones, etc.)
+DROP SCHEMA IF EXISTS nxc_tenant CASCADE;
+DROP SCHEMA IF EXISTS nxc_auth CASCADE;
+DROP SCHEMA IF EXISTS nxc_menu CASCADE;
+DROP SCHEMA IF EXISTS nxc_preference CASCADE;
+DROP SCHEMA IF EXISTS nxc_config CASCADE;
+
+-- Crear schemas desde cero
+CREATE SCHEMA nxc_tenant;
+CREATE SCHEMA nxc_auth;
+CREATE SCHEMA nxc_menu;
+CREATE SCHEMA nxc_preference;
+CREATE SCHEMA nxc_config;
 
 -- =============================================================================
 -- 2. TIPOS ENUM
@@ -88,15 +96,16 @@ DO $$ BEGIN
         );
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'menu_location') THEN
-        CREATE TYPE nxc_menu.menu_location AS ENUM (
-            'navbar',           -- barra de navegación principal
-            'sidebar',          -- panel lateral
-            'header-dropdown',  -- menú desplegable del header (perfil, ajustes, logout)
-            'footer',           -- pie de página
-            'internal'          -- uso interno, no visible en la navegación principal
-        );
-    END IF;
+    -- El tipo menu_location ya no se usa, location es ahora un campo VARCHAR abierto
+    -- IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'menu_location') THEN
+    --     CREATE TYPE nxc_menu.menu_location AS ENUM (
+    --         'navbar',           -- barra de navegación principal
+    --         'sidebar',          -- panel lateral
+    --         'header-dropdown',  -- menú desplegable del header (perfil, ajustes, logout)
+    --         'footer',           -- pie de página
+    --         'internal'          -- uso interno, no visible en la navegación principal
+    --     );
+    -- END IF;
 
 END $$;
 
@@ -530,7 +539,7 @@ CREATE TABLE IF NOT EXISTS nxc_menu.menu_items (
     route           VARCHAR(255),
     icon            VARCHAR(150),
     icon_type       VARCHAR(50)     NOT NULL DEFAULT 'tabler', -- 'tabler' | 'material' | 'custom'
-    location        nxc_menu.menu_location  NOT NULL DEFAULT 'navbar',
+    location        VARCHAR(50)     NOT NULL DEFAULT 'navbar',  -- campo abierto: 'navbar', 'sidebar', 'header-dropdown', 'footer', etc.
     item_type       nxc_menu.menu_item_type NOT NULL DEFAULT 'ITEM',
     order_index     INTEGER         NOT NULL DEFAULT 0,
     is_visible      BOOLEAN         NOT NULL DEFAULT TRUE,
@@ -1057,6 +1066,7 @@ FOR EACH ROW EXECUTE FUNCTION nxc_tenant.fn_assign_default_role();
 
 -- Vista usada por el servicio de auth al hacer login.
 -- Devuelve todo lo necesario para construir el JWT en una sola query.
+DROP VIEW IF EXISTS nxc_tenant.v_user_login_profile CASCADE;
 CREATE OR REPLACE VIEW nxc_tenant.v_user_login_profile AS
 SELECT
     u.id                    AS user_id,
@@ -1107,6 +1117,7 @@ COMMENT ON VIEW nxc_tenant.v_user_login_profile IS
     'Usada por AuthService.login(). Devuelve todo lo necesario para construir el JWT en una sola query.';
 
 -- Vista del árbol de menú con acceso efectivo por rol
+DROP VIEW IF EXISTS nxc_menu.v_menu_effective_access CASCADE;
 CREATE OR REPLACE VIEW nxc_menu.v_menu_effective_access AS
 SELECT
     mi.id               AS menu_item_id,
