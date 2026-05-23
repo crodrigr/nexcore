@@ -67,77 +67,96 @@ Implementar un sistema de control de acceso basado en roles (RBAC - Role-Based A
 
 ### 3.1. Esquema General
 
-El sistema utiliza 6 tablas principales distribuidas en 3 esquemas PostgreSQL:
+El sistema utiliza 7 tablas principales distribuidas en 2 esquemas PostgreSQL:
 
 ```
-nxc_config.*             nxc_menu.*              nxc_tenant.*
-├─ components            ├─ menu_items           └─ roles
-└─ component_elements    ├─ role_menu_items
-                         ├─ role_component_permissions
-                         └─ role_element_permissions
+nxc_menu.*                              nxc_tenant.*
+├─ components                           └─ roles
+├─ component_elements
+├─ menu_items
+├─ component_permissions
+├─ element_permissions
+├─ user_element_overrides
+└─ tenant_menu_config
 ```
 
-### 3.2. Tabla: nxc_config.components
+**Nota importante**: Todas las tablas de menús y permisos están en el esquema `nxc_menu`, no existe el esquema `nxc_config` para estos propósitos.
+
+### 3.2. Tabla: nxc_menu.components
 
 **Propósito**: Define los componentes (módulos/páginas) de la aplicación.
 
 ```sql
-CREATE TABLE nxc_config.components (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    component_key       VARCHAR(100) NOT NULL UNIQUE,  -- 'alerts', 'dashboard', 'reports'
-    component_name      VARCHAR(200) NOT NULL,         -- 'Alertas', 'Panel de Control'
-    description         TEXT,
-    is_active           BOOLEAN DEFAULT true,
-    created_at          TIMESTAMP DEFAULT NOW(),
-    updated_at          TIMESTAMP,
-    created_by          UUID,
-    updated_by          UUID
+CREATE TABLE nxc_menu.components (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
+    module_key      VARCHAR(150)    NOT NULL,   -- 'user-management', 'audit-viewer', 'dashboard'
+    name            VARCHAR(150)    NOT NULL,   -- 'Gestión de usuarios', 'Alertas'
+    route           VARCHAR(255),               -- '/users', '/alerts'
+    description     VARCHAR(500),
+    is_system       BOOLEAN         NOT NULL DEFAULT FALSE,  -- TRUE: componente del sistema
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    created_by      UUID            REFERENCES nxc_tenant.users(id),
+    updated_by      UUID            REFERENCES nxc_tenant.users(id),
+    deleted_at      TIMESTAMPTZ,
+    version         INTEGER         NOT NULL DEFAULT 0,
+    UNIQUE (tenant_id, module_key)
 );
 
 -- Índices
-CREATE INDEX idx_components_key ON nxc_config.components(component_key);
-CREATE INDEX idx_components_active ON nxc_config.components(is_active);
+CREATE INDEX ix_components_tenant
+    ON nxc_menu.components (tenant_id)
+    WHERE deleted_at IS NULL;
 ```
 
 **Ejemplos de datos:**
 
-| id | component_key | component_name | description |
-|----|---------------|----------------|-------------|
-| uuid-1 | dashboard | Panel de Control | Visualización de métricas y estadísticas |
-| uuid-2 | alerts | Alertas | Gestión de alertas SNMP |
-| uuid-3 | user-management | Gestión de Usuarios | CRUD de usuarios del tenant |
+| id | tenant_id | module_key | name | route | is_system |
+|----|-----------|------------|------|-------|----------|
+| uuid-1 | system | dashboard | Dashboard | /graphics | TRUE |
+| uuid-2 | system | alerts | Alertas | /alerts | TRUE |
+| uuid-3 | system | user-management | Gestión de Usuarios | /admin/users | TRUE |
 
-### 3.3. Tabla: nxc_config.component_elements
+**Campos clave:**
+- `module_key`: Identificador técnico único del componente (usado en código)
+- `is_system`: Si es TRUE, el componente pertenece al sistema y está disponible para todos los tenants
+
+### 3.3. Tabla: nxc_menu.component_elements
 
 **Propósito**: Define elementos específicos dentro de cada componente (botones, inputs, secciones).
 
 ```sql
-CREATE TABLE nxc_config.component_elements (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    component_id        UUID NOT NULL REFERENCES nxc_config.components(id) ON DELETE CASCADE,
-    element_key         VARCHAR(100) NOT NULL,  -- 'btn-create', 'searchInput', 'section-stats'
-    element_name        VARCHAR(200) NOT NULL,  -- 'Botón Crear', 'Input de Búsqueda'
-    description         TEXT,
-    is_active           BOOLEAN DEFAULT true,
-    created_at          TIMESTAMP DEFAULT NOW(),
-    updated_at          TIMESTAMP,
-    UNIQUE(component_id, element_key)
+CREATE TABLE nxc_menu.component_elements (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
+    component_id    UUID        NOT NULL REFERENCES nxc_menu.components(id) ON DELETE CASCADE,
+    element_key     VARCHAR(150)    NOT NULL,   -- 'btn-create-user', 'tab-roles', 'searchInput'
+    label           VARCHAR(200),               -- Descripción legible para administrador
+    element_type    VARCHAR(50),                -- 'BUTTON', 'TAB', 'FIELD', 'SECTION', 'ACTION'
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    deleted_at      TIMESTAMPTZ,
+    version         INTEGER         NOT NULL DEFAULT 0,
+    UNIQUE (tenant_id, component_id, element_key)
 );
 
 -- Índices
-CREATE INDEX idx_elements_component ON nxc_config.component_elements(component_id);
-CREATE INDEX idx_elements_key ON nxc_config.component_elements(element_key);
+CREATE INDEX ix_component_elements_component
+    ON nxc_menu.component_elements (component_id)
+    WHERE deleted_at IS NULL;
 ```
 
 **Ejemplos de datos:**
 
-| id | component_id | element_key | element_name | description |
-|----|--------------|-------------|--------------|-------------|
-| uuid-10 | uuid-3 | btn-create-user | Botón Crear Usuario | Permite crear nuevos usuarios |
-| uuid-11 | uuid-3 | btn-edit-user | Botón Editar Usuario | Permite modificar usuarios existentes |
-| uuid-12 | uuid-3 | btn-delete-user | Botón Eliminar Usuario | Permite eliminar usuarios |
-| uuid-13 | uuid-3 | searchInput | Input de Búsqueda | Filtra usuarios por texto |
-| uuid-14 | uuid-3 | paginator | Paginador | Controla la paginación de la tabla |
+| id | tenant_id | component_id | element_key | label | element_type |
+|----|-----------|--------------|-------------|-------|-------------|
+| uuid-10 | system | uuid-3 | btn-create-user | Botón Crear Usuario | BUTTON |
+| uuid-11 | system | uuid-3 | btn-edit-user | Botón Editar Usuario | BUTTON |
+| uuid-12 | system | uuid-3 | btn-delete-user | Botón Eliminar Usuario | BUTTON |
+| uuid-13 | system | uuid-3 | searchInput | Input de Búsqueda | FIELD |
+| uuid-14 | system | uuid-3 | paginator | Paginador | SECTION |
+| uuid-15 | system | uuid-3 | tab-roles | Pestaña de Roles | TAB |
 
 **Convención de nombres:**
 
@@ -153,32 +172,35 @@ CREATE INDEX idx_elements_key ON nxc_config.component_elements(element_key);
 
 ```sql
 CREATE TABLE nxc_menu.menu_items (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id           UUID NOT NULL REFERENCES nxc_tenant.tenants(id),
-    parent_id           UUID REFERENCES nxc_menu.menu_items(id),  -- NULL = raíz
-    name                VARCHAR(100) NOT NULL,         -- 'Dashboard', 'ProfileMenu'
-    title               VARCHAR(200) NOT NULL,         -- 'Panel Principal', 'Perfil'
-    icon                VARCHAR(100),                  -- 'layout-dashboard'
-    icon_type           VARCHAR(50) DEFAULT 'tabler',  -- 'tabler', 'material', 'fontawesome'
-    route               VARCHAR(255),                  -- '/graphics', '/alerts' (NULL para grupos)
-    location            VARCHAR(50) NOT NULL,          -- 'navbar', 'profile', 'sidebar', 'footer'
-    item_type           nxc_menu.menu_item_type NOT NULL,  -- ENUM: ITEM, GROUP, DIVIDER, EXTERNAL_LINK
-    order_index         INTEGER NOT NULL DEFAULT 0,
-    is_active           BOOLEAN DEFAULT true,
-    created_at          TIMESTAMP DEFAULT NOW(),
-    updated_at          TIMESTAMP,
-    version             INTEGER DEFAULT 0,
-    deleted_at          TIMESTAMP,
-    created_by          UUID,
-    updated_by          UUID,
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
+    parent_id       UUID        REFERENCES nxc_menu.menu_items(id) ON DELETE SET NULL,
+    component_id    UUID        REFERENCES nxc_menu.components(id) ON DELETE SET NULL,
+    name            VARCHAR(150)    NOT NULL,
+    title           VARCHAR(255),
+    route           VARCHAR(255),
+    icon            VARCHAR(150),
+    icon_type       VARCHAR(50)     NOT NULL DEFAULT 'tabler',  -- 'tabler', 'material', 'custom'
+    location        VARCHAR(50)     NOT NULL DEFAULT 'navbar',  -- 'navbar', 'profile', 'sidebar', 'footer'
+    item_type       nxc_menu.menu_item_type NOT NULL DEFAULT 'ITEM',
+    order_index     INTEGER         NOT NULL DEFAULT 0,
+    is_visible      BOOLEAN         NOT NULL DEFAULT TRUE,
+    is_system       BOOLEAN         NOT NULL DEFAULT FALSE,     -- No eliminable por el tenant
+    default_access  nxc_menu.access_level NOT NULL DEFAULT 'VIEW',
+    feature_flag_key VARCHAR(150),                              -- Feature flag opcional
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    created_by      UUID            REFERENCES nxc_tenant.users(id),
+    updated_by      UUID            REFERENCES nxc_tenant.users(id),
+    deleted_at      TIMESTAMPTZ,
+    version         INTEGER         NOT NULL DEFAULT 0,
     UNIQUE(tenant_id, name)
 );
 
 -- Índices
-CREATE INDEX idx_menu_tenant ON nxc_menu.menu_items(tenant_id);
-CREATE INDEX idx_menu_parent ON nxc_menu.menu_items(parent_id);
-CREATE INDEX idx_menu_location ON nxc_menu.menu_items(location);
-CREATE INDEX idx_menu_active ON nxc_menu.menu_items(is_active);
+CREATE INDEX ix_menu_items_tenant_parent
+    ON nxc_menu.menu_items (tenant_id, parent_id, order_index)
+    WHERE deleted_at IS NULL;
 ```
 
 **Valores del ENUM `menu_item_type`:**
@@ -199,71 +221,61 @@ CREATE INDEX idx_menu_active ON nxc_menu.menu_items(is_active);
 | **sidebar** | Barra lateral (si existe) | Navegación secundaria |
 | **footer** | Pie de página | Enlaces legales, ayuda |
 
+**Campos especiales:**
+
+- `component_id`: Enlaza el menú con un componente para validación de permisos
+- `default_access`: Nivel de acceso por defecto si no hay permiso explícito del rol
+- `feature_flag_key`: Si se especifica, el ítem solo se muestra cuando el feature flag está activo
+- `is_system`: TRUE para menús del sistema, no eliminables por el tenant
+- `is_visible`: Permite ocultar menús sin eliminarlos
+
 **Ejemplos de datos:**
 
-| id | name | title | route | location | item_type | parent_id | order_index |
-|----|------|-------|-------|----------|-----------|-----------|-------------|
-| uuid-20 | Dashboard | Panel Principal | /graphics | navbar | ITEM | NULL | 10 |
-| uuid-21 | Alerts | Alertas | /alerts | navbar | ITEM | NULL | 20 |
-| uuid-22 | ProfileMenu | Perfil | NULL | profile | GROUP | NULL | 50 |
-| uuid-23 | Profile | Mi Perfil | /profile | profile | ITEM | uuid-22 | 10 |
-| uuid-24 | Logout | Cerrar Sesión | /auth/login | profile | ITEM | uuid-22 | 30 |
+| id | name | title | route | location | item_type | component_id | default_access | parent_id | order_index |
+|----|------|-------|-------|----------|-----------|--------------|----------------|-----------|-------------|
+| uuid-20 | Dashboard | Panel Principal | /graphics | navbar | ITEM | v_comp_dashboard | EXECUTE | NULL | 10 |
+| uuid-21 | Alerts | Alertas | /alerts | navbar | ITEM | v_comp_alerts | EXECUTE | NULL | 20 |
+| uuid-22 | ProfileMenu | Perfil | NULL | profile | GROUP | NULL | EXECUTE | NULL | 50 |
+| uuid-23 | Profile | Mi Perfil | /profile | profile | ITEM | NULL | EXECUTE | uuid-22 | 10 |
+| uuid-24 | Logout | Cerrar Sesión | /auth/login | profile | ITEM | v_comp_auth | EXECUTE | uuid-22 | 30 |
+| uuid-25 | Administration | Administración | NULL | profile | GROUP | NULL | HIDDEN | NULL | 60 |
 
-### 3.5. Tabla: nxc_menu.role_menu_items
+**Nota importante sobre permisos de menú:**
 
-**Propósito**: Asigna menús a roles con nivel de acceso.
+El sistema NexCore no tiene una tabla separada para asignar menús a roles. En su lugar, los permisos de menú se derivan de:
 
-```sql
-CREATE TABLE nxc_menu.role_menu_items (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id           UUID NOT NULL REFERENCES nxc_tenant.tenants(id),
-    role_id             UUID NOT NULL REFERENCES nxc_tenant.roles(id),
-    menu_item_id        UUID NOT NULL REFERENCES nxc_menu.menu_items(id),
-    access_level        nxc_menu.access_level NOT NULL,  -- ENUM: EXECUTE, VIEW, HIDDEN
-    created_at          TIMESTAMP DEFAULT NOW(),
-    created_by          UUID,
-    UNIQUE(tenant_id, role_id, menu_item_id)
-);
+1. **Campo `default_access`** en `menu_items`: Define el nivel de acceso por defecto
+2. **Campo `component_id`** en `menu_items`: Enlaza el menú con un componente
+3. **Tabla `component_permissions`**: Los permisos del componente enlazado determinan el acceso al menú
 
--- Índices
-CREATE INDEX idx_role_menu_tenant ON nxc_menu.role_menu_items(tenant_id);
-CREATE INDEX idx_role_menu_role ON nxc_menu.role_menu_items(role_id);
-CREATE INDEX idx_role_menu_item ON nxc_menu.role_menu_items(menu_item_id);
-```
+La vista `v_menu_effective_access` consolida esta lógica automáticamente.
 
-**Valores del ENUM `access_level`:**
+### 3.5. Tabla: nxc_menu.component_permissions
 
-| Nivel | Descripción | Comportamiento en UI |
-|-------|-------------|----------------------|
-| **EXECUTE** | Acceso completo | Menú visible y clickeable |
-| **VIEW** | Solo visualización | Menú visible pero deshabilitado (gris) |
-| **HIDDEN** | Sin acceso | Menú no aparece en la UI |
-
-### 3.6. Tabla: nxc_menu.role_component_permissions
+### 3.5. Tabla: nxc_menu.component_permissions
 
 **Propósito**: Define el nivel de acceso de un rol a un componente completo.
 
 ```sql
-CREATE TABLE nxc_menu.role_component_permissions (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id           UUID NOT NULL REFERENCES nxc_tenant.tenants(id),
-    role_id             UUID NOT NULL REFERENCES nxc_tenant.roles(id),
-    component_id        UUID NOT NULL REFERENCES nxc_config.components(id),
-    access_level        nxc_menu.access_level NOT NULL,  -- EXECUTE, VIEW, HIDDEN
-    created_at          TIMESTAMP DEFAULT NOW(),
-    updated_at          TIMESTAMP,
-    created_by          UUID,
-    updated_by          UUID,
-    UNIQUE(tenant_id, role_id, component_id)
+CREATE TABLE nxc_menu.component_permissions (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
+    role_id         UUID        NOT NULL REFERENCES nxc_tenant.roles(id) ON DELETE CASCADE,
+    component_id    UUID        NOT NULL REFERENCES nxc_menu.components(id) ON DELETE CASCADE,
+    access          nxc_menu.access_level NOT NULL DEFAULT 'HIDDEN',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by      UUID        REFERENCES nxc_tenant.users(id),
+    updated_by      UUID        REFERENCES nxc_tenant.users(id),
+    UNIQUE (tenant_id, role_id, component_id)
 );
 
 -- Índices
-CREATE INDEX idx_role_comp_tenant ON nxc_menu.role_component_permissions(tenant_id);
-CREATE INDEX idx_role_comp_role ON nxc_menu.role_component_permissions(role_id);
-CREATE INDEX idx_role_comp_component ON nxc_menu.role_component_permissions(component_id);
+CREATE INDEX ix_component_perms_role
+    ON nxc_menu.component_permissions (tenant_id, role_id);
 ```
 
-**Interpretación del `access_level` en componentes:**
+**Interpretación del campo `access`:**
 
 | Nivel | Guard permite acceso | Usuario puede |
 |-------|---------------------|---------------|
@@ -271,31 +283,32 @@ CREATE INDEX idx_role_comp_component ON nxc_menu.role_component_permissions(comp
 | **VIEW** | ✅ Sí | Ver el componente pero con acciones limitadas |
 | **HIDDEN** | ❌ No | Es redirigido al dashboard |
 
-### 3.7. Tabla: nxc_menu.role_element_permissions
+### 3.6. Tabla: nxc_menu.element_permissions
+
+### 3.6. Tabla: nxc_menu.element_permissions
 
 **Propósito**: Define el nivel de acceso de un rol a elementos específicos dentro de un componente.
 
 ```sql
-CREATE TABLE nxc_menu.role_element_permissions (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id           UUID NOT NULL REFERENCES nxc_tenant.tenants(id),
-    role_id             UUID NOT NULL REFERENCES nxc_tenant.roles(id),
-    element_id          UUID NOT NULL REFERENCES nxc_config.component_elements(id),
-    access_level        nxc_menu.access_level NOT NULL,  -- EXECUTE, VIEW, HIDDEN
-    created_at          TIMESTAMP DEFAULT NOW(),
-    updated_at          TIMESTAMP,
-    created_by          UUID,
-    updated_by          UUID,
-    UNIQUE(tenant_id, role_id, element_id)
+CREATE TABLE nxc_menu.element_permissions (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
+    role_id         UUID        NOT NULL REFERENCES nxc_tenant.roles(id) ON DELETE CASCADE,
+    element_id      UUID        NOT NULL REFERENCES nxc_menu.component_elements(id) ON DELETE CASCADE,
+    access          nxc_menu.access_level NOT NULL DEFAULT 'HIDDEN',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by      UUID        REFERENCES nxc_tenant.users(id),
+    updated_by      UUID        REFERENCES nxc_tenant.users(id),
+    UNIQUE (tenant_id, role_id, element_id)
 );
 
 -- Índices
-CREATE INDEX idx_role_elem_tenant ON nxc_menu.role_element_permissions(tenant_id);
-CREATE INDEX idx_role_elem_role ON nxc_menu.role_element_permissions(role_id);
-CREATE INDEX idx_role_elem_element ON nxc_menu.role_element_permissions(element_id);
+CREATE INDEX ix_element_perms_role
+    ON nxc_menu.element_permissions (tenant_id, role_id);
 ```
 
-**Interpretación del `access_level` en elementos:**
+**Interpretación del campo `access` en elementos:**
 
 | Nivel | Comportamiento en UI | Ejemplo |
 |-------|----------------------|---------|
@@ -303,88 +316,59 @@ CREATE INDEX idx_role_elem_element ON nxc_menu.role_element_permissions(element_
 | **VIEW** | Elemento visible pero deshabilitado | Botón gris, input readonly |
 | **HIDDEN** | Elemento no se muestra | Display: none |
 
-### 3.8. Vista: v_user_menu_access
+### 3.7. Tablas Adicionales
 
-**Propósito**: Consolida los menús accesibles para un usuario según sus roles.
+**nxc_menu.user_element_overrides**: Permite overrides temporales o permanentes de permisos de elementos a nivel de usuario individual.
+
+**nxc_menu.tenant_menu_config**: Permite a cada tenant personalizar menús del sistema (ocultar, renombrar, reordenar) sin modificar los registros base.
+
+### 3.8. Vista: v_menu_effective_access
+
+### 3.8. Vista: v_menu_effective_access
+
+**Propósito**: Consolida el árbol de menús con el acceso efectivo por rol, considerando los permisos del componente enlazado.
 
 ```sql
-CREATE OR REPLACE VIEW nxc_menu.v_user_menu_access AS
-SELECT DISTINCT
-    u.id AS user_id,
-    u.tenant_id,
-    mi.id AS menu_id,
+CREATE OR REPLACE VIEW nxc_menu.v_menu_effective_access AS
+SELECT
+    mi.id               AS menu_item_id,
+    mi.tenant_id,
     mi.parent_id,
     mi.name,
     mi.title,
+    mi.route,
     mi.icon,
     mi.icon_type,
-    mi.route,
     mi.location,
     mi.item_type,
     mi.order_index,
-    CASE 
-        WHEN COUNT(*) FILTER (WHERE rmi.access_level = 'EXECUTE') > 0 THEN 'EXECUTE'
-        WHEN COUNT(*) FILTER (WHERE rmi.access_level = 'VIEW') > 0 THEN 'VIEW'
-        ELSE 'HIDDEN'
-    END AS access_level
-FROM nxc_tenant.users u
-JOIN nxc_tenant.user_roles ur ON ur.user_id = u.id
-JOIN nxc_tenant.roles r ON r.id = ur.role_id
-JOIN nxc_menu.role_menu_items rmi ON rmi.role_id = r.id AND rmi.tenant_id = u.tenant_id
-JOIN nxc_menu.menu_items mi ON mi.id = rmi.menu_item_id
-WHERE u.deleted_at IS NULL
-  AND u.user_status = 'ACTIVE'
-  AND mi.is_active = true
-  AND mi.deleted_at IS NULL
-GROUP BY u.id, u.tenant_id, mi.id, mi.parent_id, mi.name, mi.title, mi.icon, 
-         mi.icon_type, mi.route, mi.location, mi.item_type, mi.order_index
-HAVING CASE 
-    WHEN COUNT(*) FILTER (WHERE rmi.access_level = 'EXECUTE') > 0 THEN 'EXECUTE'
-    WHEN COUNT(*) FILTER (WHERE rmi.access_level = 'VIEW') > 0 THEN 'VIEW'
-    ELSE 'HIDDEN'
-END IN ('EXECUTE', 'VIEW');
+    mi.is_visible,
+    mi.feature_flag_key,
+    mi.default_access,
+    cp.role_id,
+    COALESCE(cp.access, mi.default_access) AS effective_access
+FROM nxc_menu.menu_items mi
+LEFT JOIN nxc_menu.components c
+    ON c.id = mi.component_id AND c.deleted_at IS NULL
+LEFT JOIN nxc_menu.component_permissions cp
+    ON cp.component_id = c.id AND cp.tenant_id = mi.tenant_id
+WHERE mi.deleted_at IS NULL
+  AND mi.is_visible = TRUE;
 ```
 
-**Lógica de agregación:**
-- Si el usuario tiene múltiples roles, se toma el nivel de acceso más permisivo
-- EXECUTE > VIEW > HIDDEN
-- Solo se retornan menús con access_level = EXECUTE o VIEW
+**Lógica de acceso efectivo:**
 
-### 3.9. Vista: v_user_permissions
+1. Si el menú tiene `component_id` enlazado:
+   - Se busca el permiso del rol en `component_permissions`
+   - Si existe permiso, se usa `cp.access`
+   - Si no existe permiso, se usa `mi.default_access`
 
-**Propósito**: Consolida los permisos de componentes y elementos para un usuario.
+2. Si el menú NO tiene `component_id`:
+   - Se usa `mi.default_access` directamente
 
-```sql
-CREATE OR REPLACE VIEW nxc_menu.v_user_permissions AS
-SELECT DISTINCT
-    u.id AS user_id,
-    u.tenant_id,
-    c.id AS component_id,
-    c.component_key,
-    CASE 
-        WHEN COUNT(*) FILTER (WHERE rcp.access_level = 'EXECUTE') > 0 THEN 'EXECUTE'
-        WHEN COUNT(*) FILTER (WHERE rcp.access_level = 'VIEW') > 0 THEN 'VIEW'
-        ELSE 'HIDDEN'
-    END AS component_access,
-    ce.id AS element_id,
-    ce.element_key,
-    CASE 
-        WHEN COUNT(*) FILTER (WHERE rep.access_level = 'EXECUTE') > 0 THEN 'EXECUTE'
-        WHEN COUNT(*) FILTER (WHERE rep.access_level = 'VIEW') > 0 THEN 'VIEW'
-        ELSE 'HIDDEN'
-    END AS element_access
-FROM nxc_tenant.users u
-JOIN nxc_tenant.user_roles ur ON ur.user_id = u.id
-JOIN nxc_tenant.roles r ON r.id = ur.role_id
-LEFT JOIN nxc_menu.role_component_permissions rcp ON rcp.role_id = r.id AND rcp.tenant_id = u.tenant_id
-LEFT JOIN nxc_config.components c ON c.id = rcp.component_id
-LEFT JOIN nxc_config.component_elements ce ON ce.component_id = c.id
-LEFT JOIN nxc_menu.role_element_permissions rep ON rep.element_id = ce.id AND rep.role_id = r.id AND rep.tenant_id = u.tenant_id
-WHERE u.deleted_at IS NULL
-  AND u.user_status = 'ACTIVE'
-  AND c.is_active = true
-GROUP BY u.id, u.tenant_id, c.id, c.component_key, ce.id, ce.element_key;
-```
+3. El backend usa esta vista para construir el árbol de menús filtrado por rol del usuario
+
+**Nota**: No hay una vista separada `v_user_permissions`. Los permisos se consultan directamente de las tablas `component_permissions` y `element_permissions` filtrando por los roles del usuario.
 
 ---
 
@@ -643,7 +627,7 @@ Content-Type: application/json
 │  ProfileService         │
 │  Retorna permissions    │
 └──────┬──────────────────┘
-       │ 5. Valida access_level
+       │ 5. Valida access (nivel de acceso)
        ↓
     ┌──┴───┐
     │ ¿Tiene permiso? │
@@ -716,7 +700,7 @@ Content-Type: application/json
 │  'users'                │
 │  Busca element_key:     │
 │  'btn-create-user'      │
-│  Retorna access_level   │
+│  Retorna access         │
 └──────┬──────────────────┘
        │
     ┌──┴───┐
@@ -1772,8 +1756,8 @@ CHECK (item_type != 'GROUP' OR route IS NULL);
 -- No puede haber permisos duplicados para el mismo tenant + rol + componente
 -- (Ya garantizado por UNIQUE constraint)
 
--- Validar que access_level tenga valores válidos
--- (Ya garantizado por ENUM type)
+-- Validar que access tenga valores válidos
+-- (Ya garantizado por ENUM type: nxc_menu.access_level)
 ```
 
 ### 8.2. Reglas de Negocio
@@ -1894,22 +1878,49 @@ public class AlertController {
 
 1. **Backend**: Crear componente en BD
 ```sql
-INSERT INTO nxc_config.components (id, component_key, component_name, description)
-VALUES (gen_random_uuid(), 'reports', 'Reportes', 'Módulo de reportes');
+INSERT INTO nxc_menu.components (id, tenant_id, module_key, name, route, is_system)
+VALUES (
+  gen_random_uuid(), 
+  '<tenant_id>', 
+  'reports', 
+  'Reportes', 
+  '/reports',
+  FALSE
+);
 ```
 
 2. **Backend**: Crear elementos del componente
 ```sql
-INSERT INTO nxc_config.component_elements (id, component_id, element_key, element_name)
+INSERT INTO nxc_menu.component_elements (id, tenant_id, component_id, element_key, label, element_type)
 VALUES 
-(gen_random_uuid(), (SELECT id FROM nxc_config.components WHERE component_key = 'reports'), 'btn-create', 'Botón Crear'),
-(gen_random_uuid(), (SELECT id FROM nxc_config.components WHERE component_key = 'reports'), 'btn-export', 'Botón Exportar');
+(
+  gen_random_uuid(), 
+  '<tenant_id>', 
+  (SELECT id FROM nxc_menu.components WHERE module_key = 'reports' AND tenant_id = '<tenant_id>'), 
+  'btn-create', 
+  'Botón Crear',
+  'BUTTON'
+),
+(
+  gen_random_uuid(), 
+  '<tenant_id>',
+  (SELECT id FROM nxc_menu.components WHERE module_key = 'reports' AND tenant_id = '<tenant_id>'), 
+  'btn-export', 
+  'Botón Exportar',
+  'BUTTON'
+);
 ```
 
 3. **Backend**: Asignar permisos a roles
 ```sql
-INSERT INTO nxc_menu.role_component_permissions (id, tenant_id, role_id, component_id, access_level)
-VALUES (gen_random_uuid(), '<tenant_id>', '<role_id>', '<component_id>', 'EXECUTE');
+INSERT INTO nxc_menu.component_permissions (id, tenant_id, role_id, component_id, access)
+VALUES (
+  gen_random_uuid(), 
+  '<tenant_id>', 
+  '<role_id>', 
+  (SELECT id FROM nxc_menu.components WHERE module_key = 'reports' AND tenant_id = '<tenant_id>'),
+  'EXECUTE'
+);
 ```
 
 4. **Frontend**: Crear componente Angular
@@ -1948,15 +1959,20 @@ WHERE name = 'Reports';
 ### 10.3. Deshabilitar Temporalmente un Componente
 
 ```sql
--- Opción 1: Desactivar el componente
-UPDATE nxc_config.components
-SET is_active = false
-WHERE component_key = 'reports';
+-- Opción 1: Ocultar el menú enlazado al componente
+UPDATE nxc_menu.menu_items
+SET is_visible = false
+WHERE component_id = (SELECT id FROM nxc_menu.components WHERE module_key = 'reports' AND tenant_id = '<tenant_id>');
 
 -- Opción 2: Cambiar todos los permisos a HIDDEN
-UPDATE nxc_menu.role_component_permissions
-SET access_level = 'HIDDEN'
-WHERE component_id = (SELECT id FROM nxc_config.components WHERE component_key = 'reports');
+UPDATE nxc_menu.component_permissions
+SET access = 'HIDDEN'
+WHERE component_id = (SELECT id FROM nxc_menu.components WHERE module_key = 'reports' AND tenant_id = '<tenant_id>');
+
+-- Opción 3: Marcar como eliminado (soft delete)
+UPDATE nxc_menu.components
+SET deleted_at = NOW()
+WHERE module_key = 'reports' AND tenant_id = '<tenant_id>';
 ```
 
 ---
@@ -1972,17 +1988,25 @@ WHERE component_id = (SELECT id FROM nxc_config.components WHERE component_key =
 SELECT * FROM nxc_menu.menu_items WHERE name = 'Reports';
 ```
 
-2. ✅ Verificar que está asignado al rol
+2. ✅ Verificar que el componente enlazado tiene permisos para el rol
 ```sql
-SELECT rmi.*, r.role_name, mi.title
-FROM nxc_menu.role_menu_items rmi
-JOIN nxc_tenant.roles r ON r.id = rmi.role_id
-JOIN nxc_menu.menu_items mi ON mi.id = rmi.menu_item_id
-WHERE mi.name = 'Reports';
+SELECT 
+    mi.name, 
+    mi.title, 
+    c.module_key, 
+    r.role_name, 
+    cp.access AS component_access,
+    mi.default_access
+FROM nxc_menu.menu_items mi
+LEFT JOIN nxc_menu.components c ON c.id = mi.component_id
+LEFT JOIN nxc_menu.component_permissions cp ON cp.component_id = c.id
+LEFT JOIN nxc_tenant.roles r ON r.id = cp.role_id
+WHERE mi.name = 'Reports'
+  AND mi.tenant_id = '<tenant_id>';
 ```
 
-3. ✅ Verificar que access_level no sea 'HIDDEN'
-4. ✅ Verificar que location sea 'navbar'
+3. ✅ Verificar que el acceso efectivo no sea 'HIDDEN'
+4. ✅ Verificar que `location` sea 'navbar' y `is_visible` sea TRUE
 5. ✅ Recargar perfil en frontend (logout + login)
 
 ### 11.2. Guard Bloquea la Ruta
@@ -1992,15 +2016,21 @@ WHERE mi.name = 'Reports';
 1. ✅ Verificar que el componente existe en `components`
 2. ✅ Verificar que hay permiso para el rol
 ```sql
-SELECT rcp.*, c.component_key, r.role_name, rcp.access_level
-FROM nxc_menu.role_component_permissions rcp
-JOIN nxc_config.components c ON c.id = rcp.component_id
-JOIN nxc_tenant.roles r ON r.id = rcp.role_id
-WHERE c.component_key = 'reports';
+SELECT 
+    cp.*, 
+    c.module_key, 
+    c.name AS component_name,
+    r.role_name, 
+    cp.access
+FROM nxc_menu.component_permissions cp
+JOIN nxc_menu.components c ON c.id = cp.component_id
+JOIN nxc_tenant.roles r ON r.id = cp.role_id
+WHERE c.module_key = 'reports'
+  AND cp.tenant_id = '<tenant_id>';
 ```
 
-3. ✅ Verificar que `access_level` sea 'EXECUTE' o 'VIEW'
-4. ✅ Verificar que `route.data.component` coincida con `component_key`
+3. ✅ Verificar que `access` sea 'EXECUTE' o 'VIEW'
+4. ✅ Verificar que `route.data.component` coincida con `module_key`
 
 ### 11.3. Todos los Botones Aparecen
 
@@ -2008,10 +2038,17 @@ WHERE c.component_key = 'reports';
 
 1. ✅ Verificar que existen permisos de elementos
 ```sql
-SELECT rep.*, ce.element_key, rep.access_level
-FROM nxc_menu.role_element_permissions rep
-JOIN nxc_config.component_elements ce ON ce.id = rep.element_id
-WHERE ce.component_id = (SELECT id FROM nxc_config.components WHERE component_key = 'reports');
+SELECT 
+    ep.*, 
+    ce.element_key, 
+    ce.label,
+    ep.access,
+    r.role_name
+FROM nxc_menu.element_permissions ep
+JOIN nxc_menu.component_elements ce ON ce.id = ep.element_id
+JOIN nxc_tenant.roles r ON r.id = ep.role_id
+WHERE ce.component_id = (SELECT id FROM nxc_menu.components WHERE module_key = 'reports' AND tenant_id = '<tenant_id>')
+  AND ep.tenant_id = '<tenant_id>';
 ```
 
 2. ✅ Verificar que el componente usa `*ngIf` con permisos
