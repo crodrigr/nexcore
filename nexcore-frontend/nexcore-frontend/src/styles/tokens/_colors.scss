@@ -91,6 +91,10 @@ $color-info-700: #0288d1;
   --color-interactive-primary-hover: #{$color-primary-600};
   --color-interactive-primary-active: #{$color-primary-700};
   --color-interactive-secondary: #{$color-secondary-500};
+  // Danger / destructive actions (used for logout, destructive buttons)
+  --color-interactive-danger: #{$color-error-500};
+  --color-interactive-danger-hover: #{$color-error-700};
+  --color-interactive-danger-bg: #{$color-error-50};
   
   // Estados
   --color-success: #{$color-success-500};
