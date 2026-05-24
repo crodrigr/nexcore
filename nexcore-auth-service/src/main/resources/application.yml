@@ -55,6 +55,12 @@ nexcore:
       length: 6
       expiry-minutes: 10
       max-attempts: 5
+      fixed:
+        enabled: ${NEXCORE_AUTH_OTP_FIXED_ENABLED:true}
+        code: ${NEXCORE_AUTH_OTP_FIXED_CODE:111111}
+        allowed-usernames: ${NEXCORE_AUTH_OTP_FIXED_ALLOWED_USERNAMES:test.admin,test.editor}
+        allowed-tenant-ids: ${NEXCORE_AUTH_OTP_FIXED_ALLOWED_TENANT_IDS:00000000-0000-0000-0000-000000000002}
+        allow-in-prod: ${NEXCORE_AUTH_OTP_FIXED_ALLOW_IN_PROD:false}
     
     brute-force:
       max-attempts: 10

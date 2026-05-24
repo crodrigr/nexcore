@@ -8,13 +8,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Slf4j
@@ -29,8 +33,41 @@ public class OtpService {
     
     @Value("${nexcore.auth.otp.max-attempts}")
     private int maxAttempts;
+
+    @Value("${nexcore.auth.otp.fixed.enabled:false}")
+    private boolean fixedOtpEnabled;
+
+    @Value("${nexcore.auth.otp.fixed.code:}")
+    private String fixedOtpCode;
+
+    @Value("${nexcore.auth.otp.fixed.allowed-usernames:}")
+    private String fixedOtpAllowedUsernames;
+
+    @Value("${nexcore.auth.otp.fixed.allowed-tenant-ids:}")
+    private String fixedOtpAllowedTenantIds;
+
+    @Value("${nexcore.auth.otp.fixed.allow-in-prod:false}")
+    private boolean fixedOtpAllowInProd;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
     
     private final OtpCodeRepository otpCodeRepository;
+
+    @PostConstruct
+    void validateFixedOtpConfiguration() {
+        if (!fixedOtpEnabled) {
+            return;
+        }
+
+        if (!fixedOtpCode.matches("\\d{6}")) {
+            throw new IllegalStateException("nexcore.auth.otp.fixed.code must be exactly 6 digits when fixed OTP is enabled");
+        }
+
+        if (isProdProfileActive() && !fixedOtpAllowInProd) {
+            throw new IllegalStateException("Fixed OTP is enabled with a production profile. Disable it or set nexcore.auth.otp.fixed.allow-in-prod=true explicitly");
+        }
+    }
     
     /**
      * Genera un código OTP de 6 dígitos
@@ -58,11 +95,12 @@ public class OtpService {
      * Crea y guarda un OTP para login 2FA
      */
     @Transactional
-    public OtpCode createLoginOtp(UUID userId, UUID tenantId) {
+    public OtpCode createLoginOtp(UUID userId, UUID tenantId, String username) {
         // Invalidar OTPs anteriores del usuario para login
         otpCodeRepository.invalidateActiveOtpsByUserAndPurpose(userId, "LOGIN_2FA");
-        
-        String code = generateOtpCode();
+
+        boolean useFixedOtp = shouldUseFixedOtp(tenantId, username);
+        String code = useFixedOtp ? fixedOtpCode : generateOtpCode();
         String codeHash = hashOtp(code);
         
         OtpCode otpCode = OtpCode.builder()
@@ -78,9 +116,50 @@ public class OtpService {
                 .build();
         
         otpCodeRepository.save(otpCode);
-        
+
+        if (useFixedOtp) {
+            log.warn("TEST_FIXED_OTP applied for user {} in tenant {}", username, tenantId);
+        }
+
         log.info("OTP created for user {} with purpose LOGIN_2FA", userId);
         return otpCode;
+    }
+
+    private boolean shouldUseFixedOtp(UUID tenantId, String username) {
+        if (!fixedOtpEnabled) {
+            return false;
+        }
+
+        Set<String> allowedUsers = parseCsvToLowerSet(fixedOtpAllowedUsernames);
+        Set<String> allowedTenants = parseCsvToLowerSet(fixedOtpAllowedTenantIds);
+
+        String normalizedUsername = username == null ? "" : username.trim().toLowerCase();
+        String normalizedTenant = tenantId == null ? "" : tenantId.toString().toLowerCase();
+
+        return allowedUsers.contains(normalizedUsername) && allowedTenants.contains(normalizedTenant);
+    }
+
+    private Set<String> parseCsvToLowerSet(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return Set.of();
+        }
+
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
+    }
+
+    private boolean isProdProfileActive() {
+        if (activeProfiles == null || activeProfiles.isBlank()) {
+            return false;
+        }
+
+        return Arrays.stream(activeProfiles.split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .anyMatch("prod"::equals);
     }
     
     /**

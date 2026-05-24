@@ -1220,3 +1220,106 @@ COMMENT ON VIEW nxc_menu.v_menu_effective_access IS
 
 
 -- =============================================================================
+
+DO $$
+DECLARE
+    v_tenant_id            UUID := '00000000-0000-0000-0000-000000000002';
+    v_user_admin_id        UUID := '00000000-0000-0000-0001-000000000002';
+    v_user_test_admin_id   UUID := '00000000-0000-0000-0001-000000000004';
+    v_user_test_editor_id  UUID := '00000000-0000-0000-0001-000000000005';
+    v_role_tenant_admin    UUID;
+    v_role_editor          UUID;
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM nxc_tenant.tenants t
+        WHERE t.id = v_tenant_id
+          AND t.deleted_at IS NULL
+    ) THEN
+        RAISE NOTICE 'Seed test users omitido: tenant demo no existe.';
+        RETURN;
+    END IF;
+
+    SELECT id INTO v_role_tenant_admin
+    FROM nxc_tenant.roles
+    WHERE tenant_id = v_tenant_id
+      AND name = 'TENANT_ADMIN'
+      AND deleted_at IS NULL
+    LIMIT 1;
+
+    SELECT id INTO v_role_editor
+    FROM nxc_tenant.roles
+    WHERE tenant_id = v_tenant_id
+      AND name = 'EDITOR'
+      AND deleted_at IS NULL
+    LIMIT 1;
+
+    IF v_role_tenant_admin IS NULL OR v_role_editor IS NULL THEN
+        RAISE NOTICE 'Seed test users omitido: roles TENANT_ADMIN/EDITOR no disponibles.';
+        RETURN;
+    END IF;
+
+    INSERT INTO nxc_tenant.users (
+        id, tenant_id, username, email, password_hash, full_name,
+        status, is_tenant_admin, email_verified, email_verified_at,
+        active, suspended, activated_at, created_at, updated_at, version
+    ) VALUES (
+        v_user_test_admin_id, v_tenant_id,
+        'test.admin', 'test.admin@nexcore.io',
+        '$2a$12$2SgNZ1P9TWruO3hmUqL6u.U3K4mKg9o7xtK6N8uZJXVxjFqbMDf/y',
+        'Test Admin',
+        'ACTIVE', TRUE, TRUE, NOW(),
+        TRUE, FALSE, NOW(), NOW(), NOW(), 0
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET tenant_id = EXCLUDED.tenant_id,
+        username = EXCLUDED.username,
+        email = EXCLUDED.email,
+        full_name = EXCLUDED.full_name,
+        status = 'ACTIVE',
+        is_tenant_admin = TRUE,
+        active = TRUE,
+        suspended = FALSE,
+        updated_at = NOW();
+
+    DELETE FROM nxc_tenant.user_roles
+    WHERE tenant_id = v_tenant_id
+      AND user_id = v_user_test_admin_id;
+
+    INSERT INTO nxc_tenant.user_roles (tenant_id, user_id, role_id, assigned_at, assigned_by)
+    VALUES (v_tenant_id, v_user_test_admin_id, v_role_tenant_admin, NOW(), v_user_admin_id)
+    ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING;
+
+    INSERT INTO nxc_tenant.users (
+        id, tenant_id, username, email, password_hash, full_name,
+        status, is_tenant_admin, email_verified, email_verified_at,
+        active, suspended, activated_at, created_at, updated_at, version
+    ) VALUES (
+        v_user_test_editor_id, v_tenant_id,
+        'test.editor', 'test.editor@nexcore.io',
+        '$2a$12$2SgNZ1P9TWruO3hmUqL6u.U3K4mKg9o7xtK6N8uZJXVxjFqbMDf/y',
+        'Test Editor',
+        'ACTIVE', FALSE, TRUE, NOW(),
+        TRUE, FALSE, NOW(), NOW(), NOW(), 0
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET tenant_id = EXCLUDED.tenant_id,
+        username = EXCLUDED.username,
+        email = EXCLUDED.email,
+        full_name = EXCLUDED.full_name,
+        status = 'ACTIVE',
+        is_tenant_admin = FALSE,
+        active = TRUE,
+        suspended = FALSE,
+        updated_at = NOW();
+
+    DELETE FROM nxc_tenant.user_roles
+    WHERE tenant_id = v_tenant_id
+      AND user_id = v_user_test_editor_id;
+
+    INSERT INTO nxc_tenant.user_roles (tenant_id, user_id, role_id, assigned_at, assigned_by)
+    VALUES (v_tenant_id, v_user_test_editor_id, v_role_editor, NOW(), v_user_admin_id)
+    ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING;
+
+    RAISE NOTICE 'Usuarios test.admin y test.editor asegurados para tenant demo.';
+END $$;

@@ -117,7 +117,7 @@ public class AuthService {
             throw new InvalidCredentialsException("Invalid username or password");
         }
 
-        OtpCode otpCode = otpService.createLoginOtp(user.getId(), request.getTenantId());
+        OtpCode otpCode = otpService.createLoginOtp(user.getId(), request.getTenantId(), user.getUsername());
 
         try {
             emailService.sendOtpEmail(user.getEmail(), user.getUsername(), otpCode);
