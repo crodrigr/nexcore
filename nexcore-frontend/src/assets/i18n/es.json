@@ -22,9 +22,13 @@
   },
   "menu": {
     "dashboard": "Panel",
+    "tenants": "Tenants",
+    "identity_access": "Identidad y Accesos",
     "alerts": "Alertas",
     "incidents": "Incidentes",
     "traps": "Traps SNMP",
+    "feature_flags": "Feature Flags",
+    "platform_settings": "Configuracion de plataforma",
     "profile_menu": "Perfil",
     "profile": "Mi Perfil",
     "settings": "Configuracion",

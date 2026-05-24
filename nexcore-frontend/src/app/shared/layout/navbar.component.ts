@@ -239,6 +239,41 @@ export class NavbarComponent implements OnInit {
   }
 
   fallbackInline = false;
+  private readonly defaultIcon = 'menu';
+
+  private readonly iconAliases: Record<string, string> = {
+    'layout-dashboard': 'dashboard',
+    'alert-circle': 'bell',
+    'chart-bar': 'chart-bar',
+    history: 'chart-bar',
+    lock: 'settings',
+    logout: 'close',
+    menu: 'menu',
+    profile: 'profile',
+    radar: 'donut',
+    settings: 'settings',
+    shield: 'settings',
+    user: 'profile',
+    'user-circle': 'profile',
+    users: 'users'
+  };
+
+  getIconUrl(menu: MenuItem): string {
+    return this.buildIconUrl(menu.icon);
+  }
+
+  onIconError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (!img) {
+      return;
+    }
+
+    if (img.src.endsWith('/menu.svg')) {
+      return;
+    }
+
+    img.src = this.buildIconUrl(this.defaultIcon);
+  }
 
   private openNotificationOverlay() {
     if (this.notifRef) return;
@@ -315,6 +350,12 @@ export class NavbarComponent implements OnInit {
       .replace(/([a-z])([A-Z])/g, '$1_$2')
       .replace(/[\s-]+/g, '_')
       .toLowerCase();
+  }
+
+  private buildIconUrl(icon: string | null | undefined): string {
+    const normalizedIcon = (icon || this.defaultIcon).trim().toLowerCase().replace(/\.svg$/i, '');
+    const aliasedIcon = this.iconAliases[normalizedIcon] || normalizedIcon;
+    return `/assets/icons/${aliasedIcon}.svg`;
   }
 }
 

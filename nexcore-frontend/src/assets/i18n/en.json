@@ -22,9 +22,13 @@
   },
   "menu": {
     "dashboard": "Dashboard",
+    "tenants": "Tenants",
+    "identity_access": "Identity & Access",
     "alerts": "Alerts",
     "incidents": "Incidents",
     "traps": "Traps SNMP",
+    "feature_flags": "Feature Flags",
+    "platform_settings": "Platform Settings",
     "profile_menu": "Profile",
     "profile": "My Profile",
     "settings": "Settings",
@@ -63,6 +67,8 @@
       "weekly": "Weekly",
       "monthly": "Monthly",
       "distribution": "Distribution by Tenant",
+      "feature_flags": "Feature Flags",
+      "platform_settings": "Configuracion de plataforma",
       "others": "Others"
     }
   },
@@ -73,8 +79,6 @@
       "subtitle": "Welcome back",
       "tenant": "Tenant",
       "username": "Username",
-      "email": "Email",
-      "password": "Password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "rememberMe": "Remember me",

@@ -79,44 +79,7 @@
                       type="button"
                       [class.disabled]="isMenuDisabled(menu)"
                       (click)="navigateToMenu(menu); $event.stopPropagation()">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" [ngSwitch]="getIconName(menu)">
-                  <ng-container *ngSwitchCase="'user'">
-                    <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.4"/>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="'settings'">
-                    <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 2.3 16.88l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.27 3.7A2 2 0 0 1 7.1 1.88l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 11.3 1.7V1a2 2 0 0 1 4 0v.09c.2.07.39.17.56.29.6.41 1.39.26 1.8-.34l.06-.06A2 2 0 0 1 20.7 3.12l-.06.06a1.65 1.65 0 0 0-.33 1.82c.12.35.3.68.54.97.3.36.75.58 1.23.58H21a2 2 0 0 1 0 4h-.09c-.48 0-.93.22-1.23.58-.24.29-.42.62-.54.97z" stroke="currentColor" stroke-width="1.2"/>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="'logout'">
-                    <path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M21 12H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M8 5v14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="'users'">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.4"/>
-                    <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.4"/>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="'lock'">
-                    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="currentColor" stroke-width="1.4"/>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="'layout-navbar'">
-                    <path d="M4 6h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M4 12h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M4 18h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="'history'">
-                    <path d="M3 3v5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                  </ng-container>
-                  <ng-container *ngSwitchDefault>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.4"/>
-                  </ng-container>
-                </svg>
+                <img class="menu-icon" [src]="getIconUrl(menu)" [alt]="getIconName(menu)" aria-hidden="true" (error)="onIconError($event)" />
                 <span class="item-label">{{ getMenuLabel(menu) }}</span>
               </button>
               
@@ -131,44 +94,7 @@
                         type="button"
                         [class.disabled]="isMenuDisabled(child)"
                         (click)="navigateToMenu(child); $event.stopPropagation()">
-                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" [ngSwitch]="getIconName(child)">
-                    <ng-container *ngSwitchCase="'user'">
-                      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" stroke="currentColor" stroke-width="1.4"/>
-                      <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.4"/>
-                    </ng-container>
-                    <ng-container *ngSwitchCase="'settings'">
-                      <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="currentColor" stroke-width="1.4"/>
-                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 2.3 16.88l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.27 3.7A2 2 0 0 1 7.1 1.88l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 11.3 1.7V1a2 2 0 0 1 4 0v.09c.2.07.39.17.56.29.6.41 1.39.26 1.8-.34l.06-.06A2 2 0 0 1 20.7 3.12l-.06.06a1.65 1.65 0 0 0-.33 1.82c.12.35.3.68.54.97.3.36.75.58 1.23.58H21a2 2 0 0 1 0 4h-.09c-.48 0-.93.22-1.23.58-.24.29-.42.62-.54.97z" stroke="currentColor" stroke-width="1.2"/>
-                    </ng-container>
-                    <ng-container *ngSwitchCase="'logout'">
-                      <path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M21 12H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M8 5v14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                    </ng-container>
-                    <ng-container *ngSwitchCase="'users'">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.4"/>
-                      <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.4"/>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.4"/>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.4"/>
-                    </ng-container>
-                    <ng-container *ngSwitchCase="'lock'">
-                      <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/>
-                      <path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="currentColor" stroke-width="1.4"/>
-                    </ng-container>
-                    <ng-container *ngSwitchCase="'layout-navbar'">
-                      <path d="M4 6h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                      <path d="M4 12h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                      <path d="M4 18h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                    </ng-container>
-                    <ng-container *ngSwitchCase="'history'">
-                      <path d="M3 3v5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </ng-container>
-                    <ng-container *ngSwitchDefault>
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.4"/>
-                    </ng-container>
-                  </svg>
+                  <img class="menu-icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
                   <span class="item-label">{{ getMenuLabel(child) }}</span>
                 </button>
               </ng-container>
