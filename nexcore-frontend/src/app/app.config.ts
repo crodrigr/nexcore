@@ -1,6 +1,8 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 
 // Transloco (i18n) - runtime, lazy-load
 import { provideTransloco } from '@ngneat/transloco';
@@ -16,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     // Http client required by Transloco loader
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
     // Transloco provider: runtime translations, default en, fallback en
     provideTransloco({
       loader: TranslocoHttpLoader,
@@ -48,3 +50,11 @@ export const appConfig: ApplicationConfig = {
     }
   ]
 };
+
+// Register the AuthInterceptor so it is picked up by withInterceptorsFromDi()
+export const httpInterceptorProviders = [
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+];
+
+// add interceptor provider to the global providers so the DI picks it up
+(appConfig.providers as any[]).push(...httpInterceptorProviders);

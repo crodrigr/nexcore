@@ -44,7 +44,6 @@ body.sidebar-collapsed .sidebar-footer .plan-card { display:none }
 
 .profile-card { display:flex; gap:8px; align-items:center; padding:2px }
 .avatar-square { width:48px; height:48px; background:linear-gradient(180deg,var(--color-interactive-primary),var(--color-interactive-primary-active)); color:var(--color-text-inverse); display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:800; font-size:13px }
-.profile-card { align-items:center }
 
 /* When collapsed, center the avatar horizontally */
 body.sidebar-collapsed .profile-card { justify-content:center }
@@ -52,6 +51,8 @@ body.sidebar-collapsed .profile-card { justify-content:center }
 .profile-info .role { font-size:9px; color:var(--color-text-secondary); margin-top:2px }
 
 .sidebar-nav { display:flex; flex-direction:column; gap:10px; margin-top:10px; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.sidebar-group { display:flex; flex-direction:column; gap:8px; }
+.sidebar-group-title { padding:6px 10px 2px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--color-text-tertiary, var(--color-text-secondary)); }
 .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 14px 10px 10px; color:var(--color-text-secondary); text-decoration:none; border-radius:8px; font-weight:600; position:relative }
 .sidebar-link.active {
   /* Full-width solid highlight for active item (strong contrast in dark & light) */
@@ -69,13 +70,12 @@ body.sidebar-collapsed .profile-card { justify-content:center }
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
-.sidebar-link .icon { transition: background 160ms ease, transform 160ms ease, color 160ms ease; }
+.sidebar-link .icon { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; opacity:0.95; border-radius:6px; transition: background 160ms ease, transform 160ms ease, color 160ms ease; }
+.sidebar-link.disabled { opacity: 0.6; pointer-events: none; }
 
 
 /* Remove old right-side indicator in favor of full pill */
 .sidebar-link.active::after { display: none; }
-.sidebar-link .icon { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; opacity:0.95; border-radius:6px }
-
 /* Ensure svg strokes/fills inherit color so icons switch to inverse on active */
 .sidebar-link svg { color: inherit; stroke: currentColor; fill: none }
 
@@ -124,27 +124,5 @@ body.sidebar-collapsed .sidebar-link[data-tooltip]:hover::after {
 
 /* Tooltip for collapsed sidebar items */
 .sidebar-link[data-tooltip] { position: relative }
-body.sidebar-collapsed .sidebar-link[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 84px; /* sidebar width (72) + gap */
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  padding: 8px 12px;
-  border-radius: 8px;
-  box-shadow: var(--shadow-md);
-  font-size: 13px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
-  transform-origin: left center;
-}
-body.sidebar-collapsed .sidebar-link[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(4px);
-}
 
 

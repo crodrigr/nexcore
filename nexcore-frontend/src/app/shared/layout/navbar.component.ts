@@ -1,10 +1,12 @@
-import { Component, OnInit, HostListener, ElementRef, ViewChild, createComponent, ApplicationRef, Injector, ComponentRef, EnvironmentInjector, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, HostListener, ElementRef, ViewChild, createComponent, ApplicationRef, Injector, ComponentRef, EnvironmentInjector, inject, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { ThemeToggleComponent } from '../theme/theme-toggle.component';
 import { NotificationComponent } from '../components/notification/notification.component';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import { ProfileService, MenuService, MenuItem, User } from '../services';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -25,8 +27,30 @@ export class NavbarComponent implements OnInit {
   availableLangs = ['en', 'es'];
   currentLang = 'en';
   showLangMenu = false;
+  
+  // Menús y usuario dinámicos desde el backend
+  navbarMenus$: Observable<MenuItem[]>;
+  profileMenus$: Observable<MenuItem[]>;
+  user$: Observable<User | null>;
+  userInitials = 'NC';
+  // Debug helper: render/console menu payloads
+  debugMenuOutput = false;
+  private subscriptions: Subscription[] = [];
 
-  constructor(private hostRef: ElementRef, private injector: Injector, private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private router: Router) {}
+  constructor(
+    private hostRef: ElementRef, 
+    private injector: Injector, 
+    private appRef: ApplicationRef, 
+    private environmentInjector: EnvironmentInjector, 
+    private router: Router,
+    private profileService: ProfileService,
+    private menuService: MenuService
+  ) {
+    // Inicializar observables de menús
+    this.navbarMenus$ = this.menuService.getNavbarMenus();
+    this.profileMenus$ = this.menuService.getProfileMenus();
+    this.user$ = this.profileService.user$;
+  }
 
   ngOnInit(): void {
     try {
@@ -45,6 +69,33 @@ export class NavbarComponent implements OnInit {
       this.currentLang = lang;
       this.transloco.setActiveLang(lang as string);
     } catch (e) {}
+    
+    // Cargar perfil desde el backend (o localStorage si ya existe)
+    this.profileService.loadProfile().subscribe({
+      next: (profile) => {
+        if (profile) {
+          console.log('[NavbarComponent] Profile loaded successfully');
+        }
+      },
+      error: (err) => {
+        console.error('[NavbarComponent] Error loading profile:', err);
+      }
+    });
+    
+    // Suscribirse a cambios de usuario para actualizar iniciales
+    this.subscriptions.push(this.user$.subscribe(user => {
+      if (user) {
+        this.userInitials = this.profileService.getUserInitials();
+      }
+    }));
+
+    // Debug: log emitted menu lists so we can inspect payloads
+    this.subscriptions.push(this.profileMenus$.subscribe(pm => {
+      console.debug('[Navbar] profileMenus emitted:', pm);
+    }));
+    this.subscriptions.push(this.navbarMenus$.subscribe(nm => {
+      console.debug('[Navbar] navbarMenus emitted:', nm);
+    }));
   }
 
   toggleSidebar() {
@@ -90,6 +141,10 @@ export class NavbarComponent implements OnInit {
   signOut() {
     // close the dropdown immediately
     this.showProfile = false;
+    
+    // Limpiar el perfil del servicio
+    this.profileService.clearProfile();
+    
     // attempt to clear common auth keys (non-destructive) and navigate to login
     try {
       localStorage.removeItem('auth');
@@ -133,6 +188,39 @@ export class NavbarComponent implements OnInit {
   selectLang(lang: string) {
     this.changeLang(lang);
     this.showLangMenu = false;
+  }
+  
+  /**
+   * Navega a una ruta de menú
+   * @param menu Item del menú
+   */
+  navigateToMenu(menu: MenuItem) {
+    if (!menu.route) return;
+
+    if (menu.name === 'Logout' || menu.route === '/auth/login') {
+      this.signOut();
+      return;
+    }
+    
+    if (menu.item_type === 'EXTERNAL_LINK') {
+      window.open(menu.route, '_blank');
+    } else {
+      this.router.navigate([menu.route]);
+      // Cerrar dropdowns al navegar
+      this.showProfile = false;
+    }
+  }
+  
+  /**
+   * Verifica si un menú está deshabilitado (access: 'view')
+   * @param menu Item del menú
+   */
+  isMenuDisabled(menu: MenuItem): boolean {
+    return menu.access === 'view';
+  }
+
+  getIconName(menu: MenuItem): string {
+    return menu.icon || 'default';
   }
 
   fallbackInline = false;
@@ -189,6 +277,9 @@ export class NavbarComponent implements OnInit {
 
   ngOnDestroy(): void {
     this.closeNotificationOverlay();
+    try {
+      this.subscriptions.forEach(s => s.unsubscribe());
+    } catch (e) {}
   }
 }
 

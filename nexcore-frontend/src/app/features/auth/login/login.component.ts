@@ -37,7 +37,7 @@ export class LoginComponent {
   
   tenants: Tenant[] = [
     { id: '00000000-0000-0000-0000-000000000001', name: 'Sistema' },
-    { id: '00000000-0000-0000-0001-000000000001', name: 'Demo' }
+    { id: '00000000-0000-0000-0000-000000000002', name: 'Demo' }
   ];
   
   constructor() {

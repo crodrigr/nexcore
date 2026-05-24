@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { Profile, ProfileService } from '../../../shared/services';
 
 export interface LoginRequest {
   tenantId: string;
@@ -25,7 +26,7 @@ export interface SessionResponse {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
-  profile: UserProfile;
+  profile: Profile;
 }
 
 export interface UserProfile {
@@ -33,9 +34,12 @@ export interface UserProfile {
   username: string;
   email: string;
   name: string;
+  roles?: string[];
+  phone?: string | null;
+  photo?: string | null;
   avatar?: string;
-  tenantId: string;
-  tenantName: string;
+  tenantId?: string;
+  tenantName?: string;
 }
 
 export interface ForgotPasswordRequest {
@@ -46,7 +50,8 @@ export interface ForgotPasswordRequest {
   providedIn: 'root'
 })
 export class AuthService {
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly profileService = inject(ProfileService);
   
   // State signals
   userProfile = signal<UserProfile | null>(null);
@@ -60,7 +65,7 @@ export class AuthService {
   // MÉTODOS MOCK (Fase 1 - Solo Frontend)
   // ============================================================
   
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   async login(request: LoginRequest): Promise<LoginResponse> {
     const url = `${environment.authBaseUrl}${environment.endpoints.login}`;
@@ -113,7 +118,7 @@ export class AuthService {
     try {
       const params = userId ? `?userId=${encodeURIComponent(userId)}` : '';
       const headers: any = {};
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         const token = localStorage.getItem('accessToken');
         if (token) headers['Authorization'] = `Bearer ${token}`;
       }
@@ -136,12 +141,13 @@ export class AuthService {
   }
   
   logout(): void {
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       sessionStorage.clear();
     }
     
+    this.profileService.clearProfile();
     this.userProfile.set(null);
     this.isAuthenticated.set(false);
     
@@ -149,23 +155,49 @@ export class AuthService {
   }
   
   private saveSession(response: SessionResponse): void {
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
     }
+
+    this.profileService.setProfile({
+      ...response.profile,
+      token: response.accessToken
+    });
     
-    this.userProfile.set(response.profile);
+    this.userProfile.set(this.mapProfileToUserProfile(response.profile));
     this.isAuthenticated.set(true);
   }
   
   private loadSessionFromStorage(): void {
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       const accessToken = localStorage.getItem('accessToken');
+      const storedProfile = localStorage.getItem('profile');
       
       if (accessToken) {
         this.isAuthenticated.set(true);
-        // TODO: Implementar validación de token y carga de perfil en Fase 2
+        if (storedProfile) {
+          try {
+            const profile = JSON.parse(storedProfile) as Profile;
+            this.userProfile.set(this.mapProfileToUserProfile(profile));
+          } catch (error) {
+            console.warn('[AuthService] Failed to restore profile from storage', error);
+          }
+        }
       }
     }
+  }
+
+  private mapProfileToUserProfile(profile: Profile): UserProfile {
+    return {
+      id: profile.user.iduser,
+      username: profile.user.username,
+      email: profile.user.email,
+      name: profile.user.name,
+      roles: profile.user.roles,
+      phone: profile.user.phone,
+      photo: profile.user.photo,
+      avatar: profile.user.photo ?? undefined
+    };
   }
 }

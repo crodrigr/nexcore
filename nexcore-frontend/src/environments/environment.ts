@@ -2,6 +2,7 @@
 export const environment = {
   production: false,
   authBaseUrl: 'http://localhost:8081',
+  coreBaseUrl: 'http://localhost:8080',
   endpoints: {
     login: '/auth/login',
     verifyOtp: '/auth/verify-otp',

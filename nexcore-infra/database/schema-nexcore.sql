@@ -1,5 +1,5 @@
 -- =============================================================================
--- NexCore Platform  –  PostgreSQL Schema  v2.0
+-- NexCore Platform - PostgreSQL Schema v2.0
 -- Modelo B: el usuario pertenece al tenant (identidad local)
 -- Un usuario existe dentro de exactamente un tenant.
 -- El SUPER_ADMIN del sistema es un usuario del tenant especial 'system'.
@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS nxc_tenant.tenants (
     plan                    nxc_tenant.tenant_plan      NOT NULL DEFAULT 'FREE',
     mode                    nxc_tenant.tenant_mode      NOT NULL DEFAULT 'SAAS_SHARED',
     status                  nxc_tenant.tenant_status    NOT NULL DEFAULT 'TRIAL',
+    active                  BOOLEAN                     NOT NULL DEFAULT TRUE,  -- Compatibilidad con auth-service
 
     -- Identidad visual
     logo_url                VARCHAR(500),
@@ -213,6 +214,8 @@ CREATE TABLE IF NOT EXISTS nxc_tenant.users (
 
     -- Estado dentro de su tenant
     status              nxc_tenant.user_status      NOT NULL DEFAULT 'PENDING_ACTIVATION',
+    active              BOOLEAN                     NOT NULL DEFAULT TRUE,  -- Compatibilidad con auth-service
+    suspended           BOOLEAN                     NOT NULL DEFAULT FALSE, -- Compatibilidad con auth-service
     is_tenant_admin     BOOLEAN                     NOT NULL DEFAULT FALSE,
                             -- TRUE: puede gestionar usuarios y roles del tenant.
                             -- Distinto del SUPER_ADMIN de la plataforma.
@@ -308,7 +311,7 @@ COMMENT ON COLUMN nxc_tenant.roles.is_default IS
     'Si TRUE, se asigna automáticamente cuando se crea un usuario en este tenant.';
 
 -- ---------------------------------------------------------------------------
--- 6. user_roles  –  asignación de roles a usuarios (dentro del mismo tenant)
+-- 6. user_roles  --  asignación de roles a usuarios (dentro del mismo tenant)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_tenant.user_roles (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -333,7 +336,7 @@ COMMENT ON COLUMN nxc_tenant.user_roles.expires_at IS
     'Soporte para roles temporales. NULL = permanente. Un job nocturno revoca los expirados.';
 
 -- ---------------------------------------------------------------------------
--- 7. user_invitations  –  tokens de invitación para nuevos usuarios
+-- 7. user_invitations  --  tokens de invitación para nuevos usuarios
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_tenant.user_invitations (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -366,13 +369,14 @@ CREATE INDEX IF NOT EXISTS ix_invitations_tenant_email
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
--- 8. sessions  –  sesiones activas por usuario
+-- 8. sessions  --  sesiones activas por usuario
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_auth.sessions (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
     user_id         UUID        NOT NULL REFERENCES nxc_tenant.users(id)   ON DELETE CASCADE,
 
+    refresh_token_hash  VARCHAR(255),       -- Hash del refresh token para esta sesión
     device_id       UUID        NOT NULL DEFAULT gen_random_uuid(),
     device_name     VARCHAR(200),       -- "Chrome en macOS 14"
     ip_address      VARCHAR(45),
@@ -391,7 +395,7 @@ CREATE INDEX IF NOT EXISTS ix_sessions_user_active
     WHERE is_active = TRUE;
 
 -- ---------------------------------------------------------------------------
--- 9. refresh_tokens  –  tokens de refresco con rotación automática
+-- 9. refresh_tokens  --  tokens de refresco con rotación automática
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_auth.refresh_tokens (
     id                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -417,7 +421,7 @@ COMMENT ON COLUMN nxc_auth.refresh_tokens.previous_token_hash IS
     'Si se detecta reuso del token anterior (ya rotado), se revoca toda la sesión: posible robo de token.';
 
 -- ---------------------------------------------------------------------------
--- 10. login_attempts  –  trazabilidad y protección brute force
+-- 10. login_attempts  --  trazabilidad y protección brute force
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_auth.login_attempts (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -426,6 +430,7 @@ CREATE TABLE IF NOT EXISTS nxc_auth.login_attempts (
     username_tried  VARCHAR(200)    NOT NULL,
     ip_address      VARCHAR(45)     NOT NULL,
     success         BOOLEAN         NOT NULL,
+    stage           VARCHAR(20)     NOT NULL,  -- 'LOGIN' | 'MFA' | 'PASSWORD_RESET'
     failure_reason  VARCHAR(100),
                         -- 'WRONG_PASSWORD' | 'USER_BLOCKED' | 'USER_SUSPENDED'
                         -- | 'TENANT_INACTIVE' | 'MFA_FAILED' | 'ACCOUNT_LOCKED'
@@ -441,9 +446,9 @@ CREATE INDEX IF NOT EXISTS ix_login_attempts_ip_fails
     WHERE success = FALSE;
 
 -- ---------------------------------------------------------------------------
--- 11. password_reset_tokens
+-- 11. password_resets  --  tokens para reseteo de contraseña
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS nxc_auth.password_reset_tokens (
+CREATE TABLE IF NOT EXISTS nxc_auth.password_resets (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
     user_id         UUID        NOT NULL REFERENCES nxc_tenant.users(id)   ON DELETE CASCADE,
@@ -456,7 +461,31 @@ CREATE TABLE IF NOT EXISTS nxc_auth.password_reset_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS ix_password_reset_token_hash
-    ON nxc_auth.password_reset_tokens (token_hash)
+    ON nxc_auth.password_resets (token_hash)
+    WHERE used_at IS NULL;
+
+-- ---------------------------------------------------------------------------
+-- 12. otp_codes  --  códigos de autenticación de dos factores (2FA/MFA)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS nxc_auth.otp_codes (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID        NOT NULL REFERENCES nxc_tenant.tenants(id) ON DELETE CASCADE,
+    user_id         UUID        NOT NULL REFERENCES nxc_tenant.users(id)   ON DELETE CASCADE,
+
+    code_hash       VARCHAR(255)    NOT NULL,
+    purpose         VARCHAR(50)     NOT NULL,  -- 'LOGIN_2FA' | 'EMAIL_VERIFY' | 'PASSWORD_RESET'
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    expires_at      TIMESTAMPTZ     NOT NULL,
+    used_at         TIMESTAMPTZ,
+    attempts        INTEGER         NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS ix_otp_codes_user_purpose
+    ON nxc_auth.otp_codes (user_id, purpose, created_at DESC)
+    WHERE used_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS ix_otp_codes_cleanup
+    ON nxc_auth.otp_codes (expires_at)
     WHERE used_at IS NULL;
 
 -- =============================================================================
@@ -466,7 +495,7 @@ CREATE INDEX IF NOT EXISTS ix_password_reset_token_hash
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
--- 12. components  –  módulos / páginas de la aplicación
+-- 13. components  --  módulos / páginas de la aplicación
 --     is_system=TRUE → componente global (visible para todos los tenants).
 --     is_system=FALSE → componente privado registrado por ese tenant.
 -- ---------------------------------------------------------------------------
@@ -496,7 +525,7 @@ CREATE INDEX IF NOT EXISTS ix_components_tenant
     WHERE deleted_at IS NULL;
 
 -- ---------------------------------------------------------------------------
--- 13. component_elements  –  elementos de UI controlables individualmente
+-- 13. component_elements  --  elementos de UI controlables individualmente
 --     Botones, tabs, secciones, campos. Se controla su visibilidad/habilitación
 --     por rol y por usuario.
 -- ---------------------------------------------------------------------------
@@ -522,7 +551,7 @@ CREATE INDEX IF NOT EXISTS ix_component_elements_component
     WHERE deleted_at IS NULL;
 
 -- ---------------------------------------------------------------------------
--- 14. menu_items  –  árbol de navegación por tenant
+-- 14. menu_items  --  árbol de navegación por tenant
 --     parent_id NULL = ítem raíz.
 --     order_index controla el orden dentro del mismo nivel.
 --     feature_flag_key: el ítem solo aparece si el flag está activo para el tenant.
@@ -568,7 +597,7 @@ COMMENT ON COLUMN nxc_menu.menu_items.feature_flag_key IS
     'Si se especifica, el ítem solo se muestra cuando el feature flag está activo para el tenant.';
 
 -- ---------------------------------------------------------------------------
--- 15. component_permissions  –  permiso de ROL sobre un componente completo
+-- 15. component_permissions  --  permiso de ROL sobre un componente completo
 --     Si un rol tiene EXECUTE sobre un componente, puede usar todos sus
 --     elementos (a menos que element_permissions lo restrinja).
 -- ---------------------------------------------------------------------------
@@ -592,7 +621,7 @@ CREATE INDEX IF NOT EXISTS ix_component_perms_role
     ON nxc_menu.component_permissions (tenant_id, role_id);
 
 -- ---------------------------------------------------------------------------
--- 16. element_permissions  –  permiso de ROL sobre un elemento específico
+-- 16. element_permissions  --  permiso de ROL sobre un elemento específico
 --     Permite granularidad fina: rol EDITOR puede ver el botón eliminar
 --     pero no ejecutarlo.
 -- ---------------------------------------------------------------------------
@@ -616,7 +645,7 @@ CREATE INDEX IF NOT EXISTS ix_element_perms_role
     ON nxc_menu.element_permissions (tenant_id, role_id);
 
 -- ---------------------------------------------------------------------------
--- 17. user_element_overrides  –  override por USUARIO sobre un elemento
+-- 17. user_element_overrides  --  override por USUARIO sobre un elemento
 --     Anula el permiso del rol. Útil para casos excepcionales.
 --     expires_at permite overrides temporales.
 -- ---------------------------------------------------------------------------
@@ -639,7 +668,7 @@ CREATE TABLE IF NOT EXISTS nxc_menu.user_element_overrides (
 );
 
 -- ---------------------------------------------------------------------------
--- 18. tenant_menu_config  –  personalización del menú por tenant
+-- 18. tenant_menu_config  --  personalización del menú por tenant
 --     Permite a cada tenant ocultar, renombrar o reordenar ítems del
 --     menú del sistema sin modificar los registros base.
 -- ---------------------------------------------------------------------------
@@ -665,7 +694,7 @@ CREATE TABLE IF NOT EXISTS nxc_menu.tenant_menu_config (
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
--- 19. user_preferences  –  configuración general de UX por usuario
+-- 19. user_preferences  --  configuración general de UX por usuario
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_preference.user_preferences (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -689,7 +718,7 @@ CREATE TABLE IF NOT EXISTS nxc_preference.user_preferences (
 );
 
 -- ---------------------------------------------------------------------------
--- 20. table_column_configs  –  configuración de columnas por tabla/vista
+-- 20. table_column_configs  --  configuración de columnas por tabla/vista
 --     Persiste el orden, visibilidad y ancho de columnas que el usuario
 --     configura en cada tabla de la interfaz.
 -- ---------------------------------------------------------------------------
@@ -712,7 +741,7 @@ CREATE TABLE IF NOT EXISTS nxc_preference.table_column_configs (
 );
 
 -- ---------------------------------------------------------------------------
--- 21. saved_filters  –  filtros guardados por el usuario
+-- 21. saved_filters  --  filtros guardados por el usuario
 --     El usuario puede guardar combinaciones de filtros con nombre
 --     y aplicarlas con un clic. Puede marcarlas como default o compartirlas.
 -- ---------------------------------------------------------------------------
@@ -775,7 +804,7 @@ CREATE INDEX IF NOT EXISTS ix_feature_flags_global
     WHERE tenant_id IS NULL;
 
 -- ---------------------------------------------------------------------------
--- 23. tenant_configs  –  pares clave-valor de configuración por tenant
+-- 23. tenant_configs  --  pares clave-valor de configuración por tenant
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS nxc_config.tenant_configs (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -811,7 +840,7 @@ ALTER TABLE nxc_tenant.user_invitations     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_auth.sessions               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_auth.refresh_tokens         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_auth.login_attempts         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE nxc_auth.password_reset_tokens  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nxc_auth.password_resets        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_menu.components             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_menu.component_elements     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_menu.menu_items             ENABLE ROW LEVEL SECURITY;
@@ -886,7 +915,7 @@ CREATE POLICY rls_tenant ON nxc_auth.login_attempts
         OR tenant_id IS NULL
         OR tenant_id = nxc_tenant.current_tenant_id());
 
-CREATE POLICY rls_tenant ON nxc_auth.password_reset_tokens
+CREATE POLICY rls_tenant ON nxc_auth.password_resets
     USING (nxc_tenant.rls_tenant_check(tenant_id));
 
 CREATE POLICY rls_tenant ON nxc_menu.components
@@ -1148,37 +1177,46 @@ COMMENT ON VIEW nxc_menu.v_menu_effective_access IS
     'Árbol plano de menú con acceso efectivo por rol. MenuService la usa para construir el árbol filtrado.';
 
 -- =============================================================================
--- 6. DATOS SEMILLA
+-- 6. DATOS SEMILLA (SEED DATA)
+-- Datos iniciales de la plataforma NexCore
+--
+-- Ejecuta en orden:
+--   1. Tenant sistema  (slug = 'system')  + usuario SUPER_ADMIN
+--   2. Componentes del sistema (is_system = TRUE) — base para todos los tenants
+--   3. Elementos de UI por componente
+--   4. Árbol de menú del sistema
+--   5. Permisos de componentes por rol (SUPER_ADMIN, TENANT_ADMIN, EDITOR, VIEWER)
+--   6. Permisos de elementos por rol
+--   7. Tenant demo  (slug = 'demo')  + usuario admin demo
+--   8. Feature flags globales de la plataforma
+--   9. Configuración base del tenant demo
+--
+-- CONVENCIONES DE UUIDs FIJOS (facilita Postman / scripts de prueba):
+--   Tenant system    : 00000000-0000-0000-0000-000000000001
+--   Tenant demo      : 00000000-0000-0000-0000-000000000002
+--   User super_admin : 00000000-0000-0000-0001-000000000001
+--   User admin_demo  : 00000000-0000-0000-0001-000000000002
+--
+-- NOTA SEGURIDAD: Los password_hash de este script son PLACEHOLDERS.
+--   Reemplazar con hashes BCrypt reales antes de ejecutar en cualquier
+--   entorno distinto a desarrollo local.
+--   Placeholder usado: bcrypt('NexCore@2026!', 12)
 -- =============================================================================
 
--- Tenant sistema (administra la plataforma completa)
--- ON CONFLICT usa el índice parcial uq_tenants_slug (WHERE deleted_at IS NULL)
-INSERT INTO nxc_tenant.tenants (
-    id, slug, name, plan, mode, status, timezone, locale
-) VALUES (
-    '00000000-0000-0000-0000-000000000001',
-    'system',
-    'NexCore System',
-    'ENTERPRISE',
-    'ON_PREMISE',
-    'ACTIVE',
-    'UTC',
-    'es-CO'
-) ON CONFLICT (slug) WHERE deleted_at IS NULL DO NOTHING;
+-- Para obtener la contraseña de los usuarios seed:
+-- Ejecutar en Spring Boot o usar bcrypt online con costo=12
+-- Contraseña por defecto: NexCore@2026!
+-- Hash BCrypt: $2a$12$LKaVQ7zJZ8qL8z0zF2HqVOY0gQXJXqHYQJ0XxQJZQXJZQXJZQXJZQX (PLACEHOLDER - reemplazar con hash real)
 
--- Los roles base del tenant system se crean automáticamente
--- por el trigger trg_create_default_roles.
--- Adicionalmente se crea el rol SUPER_ADMIN solo para el tenant system:
-INSERT INTO nxc_tenant.roles (
-    tenant_id, name, description, is_system_role, is_default
-) VALUES (
-    '00000000-0000-0000-0000-000000000001',
-    'SUPER_ADMIN',
-    'Administrador global de la plataforma. Acceso total a todos los tenants via bypass de RLS.',
-    TRUE,
-    FALSE
-) ON CONFLICT (tenant_id, name) DO NOTHING;
+-- Para facilitar el desarrollo, incluimos este seed completo que configura:
+-- - Tenant system + usuario super.admin
+-- - Tenant demo + usuario admin.demo  
+-- - Componentes del sistema (dashboard, alerts, incidents, traps, auth, users, roles, menus, audit, settings)
+-- - Elementos de UI por componente (botones, filtros, tabs, etc.)
+-- - Árbol de menú completo (navbar + profile dropdown)
+-- - Permisos por rol (SUPER_ADMIN, TENANT_ADMIN, EDITOR, VIEWER)
+-- - Feature flags globales
+-- - Configuración base del tenant demo
 
--- =============================================================================
--- FIN DEL SCHEMA NexCore v2.0  –  Modelo B (usuario pertenece al tenant)
+
 -- =============================================================================

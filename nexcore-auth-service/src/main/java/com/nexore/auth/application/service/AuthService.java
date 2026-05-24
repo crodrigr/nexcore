@@ -49,9 +49,18 @@ public class AuthService {
     @Transactional
     public ChallengeResponse login(LoginRequest request) {
         String ipAddress = getClientIp();
+        
+        // DEBUG: Log request details
+        log.info("🔍 LOGIN REQUEST - TenantId: {}, Username: {}, Password: '{}', IP: {}", 
+                request.getTenantId(), 
+                request.getUsername(), 
+                request.getPassword(),
+                ipAddress);
 
         Tenant tenant = tenantRepository.findById(request.getTenantId())
                 .orElseThrow(() -> new TenantNotFoundException(request.getTenantId(), "Tenant not found"));
+        
+        log.info("✅ Tenant found - ID: {}, Name: {}, Active: {}", tenant.getId(), tenant.getName(), tenant.getActive());
 
         if (!tenant.getActive()) {
             throw new TenantInactiveException(request.getTenantId(), "Tenant is inactive");
@@ -59,6 +68,18 @@ public class AuthService {
 
         User user = userRepository.findByTenantIdAndUsername(request.getTenantId(), request.getUsername())
                 .orElse(null);
+        
+        if (user == null) {
+            log.warn("❌ User NOT found - TenantId: {}, Username: {}", request.getTenantId(), request.getUsername());
+        } else {
+            log.info("✅ User found - ID: {}, Username: {}, Email: {}, Active: {}, Suspended: {}, PasswordHash: {}", 
+                    user.getId(), 
+                    user.getUsername(), 
+                    user.getEmail(),
+                    user.getActive(), 
+                    user.getSuspended(),
+                    user.getPasswordHash() != null ? user.getPasswordHash().substring(0, 20) + "..." : "NULL");
+        }
 
         try {
             bruteForceProtection.checkRateLimit(user != null ? user.getId() : null, ipAddress);
@@ -85,6 +106,11 @@ public class AuthService {
         }
 
         boolean passwordMatches = BCrypt.checkpw(request.getPassword(), user.getPasswordHash());
+        log.info("🔐 Password validation - Matches: {}, Input password: '{}', Stored hash: '{}'", 
+                passwordMatches, 
+                request.getPassword(),
+                user.getPasswordHash().substring(0, 30) + "...");
+        
         if (!passwordMatches) {
             recordFailedAttempt(user.getId(), user.getTenantId(), user.getUsername(), ipAddress, "CREDENTIALS");
             bruteForceProtection.recordFailedAttempt(user.getId(), ipAddress);
