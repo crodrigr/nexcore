@@ -16,6 +16,7 @@ import { MenuItem, MenuService, ProfileService } from '../services';
 export class SidebarComponent implements OnInit {
   sidebarMenus$: Observable<MenuItem[]>;
   activeRoute: string | null = null;
+  expandedGroups: Record<string, boolean> = {};
   private readonly translocoService: TranslocoService;
   private readonly defaultIcon = 'menu';
 
@@ -107,6 +108,21 @@ export class SidebarComponent implements OnInit {
     this.activeRoute = this.normalizeRoute(route);
   }
 
+  toggleGroup(menu: MenuItem): void {
+    const groupId = this.getGroupKey(menu);
+    this.expandedGroups[groupId] = !this.isGroupExpanded(menu);
+  }
+
+  isGroupExpanded(menu: MenuItem): boolean {
+    const groupId = this.getGroupKey(menu);
+    if (groupId in this.expandedGroups) {
+      return this.expandedGroups[groupId];
+    }
+
+    const hasActiveChild = (menu.children || []).some(child => this.isMenuActive(child.route));
+    return hasActiveChild;
+  }
+
   isMenuActive(route: string | null): boolean {
     const normalizedRoute = this.normalizeRoute(route);
     if (!normalizedRoute || !this.activeRoute) {
@@ -152,5 +168,9 @@ export class SidebarComponent implements OnInit {
     const normalizedIcon = (icon || this.defaultIcon).trim().toLowerCase().replace(/\.svg$/i, '');
     const aliasedIcon = this.iconAliases[normalizedIcon] || normalizedIcon;
     return `/assets/icons/${aliasedIcon}.svg`;
+  }
+
+  private getGroupKey(menu: MenuItem): string {
+    return menu.id || menu.name || 'group';
   }
 }

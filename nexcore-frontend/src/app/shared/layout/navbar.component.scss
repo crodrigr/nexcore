@@ -62,6 +62,10 @@
   width: 18px;
   height: 18px;
   color: var(--color-text-secondary);
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  flex: 0 0 18px;
   transition: color 140ms ease;
 }
 
@@ -337,7 +341,16 @@
 .profile-meta .email { font-size:12px; color:var(--color-text-secondary); margin-top:2px }
 .profile-actions { display:flex; flex-direction:column; padding-top:8px }
 .profile-actions .item { padding:8px 6px; color:var(--color-text-primary); text-decoration:none; cursor:pointer; border-radius:6px; display:flex; align-items:center; gap:10px; background:transparent; border:none; width: 100%; text-align: left; transition: background 160ms ease, transform 120ms ease }
-.profile-actions .item .menu-icon { width:18px; height:18px; margin-right:6px; color:var(--color-text-secondary); flex:0 0 18px }
+.profile-actions .item .menu-icon {
+  width:18px;
+  height:18px;
+  margin-right:6px;
+  color:var(--color-text-secondary);
+  flex:0 0 18px;
+  display:block;
+  object-fit: contain;
+  object-position: center;
+}
 .profile-actions .item .item-label { font-size:13px; flex: 1 }
 .profile-actions .item.logout { color: var(--color-interactive-danger) }
 .profile-actions .item.logout .menu-icon { color: var(--color-interactive-danger) }

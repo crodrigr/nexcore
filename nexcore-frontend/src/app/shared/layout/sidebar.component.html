@@ -15,18 +15,31 @@
            <span>{{ getMenuLabel(menu) }}</span>
         </a>
 
-        <div *ngIf="menu.item_type === 'GROUP'" class="sidebar-group">
-           <div class="sidebar-group-title">{{ getMenuLabel(menu) }}</div>
-          <a *ngFor="let child of menu.children"
-             [routerLink]="child.route"
-             class="sidebar-link"
-             [class.active]="isMenuActive(child.route)"
-             [class.disabled]="isMenuDisabled(child)"
-             (click)="setActiveMenu(child.route)"
-             [attr.data-tooltip]="getMenuLabel(child)">
-            <img class="icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
-            <span>{{ getMenuLabel(child) }}</span>
-          </a>
+        <div *ngIf="menu.item_type === 'GROUP'" class="sidebar-group" [class.expanded]="isGroupExpanded(menu)">
+          <button type="button"
+                  class="sidebar-group-toggle"
+                  [attr.aria-expanded]="isGroupExpanded(menu)"
+                  [attr.data-tooltip]="getMenuLabel(menu)"
+                  (click)="toggleGroup(menu)">
+            <span class="sidebar-group-main">
+              <img class="icon" [src]="getIconUrl(menu)" [alt]="getIconName(menu)" aria-hidden="true" (error)="onIconError($event)" />
+              <span class="sidebar-group-title">{{ getMenuLabel(menu) }}</span>
+            </span>
+            <span class="sidebar-group-chevron" [class.open]="isGroupExpanded(menu)">▾</span>
+          </button>
+
+          <div class="sidebar-group-children" [class.hidden]="!isGroupExpanded(menu)">
+            <a *ngFor="let child of menu.children"
+               [routerLink]="child.route"
+               class="sidebar-link child-link"
+               [class.active]="isMenuActive(child.route)"
+               [class.disabled]="isMenuDisabled(child)"
+               (click)="setActiveMenu(child.route)"
+               [attr.data-tooltip]="getMenuLabel(child)">
+              <img class="icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
+              <span>{{ getMenuLabel(child) }}</span>
+            </a>
+          </div>
         </div>
       </ng-container>
     </ng-container>

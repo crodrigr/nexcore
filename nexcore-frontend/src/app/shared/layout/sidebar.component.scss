@@ -52,7 +52,161 @@ body.sidebar-collapsed .profile-card { justify-content:center }
 
 .sidebar-nav { display:flex; flex-direction:column; gap:10px; margin-top:10px; flex: 1; overflow-y: auto; overflow-x: hidden; }
 .sidebar-group { display:flex; flex-direction:column; gap:8px; }
-.sidebar-group-title { padding:6px 10px 2px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--color-text-tertiary, var(--color-text-secondary)); }
+
+/* Unified typography for all menu nodes (items, groups and children) */
+.sidebar-link,
+.sidebar-group-toggle,
+.sidebar-group-title {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid transparent;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-radius: 10px;
+  padding: 9px 12px 9px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.sidebar-group-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sidebar-group-title {
+  padding: 0;
+  letter-spacing: normal;
+  text-transform: none;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-group-chevron {
+  color: inherit;
+  font-size: 11px;
+  line-height: 1;
+  transition: transform 140ms ease;
+}
+.sidebar-group-chevron.open { transform: rotate(180deg); }
+
+.sidebar-group-children {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 0 8px;
+  padding: 6px 6px 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-surface);
+  position: relative;
+  overflow: hidden;
+  transform-origin: top;
+  transition: opacity 180ms ease, transform 180ms ease, margin 180ms ease;
+}
+
+.sidebar-group-children::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-interactive-primary), var(--color-interactive-primary-active));
+  opacity: 0.2;
+}
+
+.sidebar-group-children.hidden {
+  display: none;
+}
+
+.sidebar-group .child-link {
+  margin-left: 6px;
+  padding: 8px 10px 8px 12px;
+  min-height: 36px;
+  border-left: 0;
+  border-radius: 8px;
+  position: relative;
+}
+
+.sidebar-group .child-link::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-border-light);
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.sidebar-group .child-link:hover {
+  background: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.sidebar-group .child-link.active {
+  background: var(--color-interactive-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-group .child-link:hover::before,
+.sidebar-group .child-link.active::before {
+  background: var(--color-interactive-primary);
+  transform: translateY(-50%) scale(1.15);
+}
+
+.sidebar-group-toggle:hover {
+  background: var(--hover-bg);
+  color: var(--hover-text);
+  border-color: var(--color-border-light);
+  transform: translateX(2px);
+}
+
+.sidebar-group.expanded .sidebar-group-toggle {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.sidebar-group-toggle .icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  opacity: 0.95;
+  border-radius: 6px;
+  object-fit: contain;
+  object-position: center;
+  flex: 0 0 auto;
+}
+
+body.sidebar-collapsed .sidebar-group-toggle {
+  justify-content: center;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
+}
+body.sidebar-collapsed .sidebar-group .sidebar-link.hidden { display: none; }
+body.sidebar-collapsed .sidebar-group-toggle .sidebar-group-title { display: none; }
+body.sidebar-collapsed .sidebar-group-toggle .sidebar-group-chevron { display: none; }
+body.sidebar-collapsed .sidebar-group-children { display: none; }
+body.sidebar-collapsed .sidebar-group .child-link {
+  margin-left: 0;
+  padding-left: 10px;
+  border-left: 0;
+  border-radius: 8px;
+}
+
 .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 14px 10px 10px; color:var(--color-text-secondary); text-decoration:none; border-radius:8px; font-weight:600; position:relative }
 .sidebar-link.active {
   /* Full-width solid highlight for active item (strong contrast in dark & light) */
@@ -70,7 +224,17 @@ body.sidebar-collapsed .profile-card { justify-content:center }
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
-.sidebar-link .icon { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; opacity:0.95; border-radius:6px; transition: background 160ms ease, transform 160ms ease, color 160ms ease; }
+.sidebar-link .icon {
+  width:20px;
+  height:20px;
+  display:block;
+  opacity:0.95;
+  border-radius:6px;
+  object-fit: contain;
+  object-position: center;
+  flex: 0 0 auto;
+  transition: background 160ms ease, transform 160ms ease, color 160ms ease;
+}
 .sidebar-link.disabled { opacity: 0.6; pointer-events: none; }
 
 
@@ -87,7 +251,14 @@ body.sidebar-collapsed .profile-card { justify-content:center }
 .small { font-size:12px; color:var(--color-text-secondary); margin-top:6px }
 
 /* Collapsed state: keep icon sizes consistent and show active icon background */
-body.sidebar-collapsed .sidebar-link .icon { width:32px; height:32px; border-radius:8px; background: transparent }
+body.sidebar-collapsed .sidebar-link .icon {
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background: transparent;
+  object-fit: contain;
+  object-position: center;
+}
 body.sidebar-collapsed .sidebar-link.active { background: transparent; color: var(--color-text-secondary); }
 body.sidebar-collapsed .sidebar-link.active .icon {
   background: linear-gradient(180deg, var(--color-interactive-primary), var(--color-interactive-primary-active));

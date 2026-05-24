@@ -1042,6 +1042,521 @@ BEGIN
 END $$;
 
 -- =============================================================================
+-- BLOQUE 10 — CONSOLIDACIÓN FINAL SUPER_ADMIN
+-- Integra la configuración final para dejar activo solo el menú/componentes
+-- necesarios para SUPER_ADMIN.
+-- =============================================================================
+
+DO $$
+DECLARE
+    v_tid_system        UUID := '00000000-0000-0000-0000-000000000001';
+    v_uid_super_admin   UUID := '00000000-0000-0000-0001-000000000001';
+
+    v_role_sys_super    UUID;
+    v_role_sys_admin    UUID;
+    v_role_sys_editor   UUID;
+    v_role_sys_viewer   UUID;
+
+    v_role_demo_admin   UUID;
+    v_role_demo_editor  UUID;
+    v_role_demo_viewer  UUID;
+
+    v_comp_dashboard    UUID;
+    v_comp_tenants      UUID;
+    v_comp_users        UUID;
+    v_comp_audit        UUID;
+    v_comp_feature      UUID;
+    v_comp_platform     UUID;
+    v_comp_auth         UUID;
+
+    v_menu_profile_group UUID;
+BEGIN
+    RAISE NOTICE '=== BLOQUE 10: Consolidación SUPER_ADMIN ===';
+
+    SELECT id INTO v_role_sys_super  FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'SUPER_ADMIN';
+    SELECT id INTO v_role_sys_admin  FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'TENANT_ADMIN';
+    SELECT id INTO v_role_sys_editor FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'EDITOR';
+    SELECT id INTO v_role_sys_viewer FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'VIEWER';
+
+    SELECT id INTO v_role_demo_admin  FROM nxc_tenant.roles WHERE tenant_id = '00000000-0000-0000-0000-000000000002' AND name = 'TENANT_ADMIN';
+    SELECT id INTO v_role_demo_editor FROM nxc_tenant.roles WHERE tenant_id = '00000000-0000-0000-0000-000000000002' AND name = 'EDITOR';
+    SELECT id INTO v_role_demo_viewer FROM nxc_tenant.roles WHERE tenant_id = '00000000-0000-0000-0000-000000000002' AND name = 'VIEWER';
+
+    -- 1) Limpiar componentes/menús legacy que no van en el baseline final
+    DELETE FROM nxc_menu.components
+    WHERE tenant_id = v_tid_system
+      AND module_key IN ('alerts', 'incidents', 'traps', 'role-management', 'menu-management', 'tenant-settings');
+
+    DELETE FROM nxc_menu.menu_items
+    WHERE tenant_id = v_tid_system
+      AND (
+            (location = 'sidebar' AND name NOT IN ('dashboard', 'tenant-management', 'identity-access', 'audit-viewer', 'feature-flags', 'platform-settings'))
+         OR (location = 'profile' AND name NOT IN ('ProfileMenu', 'Profile', 'Settings', 'Logout'))
+      );
+
+    -- 2) Upsert de componentes finales
+    INSERT INTO nxc_menu.components (tenant_id, module_key, name, route, description, is_system, created_by, created_at, updated_at, version)
+    VALUES
+        (v_tid_system, 'dashboard',         'Dashboard',         '/dashboard',       'Dashboard principal',                            TRUE, v_uid_super_admin, NOW(), NOW(), 0),
+        (v_tid_system, 'tenant-management', 'Tenant Management', '/tenants',         'Administración de tenants',                      TRUE, v_uid_super_admin, NOW(), NOW(), 0),
+        (v_tid_system, 'user-management',   'Identity & Access', '/identity-access', 'Administración de identidad y accesos',          TRUE, v_uid_super_admin, NOW(), NOW(), 0),
+        (v_tid_system, 'audit-viewer',      'Audit Viewer',      '/audit',           'Auditoría de plataforma',                        TRUE, v_uid_super_admin, NOW(), NOW(), 0),
+        (v_tid_system, 'feature-flags',     'Feature Flags',     '/feature-flags',   'Feature flags globales',                         TRUE, v_uid_super_admin, NOW(), NOW(), 0),
+        (v_tid_system, 'platform-settings', 'Platform Settings', '/settings',        'Configuración global de plataforma',             TRUE, v_uid_super_admin, NOW(), NOW(), 0)
+    ON CONFLICT (tenant_id, module_key)
+    DO UPDATE SET
+        name = EXCLUDED.name,
+        route = EXCLUDED.route,
+        description = EXCLUDED.description,
+        is_system = TRUE,
+        updated_at = NOW();
+
+    SELECT id INTO v_comp_dashboard FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'dashboard';
+    SELECT id INTO v_comp_tenants   FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'tenant-management';
+    SELECT id INTO v_comp_users     FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'user-management';
+    SELECT id INTO v_comp_audit     FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'audit-viewer';
+    SELECT id INTO v_comp_feature   FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'feature-flags';
+    SELECT id INTO v_comp_platform  FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'platform-settings';
+    SELECT id INTO v_comp_auth      FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'auth';
+
+    -- 3) Sidebar final
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_dashboard, title = 'menu.dashboard', route = '/dashboard', icon = 'dashboard', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 1, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
+        updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'dashboard';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_dashboard, NULL, 'dashboard', 'menu.dashboard', '/dashboard', 'dashboard', 'tabler', 'sidebar', 'ITEM', 1, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_tenants, title = 'menu.tenants', route = '/tenants', icon = 'users', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 2, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
+        updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'tenant-management';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_tenants, NULL, 'tenant-management', 'menu.tenants', '/tenants', 'users', 'tabler', 'sidebar', 'ITEM', 2, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_users, title = 'menu.identity_access', route = '/identity-access', icon = 'profile', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 3, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
+        updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'identity-access';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_users, NULL, 'identity-access', 'menu.identity_access', '/identity-access', 'profile', 'tabler', 'sidebar', 'ITEM', 3, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_audit, title = 'menu.audit', route = '/audit', icon = 'chart-bar', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 4, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
+        updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'audit-viewer';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_audit, NULL, 'audit-viewer', 'menu.audit', '/audit', 'chart-bar', 'tabler', 'sidebar', 'ITEM', 4, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_feature, title = 'menu.feature_flags', route = '/feature-flags', icon = 'bell', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 5, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
+        updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'feature-flags';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_feature, NULL, 'feature-flags', 'menu.feature_flags', '/feature-flags', 'bell', 'tabler', 'sidebar', 'ITEM', 5, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_platform, title = 'menu.platform_settings', route = '/settings', icon = 'settings', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 6, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
+        updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'platform-settings';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_platform, NULL, 'platform-settings', 'menu.platform_settings', '/settings', 'settings', 'tabler', 'sidebar', 'ITEM', 6, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    -- 4) Profile final (Logout en EXECUTE)
+    SELECT id INTO v_menu_profile_group
+    FROM nxc_menu.menu_items
+    WHERE tenant_id = v_tid_system AND location = 'profile' AND parent_id IS NULL AND name = 'ProfileMenu'
+    LIMIT 1;
+
+    IF v_menu_profile_group IS NULL THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, NULL, NULL, 'ProfileMenu', 'menu.profile_menu', NULL, 'profile', 'tabler', 'profile', 'GROUP', 50, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0)
+        RETURNING id INTO v_menu_profile_group;
+    ELSE
+        UPDATE nxc_menu.menu_items
+        SET title = 'menu.profile_menu', icon = 'profile', icon_type = 'tabler', order_index = 50,
+            is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level, updated_at = NOW()
+        WHERE id = v_menu_profile_group;
+    END IF;
+
+    DELETE FROM nxc_menu.menu_items
+    WHERE tenant_id = v_tid_system
+      AND location = 'profile'
+      AND parent_id = v_menu_profile_group
+      AND name NOT IN ('Profile', 'Settings', 'Logout');
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = NULL, parent_id = v_menu_profile_group, title = 'menu.profile', route = '/profile', icon = 'profile', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 10, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level, updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'profile' AND name = 'Profile';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, NULL, v_menu_profile_group, 'Profile', 'menu.profile', '/profile', 'profile', 'tabler', 'profile', 'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_platform, parent_id = v_menu_profile_group, title = 'menu.settings', route = '/settings', icon = 'settings', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 20, is_visible = TRUE, is_system = TRUE, default_access = 'HIDDEN'::nxc_menu.access_level, updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'profile' AND name = 'Settings';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_platform, v_menu_profile_group, 'Settings', 'menu.settings', '/settings', 'settings', 'tabler', 'profile', 'ITEM', 20, TRUE, TRUE, 'HIDDEN'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    UPDATE nxc_menu.menu_items
+    SET component_id = v_comp_auth, parent_id = v_menu_profile_group, title = 'menu.logout', route = '/auth/login', icon = 'close', icon_type = 'tabler',
+        item_type = 'ITEM', order_index = 30, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level, updated_at = NOW()
+    WHERE tenant_id = v_tid_system AND location = 'profile' AND name = 'Logout';
+    IF NOT FOUND THEN
+        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+        VALUES (v_tid_system, v_comp_auth, v_menu_profile_group, 'Logout', 'menu.logout', '/auth/login', 'close', 'tabler', 'profile', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
+    END IF;
+
+    -- 5) Permisos finales del SUPER_ADMIN y baseline de roles restantes
+    DELETE FROM nxc_menu.component_permissions
+    WHERE tenant_id = v_tid_system
+      AND component_id IN (
+          SELECT id FROM nxc_menu.components
+          WHERE tenant_id = v_tid_system
+            AND module_key NOT IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+      );
+
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT v_tid_system, v_role_sys_super, c.id, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = 'EXECUTE'::nxc_menu.access_level,
+            updated_at = NOW();
+
+    -- Roles no super-admin quedan restringidos en componentes administrativos
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT v_tid_system, v_role_sys_admin, c.id,
+           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'EXECUTE'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
+           v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = EXCLUDED.access,
+            updated_at = NOW();
+
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT v_tid_system, v_role_sys_editor, c.id,
+           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'EXECUTE'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
+           v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = EXCLUDED.access,
+            updated_at = NOW();
+
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT v_tid_system, v_role_sys_viewer, c.id,
+           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'VIEW'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
+           v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = EXCLUDED.access,
+            updated_at = NOW();
+
+    -- Alinear permisos del tenant demo al nuevo baseline
+    DELETE FROM nxc_menu.component_permissions
+    WHERE tenant_id = '00000000-0000-0000-0000-000000000002'
+      AND component_id IN (
+          SELECT id FROM nxc_menu.components
+          WHERE tenant_id = v_tid_system
+            AND module_key NOT IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+      );
+
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT '00000000-0000-0000-0000-000000000002'::UUID, v_role_demo_admin, c.id,
+           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'EXECUTE'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
+           v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = EXCLUDED.access,
+            updated_at = NOW();
+
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT '00000000-0000-0000-0000-000000000002'::UUID, v_role_demo_editor, c.id,
+           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'EXECUTE'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
+           v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = EXCLUDED.access,
+            updated_at = NOW();
+
+    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+    SELECT '00000000-0000-0000-0000-000000000002'::UUID, v_role_demo_viewer, c.id,
+           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'VIEW'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
+           v_uid_super_admin, NOW(), NOW()
+    FROM nxc_menu.components c
+    WHERE c.tenant_id = v_tid_system
+      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+        SET access = EXCLUDED.access,
+            updated_at = NOW();
+
+    RAISE NOTICE 'Consolidación SUPER_ADMIN aplicada (logout en EXECUTE).';
+END $$;
+
+-- =============================================================================
+-- BLOQUE 11 — CONSOLIDACIÓN TENANT DEMO (antes en 02-admin-user-config.sql)
+-- Deja el tenant demo con navegación navbar/profile y usuarios demo base.
+-- =============================================================================
+
+DO $$
+DECLARE
+        v_tenant_id            UUID := '00000000-0000-0000-0000-000000000002';
+        v_user_admin_id        UUID := '00000000-0000-0000-0001-000000000002';
+        v_user_editor_id       UUID := '00000000-0000-0000-0001-000000000003';
+
+        v_role_tenant_admin    UUID;
+        v_role_editor          UUID;
+
+        v_comp_identity_access UUID;
+        v_comp_navigation      UUID;
+        v_comp_audit           UUID;
+        v_comp_tenant_settings UUID;
+        v_comp_profile         UUID;
+        v_comp_crm             UUID;
+        v_comp_projects        UUID;
+        v_comp_monitoring      UUID;
+
+        v_menu_admin_group     UUID;
+        v_menu_profile_group   UUID;
+
+        v_exists               INTEGER;
+BEGIN
+        RAISE NOTICE '=== BLOQUE 11: Consolidación tenant demo ===';
+
+        -- Validaciones base
+        SELECT COUNT(*) INTO v_exists
+        FROM nxc_tenant.tenants
+        WHERE id = v_tenant_id AND deleted_at IS NULL;
+        IF v_exists = 0 THEN
+                RAISE EXCEPTION 'Tenant % no existe', v_tenant_id;
+        END IF;
+
+        SELECT id INTO v_role_tenant_admin
+        FROM nxc_tenant.roles
+        WHERE tenant_id = v_tenant_id
+            AND name = 'TENANT_ADMIN'
+            AND deleted_at IS NULL
+        LIMIT 1;
+
+        IF v_role_tenant_admin IS NULL THEN
+                RAISE EXCEPTION 'Role TENANT_ADMIN no existe para tenant %', v_tenant_id;
+        END IF;
+
+        SELECT id INTO v_role_editor
+        FROM nxc_tenant.roles
+        WHERE tenant_id = v_tenant_id
+            AND name = 'EDITOR'
+            AND deleted_at IS NULL
+        LIMIT 1;
+
+        IF v_role_editor IS NULL THEN
+                RAISE EXCEPTION 'Role EDITOR no existe para tenant %', v_tenant_id;
+        END IF;
+
+        -- Usuario TENANT_ADMIN demo (id fijo)
+        UPDATE nxc_tenant.users
+        SET tenant_id = v_tenant_id,
+                status = 'ACTIVE',
+                is_tenant_admin = TRUE,
+                email_verified = TRUE,
+                email_verified_at = COALESCE(email_verified_at, NOW()),
+                updated_at = NOW()
+        WHERE id = v_user_admin_id;
+
+        IF NOT FOUND THEN
+                INSERT INTO nxc_tenant.users (
+                        id, tenant_id, username, email, password_hash, full_name,
+                        status, is_tenant_admin, email_verified, email_verified_at,
+                        activated_at, created_at, updated_at, version
+                ) VALUES (
+                        v_user_admin_id, v_tenant_id,
+                        'admin.demo', 'admin.demo@nexcore.io',
+                        '$2a$12$2SgNZ1P9TWruO3hmUqL6u.U3K4mKg9o7xtK6N8uZJXVxjFqbMDf/y',
+                        'Admin Demo',
+                        'ACTIVE', TRUE, TRUE, NOW(),
+                        NOW(), NOW(), NOW(), 0
+                );
+        END IF;
+
+        -- Dejar solo TENANT_ADMIN para admin.demo
+        DELETE FROM nxc_tenant.user_roles
+        WHERE tenant_id = v_tenant_id
+            AND user_id = v_user_admin_id;
+
+        INSERT INTO nxc_tenant.user_roles (tenant_id, user_id, role_id, assigned_at, assigned_by)
+        VALUES (v_tenant_id, v_user_admin_id, v_role_tenant_admin, NOW(), v_user_admin_id)
+        ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING;
+
+        -- Usuario EDITOR demo
+        INSERT INTO nxc_tenant.users (
+                id, tenant_id, username, email, password_hash, full_name,
+                status, is_tenant_admin, email_verified, email_verified_at,
+                activated_at, created_at, updated_at, version
+        ) VALUES (
+                v_user_editor_id, v_tenant_id,
+                'editor.demo', 'editor.demo@nexcore.io',
+                '$2a$12$2SgNZ1P9TWruO3hmUqL6u.U3K4mKg9o7xtK6N8uZJXVxjFqbMDf/y',
+                'Editor Demo',
+                'ACTIVE', FALSE, TRUE, NOW(),
+                NOW(), NOW(), NOW(), 0
+        )
+        ON CONFLICT (id) DO UPDATE
+        SET tenant_id = EXCLUDED.tenant_id,
+                username = EXCLUDED.username,
+                email = EXCLUDED.email,
+                full_name = EXCLUDED.full_name,
+                status = 'ACTIVE',
+                is_tenant_admin = FALSE,
+                updated_at = NOW();
+
+        -- Dejar solo EDITOR para editor.demo
+        DELETE FROM nxc_tenant.user_roles
+        WHERE tenant_id = v_tenant_id
+            AND user_id = v_user_editor_id;
+
+        INSERT INTO nxc_tenant.user_roles (tenant_id, user_id, role_id, assigned_at, assigned_by)
+        VALUES (v_tenant_id, v_user_editor_id, v_role_editor, NOW(), v_user_admin_id)
+        ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING;
+
+        -- Componentes del tenant demo para navbar/profile
+        INSERT INTO nxc_menu.components (tenant_id, module_key, name, route, description, is_system, created_by, created_at, updated_at, version)
+        VALUES
+            (v_tenant_id, 'user-management', 'Identity & Access', '/identity-access', 'Identity & Access', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'menu-management', 'Navigation', '/admin/menus', 'Navigation', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'audit-viewer', 'Audit', '/audit', 'Audit', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'tenant-settings', 'Tenant Settings', '/settings', 'Tenant Settings', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'profile', 'Profile', '/profile', 'Profile', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'crm', 'CRM', '/crm', 'CRM', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'projects', 'Projects', '/projects', 'Projects', TRUE, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, 'monitoring', 'Monitoring', '/monitoring', 'Monitoring', TRUE, v_user_admin_id, NOW(), NOW(), 0)
+        ON CONFLICT (tenant_id, module_key) DO UPDATE
+        SET name = EXCLUDED.name,
+                route = EXCLUDED.route,
+                description = EXCLUDED.description,
+                is_system = EXCLUDED.is_system,
+                updated_at = NOW();
+
+        SELECT id INTO v_comp_identity_access FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'user-management';
+        SELECT id INTO v_comp_navigation      FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'menu-management';
+        SELECT id INTO v_comp_audit           FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'audit-viewer';
+        SELECT id INTO v_comp_tenant_settings FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'tenant-settings';
+        SELECT id INTO v_comp_profile         FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'profile';
+        SELECT id INTO v_comp_crm             FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'crm';
+        SELECT id INTO v_comp_projects        FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'projects';
+        SELECT id INTO v_comp_monitoring      FROM nxc_menu.components WHERE tenant_id = v_tenant_id AND module_key = 'monitoring';
+
+        -- Menú navbar/profile del tenant demo
+        DELETE FROM nxc_menu.menu_items
+        WHERE tenant_id = v_tenant_id
+            AND location IN ('navbar', 'profile');
+
+        INSERT INTO nxc_menu.menu_items (
+            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
+            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
+        ) VALUES (
+            v_tenant_id, v_comp_navigation, NULL, 'Admin', 'Admin', NULL, 'settings', 'tabler', 'navbar',
+            'GROUP', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0
+        ) RETURNING id INTO v_menu_admin_group;
+
+        INSERT INTO nxc_menu.menu_items (
+            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
+            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
+        ) VALUES
+            (v_tenant_id, v_comp_identity_access, v_menu_admin_group, 'IdentityAccess', 'Identity & Access', '/identity-access', 'users', 'tabler', 'navbar', 'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_navigation,      v_menu_admin_group, 'Navigation',     'Navigation',        '/admin/menus',     'menu',  'tabler', 'navbar', 'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_audit,           v_menu_admin_group, 'Audit',          'Audit',             '/audit',           'chart-bar', 'tabler', 'navbar', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_tenant_settings, v_menu_admin_group, 'TenantSettings', 'Tenant Settings',   '/settings',        'settings', 'tabler', 'navbar', 'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_profile,         v_menu_admin_group, 'Profile',        'Profile',           '/profile',         'profile', 'tabler', 'navbar', 'ITEM', 50, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0);
+
+        INSERT INTO nxc_menu.menu_items (
+            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
+            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
+        ) VALUES
+            (v_tenant_id, v_comp_crm,        NULL, 'CRM',        'CRM',        '/crm',        'dashboard', 'tabler', 'navbar', 'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_projects,   NULL, 'Projects',   'Projects',   '/projects',   'home',      'tabler', 'navbar', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_monitoring, NULL, 'Monitoring', 'Monitoring', '/monitoring', 'bell',      'tabler', 'navbar', 'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0);
+
+        INSERT INTO nxc_menu.menu_items (
+            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
+            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
+        ) VALUES (
+            v_tenant_id, v_comp_profile, NULL, 'ProfileMenu', 'Profile', NULL, 'profile', 'tabler', 'profile',
+            'GROUP', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0
+        ) RETURNING id INTO v_menu_profile_group;
+
+        INSERT INTO nxc_menu.menu_items (
+            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
+            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
+        ) VALUES
+            (v_tenant_id, v_comp_profile,         v_menu_profile_group, 'MyProfile', 'My profile', '/profile',  'profile',  'tabler', 'profile', 'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_tenant_settings, v_menu_profile_group, 'Settings',  'Settings',   '/settings', 'settings', 'tabler', 'profile', 'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_profile,         v_menu_profile_group, 'Logout',    'menu.logout','/auth/login','close',   'tabler', 'profile', 'ITEM', 90, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0);
+
+        -- Permisos componente: TENANT_ADMIN = EXECUTE
+        INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+        SELECT v_tenant_id, v_role_tenant_admin, c.id, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW()
+        FROM nxc_menu.components c
+        WHERE c.tenant_id = v_tenant_id
+            AND c.module_key IN ('user-management','menu-management','audit-viewer','tenant-settings','profile','crm','projects','monitoring')
+        ON CONFLICT (tenant_id, role_id, component_id)
+        DO UPDATE SET access = EXCLUDED.access, updated_at = NOW();
+
+        -- Permisos componente: EDITOR = EXECUTE solo en módulos operativos definidos
+        INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+        SELECT
+            v_tenant_id,
+            v_role_editor,
+            c.id,
+            CASE
+                WHEN c.module_key IN ('crm','projects','monitoring','profile','tenant-settings')
+                    THEN 'EXECUTE'::nxc_menu.access_level
+                ELSE 'HIDDEN'::nxc_menu.access_level
+            END,
+            v_user_admin_id, NOW(), NOW()
+        FROM nxc_menu.components c
+        WHERE c.tenant_id = v_tenant_id
+            AND c.module_key IN ('user-management','menu-management','audit-viewer','tenant-settings','profile','crm','projects','monitoring')
+        ON CONFLICT (tenant_id, role_id, component_id)
+        DO UPDATE SET access = EXCLUDED.access, updated_at = NOW();
+
+        RAISE NOTICE 'Consolidación tenant demo aplicada (navbar/profile + logout).';
+END $$;
+
+-- =============================================================================
 -- Verificación post-seed
 -- Ejecutar estas queries para confirmar que todo quedó correctamente:
 -- =============================================================================
