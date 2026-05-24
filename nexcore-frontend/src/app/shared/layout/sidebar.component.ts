@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
-import { TranslocoModule } from '@ngneat/transloco';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { MenuItem, MenuService, ProfileService } from '../services';
@@ -16,13 +16,16 @@ import { MenuItem, MenuService, ProfileService } from '../services';
 export class SidebarComponent implements OnInit {
   sidebarMenus$: Observable<MenuItem[]>;
   activeRoute: string | null = null;
+  private readonly translocoService: TranslocoService;
 
   constructor(
     private readonly menuService: MenuService,
     private readonly profileService: ProfileService,
-    private readonly router: Router
+    private readonly router: Router,
+    translocoService: TranslocoService
   ) {
     this.sidebarMenus$ = this.menuService.getSidebarMenus();
+    this.translocoService = translocoService;
   }
 
   ngOnInit(): void {
@@ -43,6 +46,21 @@ export class SidebarComponent implements OnInit {
 
   isMenuDisabled(menu: MenuItem): boolean {
     return menu.access === 'view';
+  }
+
+  getMenuLabel(menu: MenuItem): string {
+    const directTranslation = this.translateIfAvailable(menu.title);
+    if (directTranslation) {
+      return directTranslation;
+    }
+
+    const fallbackKey = `menu.${this.normalizeMenuKey(menu.name)}`;
+    const fallbackTranslation = this.translateIfAvailable(fallbackKey);
+    if (fallbackTranslation) {
+      return fallbackTranslation;
+    }
+
+    return menu.title || menu.name;
   }
 
   getIconName(menu: MenuItem): string {
@@ -72,5 +90,25 @@ export class SidebarComponent implements OnInit {
     }
 
     return route;
+  }
+
+  private translateIfAvailable(key: string | null | undefined): string | null {
+    if (!key) {
+      return null;
+    }
+
+    const translated = this.translocoService.translate(key);
+    if (translated === key) {
+      return null;
+    }
+
+    return translated;
+  }
+
+  private normalizeMenuKey(name: string | null | undefined): string {
+    return (name || '')
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .replace(/[\s-]+/g, '_')
+      .toLowerCase();
   }
 }

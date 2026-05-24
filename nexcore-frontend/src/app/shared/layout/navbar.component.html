@@ -117,7 +117,7 @@
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.4"/>
                   </ng-container>
                 </svg>
-                <span class="item-label">{{ menu.title }}</span>
+                <span class="item-label">{{ getMenuLabel(menu) }}</span>
               </button>
               
               <!-- Menú tipo DIVIDER -->
@@ -125,7 +125,7 @@
               
               <!-- Menú tipo GROUP - mostrar título y sus hijos -->
               <ng-container *ngIf="menu.item_type === 'GROUP'">
-                <div class="group-title" *ngIf="menu.title">{{ menu.title }}</div>
+                <div class="group-title" *ngIf="menu.title">{{ getMenuLabel(menu) }}</div>
                 <button *ngFor="let child of menu.children"
                         class="item" 
                         type="button"
@@ -169,7 +169,7 @@
                       <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.4"/>
                     </ng-container>
                   </svg>
-                  <span class="item-label">{{ child.title }}</span>
+                  <span class="item-label">{{ getMenuLabel(child) }}</span>
                 </button>
               </ng-container>
             </ng-container>

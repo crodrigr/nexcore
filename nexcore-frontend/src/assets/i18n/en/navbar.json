@@ -19,5 +19,20 @@
     "notifications": {
       "you_have": "You have {{count}} new notifications"
     }
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "alerts": "Alerts",
+    "incidents": "Incidents",
+    "traps": "Traps SNMP",
+    "profile_menu": "Profile",
+    "profile": "My Profile",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "administration": "Administration",
+    "users": "Users",
+    "roles": "Roles",
+    "menus": "Menus",
+    "audit": "Audit"
   }
 }

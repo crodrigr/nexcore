@@ -10,7 +10,7 @@
             [class.active]="isMenuActive(menu.route)"
            [class.disabled]="isMenuDisabled(menu)"
             (click)="setActiveMenu(menu.route)"
-           [attr.data-tooltip]="menu.title">
+             [attr.data-tooltip]="getMenuLabel(menu)">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" [ngSwitch]="getIconName(menu)">
             <ng-container *ngSwitchCase="'layout-dashboard'">
               <rect x="3" y="3" width="8" height="8" rx="1"/>
@@ -38,18 +38,18 @@
               <rect x="4" y="4" width="16" height="16" rx="3" />
             </ng-container>
           </svg>
-          <span>{{ menu.title }}</span>
+           <span>{{ getMenuLabel(menu) }}</span>
         </a>
 
         <div *ngIf="menu.item_type === 'GROUP'" class="sidebar-group">
-          <div class="sidebar-group-title">{{ menu.title }}</div>
+           <div class="sidebar-group-title">{{ getMenuLabel(menu) }}</div>
           <a *ngFor="let child of menu.children"
              [routerLink]="child.route"
              class="sidebar-link"
              [class.active]="isMenuActive(child.route)"
              [class.disabled]="isMenuDisabled(child)"
              (click)="setActiveMenu(child.route)"
-             [attr.data-tooltip]="child.title">
+             [attr.data-tooltip]="getMenuLabel(child)">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" [ngSwitch]="getIconName(child)">
               <ng-container *ngSwitchCase="'user'">
                 <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" />
@@ -88,7 +88,7 @@
                 <circle cx="12" cy="12" r="8" />
               </ng-container>
             </svg>
-            <span>{{ child.title }}</span>
+            <span>{{ getMenuLabel(child) }}</span>
           </a>
         </div>
       </ng-container>

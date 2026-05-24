@@ -219,6 +219,21 @@ export class NavbarComponent implements OnInit {
     return menu.access === 'view';
   }
 
+  getMenuLabel(menu: MenuItem): string {
+    const directTranslation = this.translateIfAvailable(menu.title);
+    if (directTranslation) {
+      return directTranslation;
+    }
+
+    const fallbackKey = `menu.${this.normalizeMenuKey(menu.name)}`;
+    const fallbackTranslation = this.translateIfAvailable(fallbackKey);
+    if (fallbackTranslation) {
+      return fallbackTranslation;
+    }
+
+    return menu.title || menu.name;
+  }
+
   getIconName(menu: MenuItem): string {
     return menu.icon || 'default';
   }
@@ -280,6 +295,26 @@ export class NavbarComponent implements OnInit {
     try {
       this.subscriptions.forEach(s => s.unsubscribe());
     } catch (e) {}
+  }
+
+  private translateIfAvailable(key: string | null | undefined): string | null {
+    if (!key) {
+      return null;
+    }
+
+    const translated = this.transloco.translate(key);
+    if (translated === key) {
+      return null;
+    }
+
+    return translated;
+  }
+
+  private normalizeMenuKey(name: string | null | undefined): string {
+    return (name || '')
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .replace(/[\s-]+/g, '_')
+      .toLowerCase();
   }
 }
 

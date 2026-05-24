@@ -19,5 +19,20 @@
     "notifications": {
       "you_have": "Tienes {{count}} nuevas notificaciones"
     }
+  },
+  "menu": {
+    "dashboard": "Panel Principal",
+    "alerts": "Alertas",
+    "incidents": "Incidentes",
+    "traps": "Traps SNMP",
+    "profile_menu": "Perfil",
+    "profile": "Mi Perfil",
+    "settings": "Configuracion",
+    "logout": "Cerrar sesion",
+    "administration": "Administracion",
+    "users": "Usuarios",
+    "roles": "Roles",
+    "menus": "Menus",
+    "audit": "Auditoria"
   }
 }
