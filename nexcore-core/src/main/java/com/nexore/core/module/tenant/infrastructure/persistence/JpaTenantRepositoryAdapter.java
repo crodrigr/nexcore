@@ -54,6 +54,11 @@ public class JpaTenantRepositoryAdapter implements TenantRepository {
     }
 
     @Override
+    public long countAllActive() {
+        return delegate.countByDeletedAtIsNull();
+    }
+
+    @Override
     public void delete(Tenant tenant) {
         delegate.delete(mapper.toEntity(tenant));
     }

@@ -81,6 +81,138 @@
       "others": "Others"
     }
   },
+  "tenant": {
+    "header": {
+      "title": "Tenants",
+      "subtitle": "Tenant management"
+    },
+    "actions": {
+      "create": "Create tenant",
+      "creating": "Creating...",
+      "edit": "Edit",
+      "suspend": "Suspend",
+      "suspending": "Suspending...",
+      "activate": "Activate",
+      "activating": "Activating...",
+      "cancel": "Cancel",
+      "reviewChanges": "Review changes",
+      "back": "Back",
+      "saving": "Saving...",
+      "confirmUpdate": "Confirm update"
+    },
+    "search": {
+      "label": "Search",
+      "placeholder": "Search by id, name or slug"
+    },
+    "list": {
+      "pageOf": "Page {{page}} of {{totalPages}}",
+      "loading": "Loading tenants...",
+      "empty": "No tenants found for current filters."
+    },
+    "table": {
+      "name": "Name",
+      "slug": "Slug",
+      "plan": "Plan",
+      "mode": "Mode",
+      "status": "Status",
+      "timezone": "Timezone",
+      "createdAt": "Created At",
+      "actions": "Actions",
+      "unknown": "UNKNOWN"
+    },
+    "pager": {
+      "first": "First",
+      "previous": "Previous",
+      "next": "Next",
+      "last": "Last",
+      "pageSize": "Show",
+      "range": "{{start}}-{{end}} of {{total}}",
+      "showing": "Showing {{start}} - {{end}} of {{total}}",
+      "total": "({{total}} total)"
+    },
+    "create": {
+      "breadcrumbParent": "Tenants",
+      "breadcrumbCurrent": "New Tenant",
+      "title": "Create New Tenant",
+      "description": "Configure your new enterprise environment and deployment parameters.",
+      "hint": "Unsaved changes will be lost. Deployment typically takes 2-5 minutes."
+    },
+    "edit": {
+      "breadcrumbParent": "Tenants",
+      "breadcrumbCurrent": "Edit Tenant",
+      "title": "Update Tenant Configuration",
+      "description": "Apply changes to identity, localization and security policies.",
+      "companyDescription": "Update core identity and legal data.",
+      "regionalDescription": "Adjust timezone and localization preferences.",
+      "hint": "Changes can affect active users and authentication policies."
+    },
+    "sections": {
+      "company": {
+        "title": "Company Information",
+        "description": "Primary identity and legal registration details."
+      },
+      "regional": {
+        "title": "Regional and Localization",
+        "description": "Set the default culture and operational region."
+      },
+      "plan": {
+        "title": "Plan and Deployment",
+        "description": "Select scaling capabilities and environment mode."
+      },
+      "security": {
+        "title": "Security Policies",
+        "description": "Authentication and password requirements."
+      }
+    },
+    "fields": {
+      "name": "Tenant Name",
+      "slug": "Identifier/Slug",
+      "legalName": "Legal Entity Name",
+      "taxId": "Tax ID",
+      "timezone": "Timezone",
+      "locale": "Primary Language",
+      "dateFormat": "Date Format",
+      "currency": "Currency",
+      "plan": "Plan",
+      "mode": "Deployment Mode",
+      "mfaRequired": "MFA Required",
+      "sessionTimeoutMinutes": "Session Timeout Minutes",
+      "maxLoginAttempts": "Max Login Attempts",
+      "passwordMinLength": "Password Min Length",
+      "passwordRequiresUpper": "Password Requires Upper",
+      "passwordRequiresSpecial": "Password Requires Special"
+    },
+    "placeholders": {
+      "name": "My Company LLC",
+      "slug": "my-company",
+      "legalName": "My Company LLC",
+      "taxId": "900123456-1"
+    },
+    "validation": {
+      "slug": "Slug is required. Lowercase, numbers and hyphen only."
+    },
+    "confirm": {
+      "title": "Confirm Changes",
+      "message": "Please confirm you want to apply these tenant updates.",
+      "impactTitle": "Impact Summary"
+    },
+    "suspend": {
+      "title": "Suspend Tenant",
+      "message": "You are about to suspend tenant",
+      "warning": "This can block user access and affect active operations.",
+      "typeToConfirm": "Type",
+      "keyword": "SUSPEND",
+      "toConfirm": "to confirm"
+    },
+    "activate": {
+      "title": "Activate Tenant",
+      "message": "Confirm activation for tenant"
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
   "auth": {
     "login": {
       "title": "Sign In",
@@ -88,6 +220,7 @@
       "subtitle": "Welcome back",
       "tenant": "Tenant",
       "username": "Username",
+      "password": "Password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "rememberMe": "Remember me",

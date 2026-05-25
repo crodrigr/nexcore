@@ -5,7 +5,7 @@
     <ng-container *ngIf="sidebarMenus$ | async as sidebarMenus">
       <ng-container *ngFor="let menu of sidebarMenus">
         <a *ngIf="menu.item_type === 'ITEM'"
-           [routerLink]="menu.route"
+            [routerLink]="getMenuRoute(menu.route)"
            class="sidebar-link"
             [class.active]="isMenuActive(menu.route)"
            [class.disabled]="isMenuDisabled(menu)"
@@ -30,7 +30,7 @@
 
           <div class="sidebar-group-children" [class.hidden]="!isGroupExpanded(menu)">
             <a *ngFor="let child of menu.children"
-               [routerLink]="child.route"
+              [routerLink]="getMenuRoute(child.route)"
                class="sidebar-link child-link"
                [class.active]="isMenuActive(child.route)"
                [class.disabled]="isMenuDisabled(child)"

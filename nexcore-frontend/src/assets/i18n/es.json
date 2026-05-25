@@ -79,6 +79,138 @@
       "others": "Otros"
     }
   },
+  "tenant": {
+    "header": {
+      "title": "Tenants",
+      "subtitle": "Gestion de tenants"
+    },
+    "actions": {
+      "create": "Crear tenant",
+      "creating": "Creando...",
+      "edit": "Editar",
+      "suspend": "Suspender",
+      "suspending": "Suspendiendo...",
+      "activate": "Activar",
+      "activating": "Activando...",
+      "cancel": "Cancelar",
+      "reviewChanges": "Revisar cambios",
+      "back": "Volver",
+      "saving": "Guardando...",
+      "confirmUpdate": "Confirmar actualizacion"
+    },
+    "search": {
+      "label": "Buscar",
+      "placeholder": "Buscar por id, nombre o slug"
+    },
+    "list": {
+      "pageOf": "Pagina {{page}} de {{totalPages}}",
+      "loading": "Cargando tenants...",
+      "empty": "No se encontraron tenants para los filtros actuales."
+    },
+    "table": {
+      "name": "Nombre",
+      "slug": "Slug",
+      "plan": "Plan",
+      "mode": "Modo",
+      "status": "Estado",
+      "timezone": "Zona horaria",
+      "createdAt": "Creado",
+      "actions": "Acciones",
+      "unknown": "DESCONOCIDO"
+    },
+    "pager": {
+      "first": "Primero",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "last": "Final",
+      "pageSize": "Mostrar",
+      "range": "{{start}}-{{end}} de {{total}}",
+      "showing": "Mostrando {{start}} - {{end}} de {{total}}",
+      "total": "({{total}} total)"
+    },
+    "create": {
+      "breadcrumbParent": "Tenants",
+      "breadcrumbCurrent": "Nuevo tenant",
+      "title": "Crear nuevo tenant",
+      "description": "Configura tu nuevo entorno empresarial y parametros de despliegue.",
+      "hint": "Los cambios sin guardar se perderan. El despliegue normalmente toma de 2 a 5 minutos."
+    },
+    "edit": {
+      "breadcrumbParent": "Tenants",
+      "breadcrumbCurrent": "Editar tenant",
+      "title": "Actualizar configuracion del tenant",
+      "description": "Aplica cambios a identidad, localizacion y politicas de seguridad.",
+      "companyDescription": "Actualiza los datos de identidad y legales.",
+      "regionalDescription": "Ajusta zona horaria y preferencias de localizacion.",
+      "hint": "Los cambios pueden afectar usuarios activos y politicas de autenticacion."
+    },
+    "sections": {
+      "company": {
+        "title": "Informacion de empresa",
+        "description": "Identidad principal y detalles de registro legal."
+      },
+      "regional": {
+        "title": "Regional y localizacion",
+        "description": "Define la cultura predeterminada y region operativa."
+      },
+      "plan": {
+        "title": "Plan y despliegue",
+        "description": "Selecciona capacidades de escalado y modo de entorno."
+      },
+      "security": {
+        "title": "Politicas de seguridad",
+        "description": "Requisitos de autenticacion y contrasena."
+      }
+    },
+    "fields": {
+      "name": "Nombre del tenant",
+      "slug": "Identificador/Slug",
+      "legalName": "Razon social",
+      "taxId": "NIT",
+      "timezone": "Zona horaria",
+      "locale": "Idioma principal",
+      "dateFormat": "Formato de fecha",
+      "currency": "Moneda",
+      "plan": "Plan",
+      "mode": "Modo de despliegue",
+      "mfaRequired": "MFA requerido",
+      "sessionTimeoutMinutes": "Minutos de expiracion de sesion",
+      "maxLoginAttempts": "Intentos maximos de login",
+      "passwordMinLength": "Longitud minima de contrasena",
+      "passwordRequiresUpper": "Requiere mayusculas",
+      "passwordRequiresSpecial": "Requiere caracter especial"
+    },
+    "placeholders": {
+      "name": "Mi Empresa SAS",
+      "slug": "mi-empresa",
+      "legalName": "Mi Empresa S.A.S.",
+      "taxId": "900123456-1"
+    },
+    "validation": {
+      "slug": "Slug requerido. Solo minusculas, numeros y guion."
+    },
+    "confirm": {
+      "title": "Confirmar cambios",
+      "message": "Confirma que deseas aplicar estas actualizaciones del tenant.",
+      "impactTitle": "Resumen de impacto"
+    },
+    "suspend": {
+      "title": "Suspender tenant",
+      "message": "Estas a punto de suspender el tenant",
+      "warning": "Esto puede bloquear el acceso de usuarios y afectar operaciones activas.",
+      "typeToConfirm": "Escribe",
+      "keyword": "SUSPEND",
+      "toConfirm": "para confirmar"
+    },
+    "activate": {
+      "title": "Activar tenant",
+      "message": "Confirma la activacion para el tenant"
+    },
+    "common": {
+      "yes": "Si",
+      "no": "No"
+    }
+  },
   "auth": {
     "login": {
       "title": "Iniciar Sesión",

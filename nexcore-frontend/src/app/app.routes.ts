@@ -13,6 +13,22 @@ export const routes: Routes = [
     title: 'Dashboard'
   },
   {
+    path: 'tenants',
+    loadComponent: () =>
+      import('./features/tenants/tenant-management.component').then(m => m.TenantManagementComponent),
+    title: 'Tenant Management'
+  },
+  {
+    path: 'tenant-management',
+    redirectTo: 'tenants',
+    pathMatch: 'full'
+  },
+  {
+    path: 'identity-access',
+    redirectTo: 'tenants',
+    pathMatch: 'full'
+  },
+  {
     path: 'reset-password',
     loadComponent: () =>
       import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),

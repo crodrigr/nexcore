@@ -108,6 +108,10 @@ export class SidebarComponent implements OnInit {
     this.activeRoute = this.normalizeRoute(route);
   }
 
+  getMenuRoute(route: string | null): string | null {
+    return this.normalizeRoute(route);
+  }
+
   toggleGroup(menu: MenuItem): void {
     const groupId = this.getGroupKey(menu);
     this.expandedGroups[groupId] = !this.isGroupExpanded(menu);

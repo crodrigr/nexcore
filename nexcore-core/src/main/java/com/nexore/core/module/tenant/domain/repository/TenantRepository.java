@@ -20,5 +20,7 @@ public interface TenantRepository {
 
     List<Tenant> findAllActive(int page, int size);
 
+    long countAllActive();
+
     void delete(Tenant tenant);
 }

@@ -110,13 +110,18 @@ public class TenantService {
     public PageResponse<TenantResponse> listTenants(int page, int size) {
         List<Tenant> tenants = tenantRepository.findAllActive(page, size);
         List<TenantResponse> content = tenants.stream().map(tenantMapper::toResponse).toList();
+        long totalElements = tenantRepository.countAllActive();
+        int normalizedSize = Math.max(1, size);
+        int totalPages = totalElements == 0 ? 1 : (int) Math.ceil((double) totalElements / normalizedSize);
+        boolean last = page >= (totalPages - 1);
+
         return PageResponse.<TenantResponse>builder()
                 .content(content)
                 .page(page)
                 .size(size)
-                .totalElements(content.size())
-                .totalPages(1)
-                .last(true)
+            .totalElements(totalElements)
+            .totalPages(totalPages)
+            .last(last)
                 .build();
     }
 

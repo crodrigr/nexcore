@@ -17,4 +17,6 @@ public interface SpringDataTenantRepository extends JpaRepository<TenantJpaEntit
     boolean existsByCustomDomainAndDeletedAtIsNull(String customDomain);
 
     Page<TenantJpaEntity> findAllByDeletedAtIsNull(Pageable pageable);
+
+    long countByDeletedAtIsNull();
 }
