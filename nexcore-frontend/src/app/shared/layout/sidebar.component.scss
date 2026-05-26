@@ -1,3 +1,19 @@
+[data-theme='light'] .plan-card .small {
+  color: #111 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+[data-theme='light'] .plan-card {
+  color: var(--color-text-secondary) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
 /* Sidebar: altura y posición fija, layout robusto */
 .sidebar {
   height: 100vh;
@@ -14,6 +30,7 @@
   border-right: 1px solid var(--color-border-light);
   z-index: 100;
   padding: 0;
+  /* overflow: hidden;  <-- eliminado para que el footer no se oculte */
 }
 
 /* Collapsed sidebar (triggered by body.sidebar-collapsed) */
@@ -32,7 +49,7 @@ body.sidebar-collapsed .sidebar .avatar-square { display: none !important }
 body.sidebar-collapsed .sidebar-nav { gap:6px }
 body.sidebar-collapsed .sidebar-link { justify-content:center; padding:10px 8px }
 body.sidebar-collapsed .sidebar-link span { display:none }
-body.sidebar-collapsed .sidebar-footer .plan-card { display:none }
+
 
 /* Also support toggling the collapsed state directly on the sidebar element */
 .sidebar.collapsed {
@@ -145,8 +162,6 @@ body.sidebar-collapsed .profile-card { justify-content:center }
   margin-left: 6px;
   padding: 8px 10px 8px 12px;
   min-height: 36px;
-  border-left: 0;
-  border-radius: 8px;
   position: relative;
 }
 
@@ -213,13 +228,27 @@ body.sidebar-collapsed .sidebar-group-toggle {
 body.sidebar-collapsed .sidebar-group .sidebar-link.hidden { display: none; }
 body.sidebar-collapsed .sidebar-group-toggle .sidebar-group-title { display: none; }
 body.sidebar-collapsed .sidebar-group-toggle .sidebar-group-chevron { display: none; }
+
 body.sidebar-collapsed .sidebar-group-children { display: none; }
-body.sidebar-collapsed .sidebar-group .child-link {
-  margin-left: 0;
-  padding-left: 10px;
-  border-left: 0;
-  border-radius: 8px;
+
+.plan-card {
+  color: var(--color-text-primary) !important;
 }
+
+[data-theme='light'] .plan-card {
+  color: #111 !important;
+  font-size: 15px;
+  font-weight: 700;
+  text-shadow: none;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+[data-theme='dark'] .plan-card {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+}
+
 
 .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 14px 10px 10px; color:var(--color-text-secondary); text-decoration:none; border-radius:8px; font-weight:600; position:relative }
 .sidebar-link.active {
@@ -258,30 +287,58 @@ body.sidebar-collapsed .sidebar-group .child-link {
 .sidebar-link svg { color: inherit; stroke: currentColor; fill: none }
 
 .sidebar-footer {
-  padding-top: 12px;
+    padding-top: 20px;
+  padding-top: 0;
+    padding-bottom: 0;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   flex-shrink: 0;
   margin-top: auto;
+  margin-bottom: 0;
   width: 100%;
   background: transparent;
   text-align: center;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  box-shadow: 0 -1px 0 0 var(--color-border-light);
+}
+
+.sidebar .sidebar-footer {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 .plan-card {
-  background: #222 !important;
-  color: #fff !important;
-  padding: 12px 10px !important;
-  border-radius: 10px;
-  box-shadow: var(--shadow-md);
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+    padding: 8px 12px !important;
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 0;
 }
 .plan-title { font-weight:700; margin-bottom:6px; color:var(--color-text-primary); font-size:13px }
 .progress { height:8px; background: var(--color-bg-tertiary); border-radius:8px; overflow:hidden }
 .progress .bar { height:100%; background: linear-gradient(90deg,var(--color-interactive-primary),var(--color-interactive-primary-active)); border-radius:8px }
 .small {
-  font-size: 14px;
-  color: #fff !important;
+  font-size: 10px;
   margin-top: 6px;
   font-weight: bold;
   letter-spacing: 1px;
   background: transparent !important;
+  color: var(--color-text-secondary) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+}
+
+[data-theme='light'] .plan-card .small:hover,
+[data-theme='light'] .plan-card .small:active,
+[data-theme='light'] .plan-card .small:focus {
+  color: var(--color-text-secondary) !important;
 }
 
 /* Collapsed state: keep icon sizes consistent and show active icon background */
