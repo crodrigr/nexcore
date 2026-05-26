@@ -73,6 +73,12 @@ WHERE NOT EXISTS (
 
 COMMIT;
 
+
+-- Eliminar roles adicionales del tenant system (solo debe tener SUPER_ADMIN)
+DELETE FROM nxc_tenant.roles
+WHERE tenant_id = '00000000-0000-0000-0000-000000000001'
+  AND name <> 'SUPER_ADMIN';
+
 -- Verificación
 SELECT id, slug, name, status, plan, mode
 FROM nxc_tenant.tenants

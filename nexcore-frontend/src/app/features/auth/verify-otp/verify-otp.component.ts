@@ -127,6 +127,7 @@ export class VerifyOtpComponent {
       } catch (e) {
         userRole = '';
       }
+      console.log('[OTP] userRole:', userRole);
       if (userRole === 'SUPER_ADMIN') {
         await this.router.navigateByUrl('/tenants');
       } else {

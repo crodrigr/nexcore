@@ -41,12 +41,8 @@ DECLARE
     v_uid_admin_demo    UUID := '00000000-0000-0000-0001-000000000002';
 
     -- -------------------------------------------------------------------------
-    -- IDs de roles del tenant system (se recuperan tras el INSERT del tenant)
-    -- -------------------------------------------------------------------------
+    -- IDs de roles del tenant system (solo SUPER_ADMIN)
     v_role_sys_super    UUID;
-    v_role_sys_admin    UUID;
-    v_role_sys_editor   UUID;
-    v_role_sys_viewer   UUID;
 
     -- -------------------------------------------------------------------------
     -- IDs de roles del tenant demo (se recuperan tras el INSERT del tenant)
@@ -178,13 +174,10 @@ BEGIN
 
     RAISE NOTICE 'Tenant system OK: %', v_tid_system;
 
-    -- El trigger trg_create_default_roles crea TENANT_ADMIN, EDITOR, VIEWER.
-    -- Recuperamos los IDs que generó.
-    SELECT id INTO v_role_sys_admin  FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'TENANT_ADMIN';
-    SELECT id INTO v_role_sys_editor FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'EDITOR';
-    SELECT id INTO v_role_sys_viewer FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'VIEWER';
 
-    -- Rol SUPER_ADMIN — exclusivo del tenant system
+    -- Solo crear y mantener el rol SUPER_ADMIN para el tenant system
+    DELETE FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name IN ('TENANT_ADMIN', 'EDITOR', 'VIEWER');
+
     INSERT INTO nxc_tenant.roles (
         tenant_id, name, description, is_system_role, is_default
     ) VALUES (
@@ -195,9 +188,7 @@ BEGIN
     ) ON CONFLICT (tenant_id, name) DO NOTHING;
 
     SELECT id INTO v_role_sys_super FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'SUPER_ADMIN';
-
-    RAISE NOTICE 'Roles system — SUPER_ADMIN: %, TENANT_ADMIN: %, EDITOR: %, VIEWER: %',
-        v_role_sys_super, v_role_sys_admin, v_role_sys_editor, v_role_sys_viewer;
+    RAISE NOTICE 'Roles system — SOLO SUPER_ADMIN: %', v_role_sys_super;
 
     -- Usuario SUPER_ADMIN del sistema
     INSERT INTO nxc_tenant.users (
@@ -526,6 +517,8 @@ BEGIN
 
     RAISE NOTICE '=== BLOQUE 4: Árbol de menú ===';
 
+    -- Limpieza previa de menús duplicados
+    DELETE FROM nxc_menu.menu_items WHERE tenant_id = v_tid_system AND location = 'sidebar' AND name IN ('Dashboard', 'tenants');
     -- Sidebar principal (location: sidebar)
     INSERT INTO nxc_menu.menu_items (
         tenant_id, component_id, parent_id,
@@ -744,57 +737,13 @@ BEGIN
 
     RAISE NOTICE '=== BLOQUE 5: Permisos de componentes por rol ===';
 
-    -- SUPER_ADMIN — acceso total
+    -- SOLO SUPER_ADMIN — acceso total
     INSERT INTO nxc_menu.component_permissions
         (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
     SELECT v_tid_system, v_role_sys_super, c.id, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW()
     FROM nxc_menu.components c
     WHERE c.tenant_id = v_tid_system
     ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE SET access = 'EXECUTE'::nxc_menu.access_level;
-
-    -- TENANT_ADMIN — todo EXECUTE
-    INSERT INTO nxc_menu.component_permissions
-        (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_admin, c.id,
-        CASE
-            WHEN c.module_key IN ('dashboard','alerts','incidents','traps','auth') THEN 'EXECUTE'
-            WHEN c.module_key IN ('user-management','role-management','menu-management','audit-viewer','tenant-settings') THEN 'EXECUTE'
-            ELSE 'HIDDEN'
-        END::nxc_menu.access_level,
-        v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = EXCLUDED.access;
-
-    -- EDITOR — operacional EXECUTE, administración HIDDEN
-    INSERT INTO nxc_menu.component_permissions
-        (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_editor, c.id,
-        CASE
-            WHEN c.module_key IN ('dashboard','alerts','incidents','traps','auth') THEN 'EXECUTE'
-            ELSE 'HIDDEN'
-        END::nxc_menu.access_level,
-        v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = EXCLUDED.access;
-
-    -- VIEWER — operacional VIEW, administración HIDDEN
-    INSERT INTO nxc_menu.component_permissions
-        (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_viewer, c.id,
-        CASE
-            WHEN c.module_key IN ('dashboard','alerts','incidents','traps','auth') THEN 'VIEW'
-            ELSE 'HIDDEN'
-        END::nxc_menu.access_level,
-        v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = EXCLUDED.access;
-
     RAISE NOTICE 'Permisos de componentes asignados.';
 
 -- =============================================================================
@@ -806,56 +755,13 @@ BEGIN
 
     RAISE NOTICE '=== BLOQUE 6: Permisos de elementos por rol ===';
 
-    -- SUPER_ADMIN y TENANT_ADMIN — EXECUTE en todos los elementos
+    -- SOLO SUPER_ADMIN — EXECUTE en todos los elementos
     INSERT INTO nxc_menu.element_permissions
         (tenant_id, role_id, element_id, access, created_by, created_at, updated_at)
     SELECT v_tid_system, v_role_sys_super, ce.id, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW()
     FROM nxc_menu.component_elements ce
     WHERE ce.tenant_id = v_tid_system
     ON CONFLICT (tenant_id, role_id, element_id) DO UPDATE SET access = 'EXECUTE'::nxc_menu.access_level;
-
-    INSERT INTO nxc_menu.element_permissions
-        (tenant_id, role_id, element_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_admin, ce.id, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.component_elements ce
-    WHERE ce.tenant_id = v_tid_system
-    ON CONFLICT (tenant_id, role_id, element_id) DO UPDATE SET access = 'EXECUTE'::nxc_menu.access_level;
-
-    -- EDITOR — EXECUTE en elementos operacionales, VIEW en admin, HIDDEN en destructivos
-    INSERT INTO nxc_menu.element_permissions
-        (tenant_id, role_id, element_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_editor, ce.id,
-        CASE
-            -- Elementos destructivos: solo VIEW
-            WHEN ce.element_key IN ('btn-delete-user','btn-suspend-user','btn-delete-role') THEN 'VIEW'
-            -- Gestión de menús y audit: VIEW
-            WHEN ce.component_id IN (v_comp_menus, v_comp_audit) THEN 'VIEW'
-            -- Resto: EXECUTE
-            ELSE 'EXECUTE'
-        END::nxc_menu.access_level,
-        v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.component_elements ce
-    WHERE ce.tenant_id = v_tid_system
-    ON CONFLICT (tenant_id, role_id, element_id) DO UPDATE
-        SET access = EXCLUDED.access;
-
-    -- VIEWER — VIEW en operacional, HIDDEN en escritura
-    INSERT INTO nxc_menu.element_permissions
-        (tenant_id, role_id, element_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_viewer, ce.id,
-        CASE
-            -- Botones de acción: HIDDEN
-            WHEN ce.element_type IN ('BUTTON','ACTION')
-                AND ce.element_key NOT IN ('paginator','searchInput') THEN 'HIDDEN'
-            -- Campos de búsqueda y paginación: VIEW
-            ELSE 'VIEW'
-        END::nxc_menu.access_level,
-        v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.component_elements ce
-    WHERE ce.tenant_id = v_tid_system
-    ON CONFLICT (tenant_id, role_id, element_id) DO UPDATE
-        SET access = EXCLUDED.access;
-
     RAISE NOTICE 'Permisos de elementos asignados.';
 
 -- =============================================================================
@@ -1054,9 +960,6 @@ DECLARE
     v_uid_super_admin   UUID := '00000000-0000-0000-0001-000000000001';
 
     v_role_sys_super    UUID;
-    v_role_sys_admin    UUID;
-    v_role_sys_editor   UUID;
-    v_role_sys_viewer   UUID;
 
     v_role_demo_admin   UUID;
     v_role_demo_editor  UUID;
@@ -1075,9 +978,6 @@ BEGIN
     RAISE NOTICE '=== BLOQUE 10: Consolidación SUPER_ADMIN ===';
 
     SELECT id INTO v_role_sys_super  FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'SUPER_ADMIN';
-    SELECT id INTO v_role_sys_admin  FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'TENANT_ADMIN';
-    SELECT id INTO v_role_sys_editor FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'EDITOR';
-    SELECT id INTO v_role_sys_viewer FROM nxc_tenant.roles WHERE tenant_id = v_tid_system AND name = 'VIEWER';
 
     SELECT id INTO v_role_demo_admin  FROM nxc_tenant.roles WHERE tenant_id = '00000000-0000-0000-0000-000000000002' AND name = 'TENANT_ADMIN';
     SELECT id INTO v_role_demo_editor FROM nxc_tenant.roles WHERE tenant_id = '00000000-0000-0000-0000-000000000002' AND name = 'EDITOR';
@@ -1116,16 +1016,11 @@ BEGIN
     SELECT id INTO v_comp_platform  FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'platform-settings';
     SELECT id INTO v_comp_auth      FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = 'auth';
 
-    -- 3) Sidebar final
-    UPDATE nxc_menu.menu_items
-    SET component_id = v_comp_dashboard, title = 'menu.dashboard', route = '/tenants', icon = 'dashboard', icon_type = 'tabler',
-        item_type = 'ITEM', order_index = 1, is_visible = TRUE, is_system = TRUE, default_access = 'EXECUTE'::nxc_menu.access_level,
-        updated_at = NOW()
-    WHERE tenant_id = v_tid_system AND location = 'sidebar' AND parent_id IS NULL AND name = 'dashboard';
-    IF NOT FOUND THEN
-        INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
-        VALUES (v_tid_system, v_comp_dashboard, NULL, 'tenants', 'menu.tenants', '/tenants', 'tenants', 'tabler', 'sidebar', 'ITEM', 1, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
-    END IF;
+    -- 3) Sidebar final (solo un menú principal, sin duplicados)
+    DELETE FROM nxc_menu.menu_items WHERE tenant_id = v_tid_system AND location = 'sidebar' AND name IN ('Dashboard', 'tenants');
+    INSERT INTO nxc_menu.menu_items (tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location, item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version)
+    VALUES (v_tid_system, v_comp_dashboard, NULL, 'Tenants', 'menu.tenants', '/tenants', 'tenants', 'tabler', 'sidebar', 'ITEM', 1, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0)
+    ON CONFLICT DO NOTHING;
 
 
     -- 4) Profile final (Logout en EXECUTE)
@@ -1178,57 +1073,23 @@ BEGIN
         VALUES (v_tid_system, v_comp_auth, v_menu_profile_group, 'Logout', 'menu.logout', '/auth/login', 'close', 'tabler', 'profile', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW(), 0);
     END IF;
 
-    -- 5) Permisos finales del SUPER_ADMIN y baseline de roles restantes
-    DELETE FROM nxc_menu.component_permissions
-    WHERE tenant_id = v_tid_system
-      AND component_id IN (
-          SELECT id FROM nxc_menu.components
-          WHERE tenant_id = v_tid_system
-            AND module_key NOT IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
-      );
+        -- 5) Permisos finales del SUPER_ADMIN
+        DELETE FROM nxc_menu.component_permissions
+        WHERE tenant_id = v_tid_system
+            AND component_id IN (
+                    SELECT id FROM nxc_menu.components
+                    WHERE tenant_id = v_tid_system
+                        AND module_key NOT IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+            );
 
-    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_super, c.id, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = 'EXECUTE'::nxc_menu.access_level,
-            updated_at = NOW();
-
-    -- Roles no super-admin quedan restringidos en componentes administrativos
-    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_admin, c.id,
-           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'EXECUTE'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
-           v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = EXCLUDED.access,
-            updated_at = NOW();
-
-    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_editor, c.id,
-           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'EXECUTE'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
-           v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = EXCLUDED.access,
-            updated_at = NOW();
-
-    INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
-    SELECT v_tid_system, v_role_sys_viewer, c.id,
-           CASE WHEN c.module_key IN ('dashboard', 'auth') THEN 'VIEW'::nxc_menu.access_level ELSE 'HIDDEN'::nxc_menu.access_level END,
-           v_uid_super_admin, NOW(), NOW()
-    FROM nxc_menu.components c
-    WHERE c.tenant_id = v_tid_system
-      AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
-    ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
-        SET access = EXCLUDED.access,
-            updated_at = NOW();
+        INSERT INTO nxc_menu.component_permissions (tenant_id, role_id, component_id, access, created_by, created_at, updated_at)
+        SELECT v_tid_system, v_role_sys_super, c.id, 'EXECUTE'::nxc_menu.access_level, v_uid_super_admin, NOW(), NOW()
+        FROM nxc_menu.components c
+        WHERE c.tenant_id = v_tid_system
+            AND c.module_key IN ('dashboard', 'tenant-management', 'user-management', 'audit-viewer', 'feature-flags', 'platform-settings', 'auth')
+        ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE
+                SET access = 'EXECUTE'::nxc_menu.access_level,
+                        updated_at = NOW();
 
     -- Alinear permisos del tenant demo al nuevo baseline
     DELETE FROM nxc_menu.component_permissions
@@ -1640,4 +1501,3 @@ BEGIN
     -- Eliminar componentes
     DELETE FROM nxc_menu.components WHERE tenant_id = v_tid_system AND module_key = ANY(v_mods);
 END $$;
--- =============================================================================
