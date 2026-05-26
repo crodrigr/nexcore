@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexCore – Gestión de Usuarios</title>
+  <style>
+    /* ── Design Tokens (light theme) ── */
+    :root {
+      --navbar-height: 64px;
+      --sidebar-width: 247px;
+
+      --color-bg-primary: #ffffff;
+      --color-bg-secondary: #fafafa;
+      --color-bg-tertiary: #f5f5f5;
+      --color-surface: #ffffff;
+      --color-surface-hover: #fafafa;
+
+      --color-text-primary: #212121;
+      --color-text-secondary: #616161;
+      --color-text-tertiary: #757575;
+      --color-text-inverse: #ffffff;
+
+      --color-border-light: #eeeeee;
+      --color-border-medium: #e0e0e0;
+
+      --color-interactive-primary: #2196f3;
+      --color-interactive-primary-hover: #1e88e5;
+      --color-interactive-primary-active: #1976d2;
+      --color-interactive-danger: #f44336;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0,0,0,.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+
+      --hover-bg: rgba(33,150,243,0.12);
+      --hover-text: #212121;
+      --tooltip-bg: #ffffff;
+      --tooltip-text: #212121;
+      --lang-compact-bg: #ffffff;
+      --collapsed-hover-icon-bg: rgba(33,150,243,0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--navbar-height);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      background: linear-gradient(180deg, var(--color-bg-secondary), var(--color-surface));
+      border-bottom: 1px solid var(--color-border-light);
+      z-index: 1000;
+    }
+    .navbar-left { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+    .hamburger-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-right: 8px; padding: 8px; border-radius: 8px; border: none;
+      background: transparent; cursor: pointer;
+    }
+    .hamburger-btn:hover { background: var(--hover-bg); }
+    .hamburger-btn svg { width: 20px; height: 20px; color: var(--color-text-tertiary); }
+    .brand {
+      display: inline-flex; align-items: center; gap: 10px;
+      text-decoration: none; font-weight: 800; font-size: 20px;
+      letter-spacing: -0.5px; color: var(--color-interactive-primary);
+    }
+    .brand-logo {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 900; font-size: 15px; letter-spacing: -1px;
+    }
+    .navbar-menus {
+      display: flex; align-items: center; gap: 4px; margin-left: 24px;
+    }
+    .navbar-menu-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 8px; text-decoration: none;
+      color: var(--color-text-primary); font-size: 14px; font-weight: 500;
+      background: transparent; border: none; cursor: pointer; white-space: nowrap;
+    }
+    .navbar-menu-item:hover { background: var(--hover-bg); }
+    .navbar-menu-item.active {
+      background: var(--color-bg-primary);
+      color: var(--color-interactive-primary); font-weight: 600;
+    }
+    .navbar-center { flex: 1 1 auto; display: flex; justify-content: center; }
+    .search {
+      display: flex; align-items: center;
+      width: 480px; max-width: 60%;
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border-light);
+      padding: 9px 14px; border-radius: 10px;
+    }
+    .search svg { width: 14px; height: 14px; color: var(--color-text-secondary); flex-shrink: 0; }
+    .search input {
+      border: none; outline: none; margin-left: 12px;
+      width: 100%; background: transparent;
+      color: var(--color-text-primary); font-size: 14px;
+    }
+    .navbar-right { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(180deg, #2196f3, #1976d2);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 14px;
+    }
+    .profile-trigger {
+      background: transparent; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 8px;
+    }
+    .profile-trigger:hover { background: var(--hover-bg); }
+    .profile-info .name { font-weight: 700; color: var(--color-text-primary); font-size: 13px; }
+    .profile-info .role { font-size: 10px; color: var(--color-text-secondary); margin-top: 2px; }
+    .notif-btn {
+      position: relative; padding: 8px; border-radius: 8px;
+      background: transparent; border: none; cursor: pointer;
+    }
+    .notif-btn:hover { background: var(--hover-bg); }
+    .notif-btn svg { width: 22px; height: 22px; color: var(--color-text-tertiary); display: block; }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 999px; background: #ef4444; color: #fff;
+      font-size: 11px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,.28);
+    }
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--color-border-light);
+      background: var(--color-bg-primary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: var(--navbar-height); left: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--color-bg-secondary);
+      border-right: 1px solid var(--color-border-light);
+      z-index: 100;
+      display: flex; flex-direction: column;
+      padding: 16px 12px 0;
+      overflow-y: auto;
+    }
+    .profile-card {
+      display: flex; gap: 8px; align-items: center;
+      padding: 4px 2px 12px;
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 12px;
+    }
+    .avatar-square {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: linear-gradient(180deg, #2196f3, #1976d2);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 800; font-size: 13px; flex-shrink: 0;
+    }
+    .profile-info-sb .name { font-weight: 800; color: var(--color-text-primary); font-size: 13px; }
+    .profile-info-sb .role {
+      font-size: 9px; color: var(--color-text-secondary); margin-top: 2px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .sidebar-section-label {
+      font-size: 10px; font-weight: 700; color: var(--color-text-tertiary);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 12px 10px 6px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; color: var(--color-text-secondary);
+      text-decoration: none; border-radius: 8px;
+      font-weight: 600; font-size: 14px;
+      transition: background 160ms, color 160ms, transform 160ms;
+    }
+    .sidebar-link:hover {
+      background: var(--hover-bg); color: var(--hover-text); transform: translateX(2px);
+    }
+    .sidebar-link.active {
+      background: var(--color-interactive-primary);
+      color: var(--color-text-inverse); border-radius: 10px;
+    }
+    .sidebar-link .link-icon {
+      width: 20px; height: 20px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sidebar-link .link-icon svg { width: 18px; height: 18px; }
+    .sidebar-group { display: flex; flex-direction: column; gap: 2px; }
+    .sidebar-group-toggle {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      width: 100%; border: 1px solid transparent; background: var(--color-surface);
+      color: var(--color-text-secondary); border-radius: 10px;
+      padding: 9px 12px 9px 10px; cursor: pointer; text-align: left;
+      font-size: 14px; font-weight: 600;
+      transition: background 160ms, color 160ms;
+    }
+    .sidebar-group-toggle:hover { background: var(--hover-bg); color: var(--hover-text); border-color: var(--color-border-light); }
+    .sidebar-group-main { display: flex; align-items: center; gap: 12px; }
+    .sidebar-group-children {
+      display: flex; flex-direction: column; gap: 4px;
+      margin: 4px 0 0 8px; padding: 6px 6px 6px 12px;
+      border-radius: 12px; border: 1px solid var(--color-border-light);
+      background: var(--color-surface); position: relative;
+    }
+    .sidebar-group-children::before {
+      content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+      width: 2px; border-radius: 2px;
+      background: linear-gradient(180deg, #2196f3, #1976d2); opacity: 0.2;
+    }
+    .child-link {
+      margin-left: 2px; padding: 8px 10px; min-height: 36px;
+      position: relative; border-radius: 8px;
+    }
+    .child-link.active {
+      background: var(--color-interactive-primary); color: #fff;
+    }
+    .sidebar-footer {
+      margin-top: auto; padding: 12px 0 0;
+      border-top: 1px solid var(--color-border-light);
+      position: sticky; bottom: 0; background: var(--color-bg-secondary);
+    }
+    .plan-card {
+      background: var(--color-surface) !important;
+      border: 1px solid var(--color-border-light);
+      border-radius: 10px; padding: 10px 12px;
+      box-shadow: var(--shadow-md); margin-bottom: 8px;
+    }
+    .plan-title { font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-bottom: 6px; }
+    .progress { height: 8px; background: var(--color-bg-tertiary); border-radius: 8px; overflow: hidden; }
+    .progress .bar {
+      height: 100%;
+      background: linear-gradient(90deg, #2196f3, #1976d2);
+      border-radius: 8px; width: 42%;
+    }
+    .plan-small { font-size: 10px; margin-top: 6px; color: var(--color-text-secondary); font-weight: 600; }
+
+    /* ── MAIN CONTENT ── */
+    .page-wrap {
+      display: flex; flex-direction: column;
+      min-height: calc(100vh - var(--navbar-height));
+      margin-top: var(--navbar-height);
+    }
+    .layout { display: flex; }
+    .content {
+      flex: 1 1 auto;
+      padding: 28px 32px 28px calc(var(--sidebar-width) + 32px);
+      background: linear-gradient(180deg, rgba(13,71,161,.02), transparent 40%),
+                  var(--color-bg-primary);
+      min-height: calc(100vh - var(--navbar-height));
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; margin-bottom: 20px;
+    }
+    .module-title { font-size: 2rem; font-weight: 800; color: var(--color-text-primary); margin: 0 0 6px; }
+    .module-subtitle { color: var(--color-text-secondary); font-size: 1rem; margin: 0; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      border-radius: 12px; box-shadow: var(--shadow-sm);
+      padding: 20px 22px; margin-bottom: 22px;
+    }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+    .search-block { display: flex; flex-direction: column; gap: 6px; min-width: 300px; }
+    .search-block label { font-size: 0.84rem; color: var(--color-text-secondary); }
+    .search-block input {
+      height: 40px; border: 1px solid var(--color-border-light);
+      border-radius: 10px; padding: 0 12px;
+      background: var(--color-bg-secondary); color: var(--color-text-primary);
+      font-size: 14px; outline: none;
+    }
+    .toolbar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    .toolbar-pager {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 6px 8px; border: 1px solid var(--color-border-light);
+      border-radius: 12px; background: var(--color-bg-secondary);
+    }
+    .pager-left { display: inline-flex; align-items: center; gap: 10px; }
+    .pager-meta { color: var(--color-text-secondary); font-size: 0.82rem; font-weight: 600; }
+    .page-size-select {
+      height: 32px; min-width: 68px; border: 1px solid var(--color-border-light);
+      border-radius: 8px; padding: 0 8px; background: var(--color-bg-secondary);
+      color: var(--color-text-primary); font-size: 0.82rem;
+    }
+    .pager-controls { display: inline-flex; align-items: center; gap: 6px; }
+    .pager-btn {
+      min-width: 30px; height: 30px; border-radius: 7px;
+      border: 1px solid var(--color-border-light);
+      background: var(--color-surface); color: var(--color-text-primary);
+      font-size: 0.84rem; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; padding: 0 10px;
+    }
+    .pager-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .pager-btn:not(:disabled):hover { border-color: var(--color-border-medium); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      height: 36px; border: 0; border-radius: 9px;
+      padding: 0 14px; font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: transform 120ms, opacity 120ms;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background: var(--color-interactive-primary); color: var(--color-text-inverse); }
+    .btn-secondary {
+      background: var(--color-bg-secondary); color: var(--color-text-primary);
+      border: 1px solid var(--color-border-light);
+    }
+    .btn-danger { background: #c62828; color: #fff; }
+    .btn-success { background: #1f7a47; color: #fff; }
+    .btn-sm { height: 32px; padding: 0 10px; font-size: 13px; border-radius: 8px; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 960px; }
+    th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--color-border-light); font-size: 0.9rem; }
+    th { color: var(--color-text-secondary); font-weight: 600; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--color-surface-hover); }
+    .sort-btn {
+      border: 0; background: transparent; padding: 0; margin: 0;
+      color: inherit; font: inherit; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .sort-indicator {
+      display: inline-grid; grid-template-rows: .48rem .48rem;
+      align-items: center; justify-items: center;
+      margin-left: 2px; color: var(--color-text-secondary); line-height: 1;
+    }
+    .sort-chevron { font-size: 0.5rem; opacity: 0.45; }
+    .sort-indicator.asc .sort-chevron.up { color: var(--color-interactive-primary); opacity: 1; }
+    .sort-indicator.desc .sort-chevron.down { color: var(--color-interactive-primary); opacity: 1; }
+
+    /* ── STATUS CHIPS ── */
+    .status-chip {
+      display: inline-flex; align-items: center;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;
+    }
+    .status-active    { background: rgba(33,150,83,.14);  color: #1f6b42; }
+    .status-suspended { background: rgba(200,40,40,.14);  color: #b71c1c; }
+    .status-pending   { background: rgba(245,124,0,.14);  color: #e65100; }
+    .status-blocked   { background: rgba(100,100,100,.14);color: #424242; }
+
+    /* ── ROLE CHIPS ── */
+    .role-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .role-chip {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;
+      background: rgba(33,150,243,.1); color: #1565c0;
+      border: 1px solid rgba(33,150,243,.2); letter-spacing: 0.02em; white-space: nowrap;
+    }
+    .role-chip.system { background: rgba(106,27,154,.08); color: #6a1b9a; border-color: rgba(106,27,154,.2); }
+
+    /* ── ACTIONS CELL ── */
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── AVATAR CELL ── */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 12px; color: #fff;
+    }
+    .ua-blue   { background: linear-gradient(135deg, #2196f3, #1565c0); }
+    .ua-purple { background: linear-gradient(135deg, #9c27b0, #6a1b9a); }
+    .ua-green  { background: linear-gradient(135deg, #43a047, #1b5e20); }
+    .ua-orange { background: linear-gradient(135deg, #ff9800, #e65100); }
+    .ua-teal   { background: linear-gradient(135deg, #00bcd4, #006064); }
+    .user-meta .user-name  { font-weight: 700; font-size: 0.88rem; }
+    .user-meta .user-email { font-size: 0.78rem; color: var(--color-text-secondary); margin-top: 1px; }
+
+    /* ── TABS (sub-navigation) ── */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--color-border-light); margin-bottom: 22px; }
+    .tab-item {
+      padding: 10px 18px; font-size: 14px; font-weight: 600;
+      color: var(--color-text-secondary); border-bottom: 2px solid transparent;
+      cursor: pointer; text-decoration: none; margin-bottom: -1px;
+      transition: color 160ms, border-color 160ms;
+    }
+    .tab-item:hover { color: var(--color-text-primary); }
+    .tab-item.active { color: var(--color-interactive-primary); border-bottom-color: var(--color-interactive-primary); }
+    .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 20px; height: 20px; padding: 0 5px;
+      border-radius: 999px; background: var(--color-bg-tertiary);
+      color: var(--color-text-secondary); font-size: 11px; font-weight: 700;
+      margin-left: 6px;
+    }
+    .tab-item.active .tab-badge {
+      background: rgba(33,150,243,.14); color: var(--color-interactive-primary);
+    }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(8,12,24,.45);
+      z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 18px;
+    }
+    .modal {
+      width: min(680px, 100%); max-height: calc(100vh - 36px); overflow: auto;
+      background: var(--color-surface); border-radius: 14px;
+      border: 1px solid var(--color-border-light); box-shadow: var(--shadow-md);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; border-bottom: 1px solid var(--color-border-light);
+    }
+    .modal-header h2 { margin: 0; font-size: 1.05rem; font-weight: 800; }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 14px 20px; border-top: 1px solid var(--color-border-light);
+    }
+    .icon-btn {
+      border: 0; background: transparent; color: var(--color-text-secondary);
+      cursor: pointer; font-size: 18px; font-weight: 700; padding: 4px 8px; border-radius: 6px;
+    }
+    .icon-btn:hover { background: var(--hover-bg); }
+
+    /* ── FORM ── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.84rem; font-weight: 600; color: var(--color-text-primary); }
+    .field input, .field select, .field textarea {
+      height: 44px; border: 1px solid var(--color-border-light);
+      border-radius: 10px; padding: 0 14px;
+      background: var(--color-bg-secondary); color: var(--color-text-primary);
+      font-size: 0.95rem; outline: none; font-family: inherit;
+    }
+    .field textarea { height: auto; padding: 10px 14px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--color-interactive-primary);
+      box-shadow: 0 0 0 3px rgba(33,150,243,.18);
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field-hint { font-size: 0.78rem; color: var(--color-text-secondary); }
+
+    /* ── SEND INVITE TOGGLE ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .toggle-info .toggle-label { font-size: 0.88rem; font-weight: 600; }
+    .toggle-info .toggle-desc  { font-size: 0.78rem; color: var(--color-text-secondary); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 44px; height: 24px; flex-shrink: 0; cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 999px;
+      background: var(--color-border-medium); transition: background 200ms;
+    }
+    .toggle input:checked ~ .toggle-track { background: var(--color-interactive-primary); }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; box-shadow: var(--shadow-sm); transition: transform 200ms;
+    }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+
+    /* ── ROLES MULTI-SELECT ── */
+    .role-select-list {
+      border: 1px solid var(--color-border-light); border-radius: 10px; overflow: hidden;
+    }
+    .role-select-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-bottom: 1px solid var(--color-border-light); cursor: pointer;
+    }
+    .role-select-item:last-child { border-bottom: none; }
+    .role-select-item:hover { background: var(--color-surface-hover); }
+    .role-select-item input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--color-interactive-primary); flex-shrink: 0; }
+    .role-select-item .role-name { font-weight: 700; font-size: 0.88rem; }
+    .role-select-item .role-desc { font-size: 0.76rem; color: var(--color-text-secondary); margin-top: 2px; }
+    .role-select-item .role-badge {
+      margin-left: auto; font-size: 0.68rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 5px;
+      background: var(--color-bg-tertiary); color: var(--color-text-secondary);
+      text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0;
+    }
+    .role-select-item .role-badge.system { background: rgba(106,27,154,.08); color: #6a1b9a; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="hamburger-btn" aria-label="Menú">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <a class="brand" href="#">
+      <div class="brand-logo">Nx</div>
+      NexCore
+    </a>
+    <nav class="navbar-menus">
+      <a class="navbar-menu-item active" href="#">Platform</a>
+      <a class="navbar-menu-item" href="#">Analytics</a>
+      <a class="navbar-menu-item" href="#">Settings</a>
+    </nav>
+  </div>
+
+  <div class="navbar-center">
+    <div class="search">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text" placeholder="Buscar en NexCore..." />
+    </div>
+  </div>
+
+  <div class="navbar-right">
+    <button class="theme-btn" title="Cambiar tema">🌙</button>
+    <button class="notif-btn" aria-label="Notificaciones">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="notif-badge">3</span>
+    </button>
+    <button class="profile-trigger">
+      <div class="avatar">SA</div>
+      <div class="profile-info">
+        <div class="name">super.admin</div>
+        <div class="role">SUPER_ADMIN</div>
+      </div>
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 9l6 6 6-6"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside class="sidebar">
+  <div class="profile-card">
+    <div class="avatar-square">SA</div>
+    <div class="profile-info-sb">
+      <div class="name">super.admin</div>
+      <div class="role">SUPER_ADMIN · System</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Principal</div>
+
+    <a class="sidebar-link" href="#">
+      <span class="link-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </span>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section-label">Administración</div>
+
+    <a class="sidebar-link" href="#">
+      <span class="link-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </span>
+      Tenants
+    </a>
+
+    <a class="sidebar-link active" href="#">
+      <span class="link-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </span>
+      Usuarios &amp; Roles
+    </a>
+
+    <div class="sidebar-group">
+      <button class="sidebar-group-toggle">
+        <div class="sidebar-group-main">
+          <span class="link-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+            </svg>
+          </span>
+          Configuración
+        </div>
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-section-label">Menús UI</div>
+
+    <a class="sidebar-link" href="#">
+      <span class="link-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </span>
+      Perfil de UI
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="plan-card">
+      <div class="plan-title">Plan ENTERPRISE</div>
+      <div class="progress"><div class="bar"></div></div>
+      <div class="plan-small">42 / 100 usuarios · v2.4.1</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════ MAIN CONTENT ══════════════ -->
+<div class="page-wrap">
+  <div class="layout">
+    <main class="content">
+
+      <!-- Page Header -->
+      <header class="page-header">
+        <div>
+          <h1 class="module-title">Usuarios &amp; Roles</h1>
+          <p class="module-subtitle">Gestiona los usuarios, roles e invitaciones del tenant activo.</p>
+        </div>
+      </header>
+
+      <!-- Sub-tabs -->
+      <div class="tabs">
+        <a class="tab-item active" href="#">
+          Usuarios <span class="tab-badge">24</span>
+        </a>
+        <a class="tab-item" href="#">
+          Invitaciones <span class="tab-badge">3</span>
+        </a>
+        <a class="tab-item" href="#">
+          Roles <span class="tab-badge">5</span>
+        </a>
+      </div>
+
+      <!-- Toolbar -->
+      <section class="card toolbar">
+        <div class="search-block">
+          <label for="user-search">Buscar usuario</label>
+          <input id="user-search" type="text" placeholder="Nombre, username o email…" />
+        </div>
+        <div class="toolbar-actions">
+          <!-- Status filter -->
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:.84rem;color:var(--color-text-secondary);">Estado</label>
+            <select style="height:40px;border:1px solid var(--color-border-light);border-radius:10px;padding:0 12px;background:var(--color-bg-secondary);color:var(--color-text-primary);font-size:14px;">
+              <option value="">Todos</option>
+              <option value="ACTIVE" selected>ACTIVE</option>
+              <option value="PENDING_ACTIVATION">PENDING_ACTIVATION</option>
+              <option value="SUSPENDED">SUSPENDED</option>
+              <option value="BLOCKED">BLOCKED</option>
+            </select>
+          </div>
+
+          <!-- Pager -->
+          <div class="toolbar-pager">
+            <div class="pager-left">
+              <span class="pager-meta">1 – 10 de 24</span>
+              <select class="page-size-select">
+                <option>10</option>
+                <option>20</option>
+                <option>50</option>
+              </select>
+            </div>
+            <div class="pager-controls">
+              <button class="pager-btn" disabled title="Primera página">«</button>
+              <button class="pager-btn" disabled title="Anterior">‹</button>
+              <button class="pager-btn" title="Siguiente">›</button>
+              <button class="pager-btn" title="Última página">»</button>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <button class="btn btn-primary" onclick="document.getElementById('invite-modal').style.display='flex'">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>
+            Invitar Usuario
+          </button>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  <button class="sort-btn">
+                    Usuario
+                    <span class="sort-indicator asc">
+                      <span class="sort-chevron up">▲</span>
+                      <span class="sort-chevron down">▼</span>
+                    </span>
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn">
+                    Username
+                    <span class="sort-indicator">
+                      <span class="sort-chevron up">▲</span>
+                      <span class="sort-chevron down">▼</span>
+                    </span>
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn">
+                    Estado
+                    <span class="sort-indicator">
+                      <span class="sort-chevron up">▲</span>
+                      <span class="sort-chevron down">▼</span>
+                    </span>
+                  </button>
+                </th>
+                <th>Roles</th>
+                <th>
+                  <button class="sort-btn">
+                    Creado
+                    <span class="sort-indicator">
+                      <span class="sort-chevron up">▲</span>
+                      <span class="sort-chevron down">▼</span>
+                    </span>
+                  </button>
+                </th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar ua-blue">SA</div>
+                    <div class="user-meta">
+                      <div class="user-name">Super Admin</div>
+                      <div class="user-email">super.admin@nexcore.io</div>
+                    </div>
+                  </div>
+                </td>
+                <td>super.admin</td>
+                <td><span class="status-chip status-active">ACTIVE</span></td>
+                <td>
+                  <div class="role-chips">
+                    <span class="role-chip system">SUPER_ADMIN</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-text-secondary);font-size:.84rem;">2024-01-01 00:00</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm">Editar</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar ua-purple">AD</div>
+                    <div class="user-meta">
+                      <div class="user-name">Admin Demo</div>
+                      <div class="user-email">admin.demo@empresa.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>admin.demo</td>
+                <td><span class="status-chip status-active">ACTIVE</span></td>
+                <td>
+                  <div class="role-chips">
+                    <span class="role-chip system">TENANT_ADMIN</span>
+                    <span class="role-chip">EDITOR</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-text-secondary);font-size:.84rem;">2024-01-15 09:30</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm">Editar</button>
+                    <button class="btn btn-danger btn-sm">Suspender</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar ua-green">JR</div>
+                    <div class="user-meta">
+                      <div class="user-name">Juan Rodríguez</div>
+                      <div class="user-email">juan.rodriguez@empresa.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>juan.rodriguez</td>
+                <td><span class="status-chip status-active">ACTIVE</span></td>
+                <td>
+                  <div class="role-chips">
+                    <span class="role-chip">EDITOR</span>
+                    <span class="role-chip">SUPERVISOR</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-text-secondary);font-size:.84rem;">2024-02-10 14:22</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm">Editar</button>
+                    <button class="btn btn-danger btn-sm">Suspender</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar ua-orange">MP</div>
+                    <div class="user-meta">
+                      <div class="user-name">María Pérez</div>
+                      <div class="user-email">maria.perez@empresa.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>maria.perez</td>
+                <td><span class="status-chip status-pending">PENDING</span></td>
+                <td>
+                  <div class="role-chips">
+                    <span class="role-chip">VIEWER</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-text-secondary);font-size:.84rem;">2024-03-05 11:00</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm">Editar</button>
+                    <button class="btn btn-danger btn-sm">Suspender</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar ua-teal">CG</div>
+                    <div class="user-meta">
+                      <div class="user-name">Carlos Gómez</div>
+                      <div class="user-email">carlos.gomez@empresa.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>carlos.gomez</td>
+                <td><span class="status-chip status-suspended">SUSPENDED</span></td>
+                <td>
+                  <div class="role-chips">
+                    <span class="role-chip">VIEWER</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-text-secondary);font-size:.84rem;">2024-01-28 16:45</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm">Editar</button>
+                    <button class="btn btn-success btn-sm">Activar</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar ua-blue">LT</div>
+                    <div class="user-meta">
+                      <div class="user-name">Laura Torres</div>
+                      <div class="user-email">laura.torres@empresa.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>laura.torres</td>
+                <td><span class="status-chip status-active">ACTIVE</span></td>
+                <td>
+                  <div class="role-chips">
+                    <span class="role-chip">EDITOR</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-text-secondary);font-size:.84rem;">2024-03-18 08:15</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm">Editar</button>
+                    <button class="btn btn-danger btn-sm">Suspender</button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL: Invitar Usuario ══════════════ -->
+<div class="modal-backdrop" id="invite-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <section class="modal">
+    <header class="modal-header">
+      <h2>Invitar Usuario</h2>
+      <button class="icon-btn" onclick="document.getElementById('invite-modal').style.display='none'">✕</button>
+    </header>
+
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:18px;">
+      <div class="field">
+        <label for="inv-email">Email <span style="color:#f44336">*</span></label>
+        <input id="inv-email" type="email" placeholder="usuario@empresa.com" />
+        <span class="field-hint">El usuario recibirá un enlace de invitación en este email.</span>
+      </div>
+
+      <div class="field">
+        <label>Roles a asignar</label>
+        <div class="role-select-list">
+          <label class="role-select-item">
+            <input type="checkbox" />
+            <div>
+              <div class="role-name">TENANT_ADMIN</div>
+              <div class="role-desc">Administrador del tenant con acceso completo.</div>
+            </div>
+            <span class="role-badge system">Sistema</span>
+          </label>
+          <label class="role-select-item">
+            <input type="checkbox" checked />
+            <div>
+              <div class="role-name">EDITOR</div>
+              <div class="role-desc">Puede crear y editar contenido del tenant.</div>
+            </div>
+            <span class="role-badge system">Sistema</span>
+          </label>
+          <label class="role-select-item">
+            <input type="checkbox" />
+            <div>
+              <div class="role-name">VIEWER</div>
+              <div class="role-desc">Solo puede visualizar información.</div>
+            </div>
+            <span class="role-badge system">Sistema</span>
+          </label>
+          <label class="role-select-item">
+            <input type="checkbox" />
+            <div>
+              <div class="role-name">SUPERVISOR</div>
+              <div class="role-desc">Rol de supervisión con acceso de lectura extendido.</div>
+            </div>
+            <span class="role-badge">Custom</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('invite-modal').style.display='none'">Cancelar</button>
+      <button class="btn btn-primary">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Enviar Invitación
+      </button>
+    </div>
+  </section>
+</div>
+
+</body>
+</html>
