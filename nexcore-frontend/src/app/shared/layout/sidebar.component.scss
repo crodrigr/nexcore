@@ -1,14 +1,20 @@
+/* Sidebar: altura y posición fija, layout robusto */
 .sidebar {
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  position: fixed;
+  top: var(--navbar-height, 64px);
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
   width: 260px;
   background: var(--color-bg-secondary);
   border-right: 1px solid var(--color-border-light);
-  padding: 14px 10px;
-  height: calc(100vh - 64px);
-  position: sticky;
-  top: 64px;
-  display:flex;
-  flex-direction:column;
-  overflow: hidden;
+  z-index: 100;
+  padding: 0;
+  /* overflow: hidden;  <-- eliminado para que el footer no se oculte */
 }
 
 /* Collapsed sidebar (triggered by body.sidebar-collapsed) */
@@ -50,7 +56,15 @@ body.sidebar-collapsed .profile-card { justify-content:center }
 .profile-info .name { font-weight:800; color:var(--color-text-primary); font-size:13px }
 .profile-info .role { font-size:9px; color:var(--color-text-secondary); margin-top:2px }
 
-.sidebar-nav { display:flex; flex-direction:column; gap:10px; margin-top:10px; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 .sidebar-group { display:flex; flex-direction:column; gap:8px; }
 
 /* Unified typography for all menu nodes (items, groups and children) */
@@ -243,7 +257,13 @@ body.sidebar-collapsed .sidebar-group .child-link {
 /* Ensure svg strokes/fills inherit color so icons switch to inverse on active */
 .sidebar-link svg { color: inherit; stroke: currentColor; fill: none }
 
-.sidebar-footer { padding-top:12px; flex-shrink: 0; }
+.sidebar-footer {
+  padding-top: 12px;
+  flex-shrink: 0;
+  margin-top: auto;
+  background: inherit;
+  width: 100%;
+}
 .plan-card { background: var(--color-surface); padding:10px; border-radius:10px; box-shadow: var(--shadow-md) }
 .plan-title { font-weight:700; margin-bottom:6px; color:var(--color-text-primary); font-size:13px }
 .progress { height:8px; background: var(--color-bg-tertiary); border-radius:8px; overflow:hidden }

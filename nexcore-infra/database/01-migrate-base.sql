@@ -1546,31 +1546,14 @@ BEGIN
         WHERE tenant_id = v_tenant_id
             AND location IN ('navbar', 'sidebar', 'profile');
 
-        INSERT INTO nxc_menu.menu_items (
-            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
-            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
-        ) VALUES (
-            v_tenant_id, v_comp_navigation, NULL, 'Admin', 'menu.admin', NULL, 'settings', 'tabler', 'sidebar',
-            'GROUP', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0
-        ) RETURNING id INTO v_menu_admin_group;
 
         INSERT INTO nxc_menu.menu_items (
             tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
             item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
         ) VALUES
-            (v_tenant_id, v_comp_identity_access, v_menu_admin_group, 'IdentityAccess', 'menu.identity-access', '/identity-access', 'users', 'tabler', 'sidebar', 'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
-            (v_tenant_id, v_comp_navigation,      v_menu_admin_group, 'Navigation',     'menu.navigation',      '/admin/menus',     'menu',  'tabler', 'sidebar', 'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
-            (v_tenant_id, v_comp_audit,           v_menu_admin_group, 'Audit',          'menu.audit',           '/audit',           'chart-bar', 'tabler', 'sidebar', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
-            (v_tenant_id, v_comp_tenant_settings, v_menu_admin_group, 'TenantSettings', 'menu.tenant-settings', '/settings',        'settings', 'tabler', 'sidebar', 'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
-            (v_tenant_id, v_comp_profile,         v_menu_admin_group, 'Profile',        'menu.profile_sidebar', '/profile',         'profile', 'tabler', 'sidebar', 'ITEM', 50, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0);
-
-        INSERT INTO nxc_menu.menu_items (
-            tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,
-            item_type, order_index, is_visible, is_system, default_access, created_by, created_at, updated_at, version
-        ) VALUES
-            (v_tenant_id, v_comp_crm,        NULL, 'CRM',        'menu.crm',        '/crm',        'dashboard', 'tabler', 'sidebar', 'ITEM', 20, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
-            (v_tenant_id, v_comp_projects,   NULL, 'Projects',   'menu.projects',   '/projects',   'home',      'tabler', 'sidebar', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
-            (v_tenant_id, v_comp_monitoring, NULL, 'Monitoring', 'menu.monitoring', '/monitoring', 'bell',      'tabler', 'sidebar', 'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0);
+            (v_tenant_id, v_comp_projects,   NULL, 'Dashboard',   'menu.dashboard',   '/dashboard',   'dashboard', 'tabler', 'sidebar', 'ITEM', 10, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_crm,        NULL, 'CRM',         'menu.crm',         '/crm',         'dashboard', 'tabler', 'sidebar', 'ITEM', 30, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0),
+            (v_tenant_id, v_comp_monitoring, NULL, 'Monitoring',  'menu.monitoring',  '/monitoring',  'bell',      'tabler', 'sidebar', 'ITEM', 40, TRUE, TRUE, 'EXECUTE'::nxc_menu.access_level, v_user_admin_id, NOW(), NOW(), 0);
 
         INSERT INTO nxc_menu.menu_items (
             tenant_id, component_id, parent_id, name, title, route, icon, icon_type, location,

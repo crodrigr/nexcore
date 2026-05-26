@@ -1,22 +1,4 @@
-.layout {
-  display: flex;
-  position: relative;
-  z-index: 0;
-  isolation: isolate;
-}
-
-.page-wrap {
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - var(--navbar-height,64px));
-}
-.content {
-  flex: 1 1 auto;
-  /* reserve space for fixed navbar only; header stays in normal flow */
-  padding: calc(var(--navbar-height,64px) + 12px) 32px 28px 32px;
-  background: linear-gradient(180deg, rgba(13,71,161,0.02), transparent 40%), var(--color-bg-primary);
-  min-height: calc(100vh - var(--navbar-height,64px));
-}
+/* Elimina layout redundante, usa el global */
 
 .page-header {
   position: static;

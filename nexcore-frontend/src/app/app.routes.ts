@@ -67,5 +67,10 @@ export const routes: Routes = [
         pathMatch: 'full'
       }
     ]
+  },
+  {
+    path: 'crm',
+    loadChildren: () => import('./features/crm/crm.module').then(m => m.CrmModule),
+    title: 'CRM'
   }
 ];

@@ -1,12 +1,27 @@
-// Importar tokens de diseño (usar @use para evitar deprecación)
 @use 'styles/tokens/colors' as *;
 @use 'styles/tokens/typography' as *;
 @use 'styles/tokens/spacing' as *;
 @use 'styles/tokens/borders' as *;
-
-// Importar temas
 @use 'styles/themes/_light' as *;
 @use 'styles/themes/_dark' as *;
+
+/* Layout principal: asegura espacio para sidebar */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* El contenido deja margen para el sidebar */
+.content {
+  flex: 1 1 auto;
+  margin-left: 260px; /* igual al ancho del sidebar */
+  padding: calc(var(--navbar-height,64px) + 12px) 32px 28px 32px;
+  background: linear-gradient(180deg, rgba(13,71,161,0.02), transparent 40%), var(--color-bg-primary);
+  min-height: calc(100vh - var(--navbar-height,64px));
+}
 
 /* Font loaded via index.html to improve performance */
 
