@@ -14,7 +14,6 @@
   border-right: 1px solid var(--color-border-light);
   z-index: 100;
   padding: 0;
-  /* overflow: hidden;  <-- eliminado para que el footer no se oculte */
 }
 
 /* Collapsed sidebar (triggered by body.sidebar-collapsed) */
@@ -64,6 +63,7 @@ body.sidebar-collapsed .profile-card { justify-content:center }
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: 0;
 }
 .sidebar-group { display:flex; flex-direction:column; gap:8px; }
 
@@ -261,14 +261,28 @@ body.sidebar-collapsed .sidebar-group .child-link {
   padding-top: 12px;
   flex-shrink: 0;
   margin-top: auto;
-  background: inherit;
   width: 100%;
+  background: transparent;
+  text-align: center;
 }
-.plan-card { background: var(--color-surface); padding:10px; border-radius:10px; box-shadow: var(--shadow-md) }
+.plan-card {
+  background: #222 !important;
+  color: #fff !important;
+  padding: 12px 10px !important;
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+}
 .plan-title { font-weight:700; margin-bottom:6px; color:var(--color-text-primary); font-size:13px }
 .progress { height:8px; background: var(--color-bg-tertiary); border-radius:8px; overflow:hidden }
 .progress .bar { height:100%; background: linear-gradient(90deg,var(--color-interactive-primary),var(--color-interactive-primary-active)); border-radius:8px }
-.small { font-size:12px; color:var(--color-text-secondary); margin-top:6px }
+.small {
+  font-size: 14px;
+  color: #fff !important;
+  margin-top: 6px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background: transparent !important;
+}
 
 /* Collapsed state: keep icon sizes consistent and show active icon background */
 body.sidebar-collapsed .sidebar-link .icon {

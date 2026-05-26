@@ -1,9 +1,15 @@
+
 @use 'styles/tokens/colors' as *;
 @use 'styles/tokens/typography' as *;
 @use 'styles/tokens/spacing' as *;
 @use 'styles/tokens/borders' as *;
 @use 'styles/themes/_light' as *;
 @use 'styles/themes/_dark' as *;
+
+body.sidebar-collapsed .content {
+  margin-left: 72px !important;
+  transition: margin-left 200ms ease;
+}
 
 /* Layout principal: asegura espacio para sidebar */
 .layout {
