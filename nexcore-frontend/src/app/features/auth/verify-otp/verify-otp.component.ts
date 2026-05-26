@@ -120,8 +120,18 @@ export class VerifyOtpComponent {
         sessionStorage.removeItem('mockUsername');
       }
       
-      // Redirect to dashboard after successful verification
-      await this.router.navigateByUrl('/dashboard');
+      // Redirigir según el rol: super_admin a /tenants, otros a /dashboard
+      let userRole = '';
+      try {
+        userRole = await this.authService.getCurrentUserRole?.() || '';
+      } catch (e) {
+        userRole = '';
+      }
+      if (userRole === 'SUPER_ADMIN') {
+        await this.router.navigateByUrl('/tenants');
+      } else {
+        await this.router.navigateByUrl('/dashboard');
+      }
       
     } catch (err: any) {
       this.error.set(err.message || this.transloco.translate('auth.verifyOtp.errorInvalid'));

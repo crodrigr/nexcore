@@ -50,6 +50,16 @@ export interface ForgotPasswordRequest {
   providedIn: 'root'
 })
 export class AuthService {
+  /**
+   * Devuelve el primer rol del usuario autenticado, o string vacío si no hay sesión.
+   */
+  async getCurrentUserRole(): Promise<string> {
+    const profile = this.userProfile();
+    if (profile && Array.isArray(profile.roles) && profile.roles.length > 0) {
+      return profile.roles[0];
+    }
+    return '';
+  }
   private readonly router = inject(Router);
   private readonly profileService = inject(ProfileService);
   
