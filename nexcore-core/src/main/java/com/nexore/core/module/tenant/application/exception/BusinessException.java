@@ -3,6 +3,9 @@ package com.nexore.core.module.tenant.application.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+import java.util.UUID;
+
 @Getter
 public class BusinessException extends RuntimeException {
 
@@ -185,5 +188,28 @@ public class BusinessException extends RuntimeException {
     public static BusinessException menuUserSuspended() {
         return new BusinessException("NXC-MNU-0003",
                 "User account is suspended or blocked.", HttpStatus.FORBIDDEN);
+    }
+
+    // ---- Component / Element / Permission errors ----
+
+    public static BusinessException componentNotFound() {
+        return new BusinessException("NXC-CMP-0001",
+                "Component not found in this tenant.", HttpStatus.NOT_FOUND);
+    }
+
+    public static BusinessException elementNotFound() {
+        return new BusinessException("NXC-ELM-0001",
+                "Element not found in this component.", HttpStatus.NOT_FOUND);
+    }
+
+    public static BusinessException permissionRoleNotFound() {
+        return new BusinessException("NXC-PRM-0001",
+                "Role not found in this tenant.", HttpStatus.NOT_FOUND);
+    }
+
+    public static BusinessException permissionInvalidComponentIds(List<UUID> invalidIds) {
+        return new BusinessException("NXC-PRM-0002",
+                "One or more componentIds do not belong to this tenant: " + invalidIds,
+                HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

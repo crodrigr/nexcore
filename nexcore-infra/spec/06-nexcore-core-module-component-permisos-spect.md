@@ -1,6 +1,6 @@
 # NexCore — Especificaciones y Criterios de Aceptación
 ## Módulo: `module-menu` — Gestión de Componentes y Permisos
-**Versión:** 1.0  
+**Versión:** 1.1 (Fase 1)  
 **Schemas DB:** `nxc_menu`, `nxc_tenant`  
 **Paquete base:** `com.nexore.core.module.menu`  
 **Ubicación:** `nexcore-core/src/main/java/com/nexore/core/module/menu/`  
@@ -8,11 +8,23 @@
 
 ---
 
+## Alcance de esta versión
+
+Este spec cubre **únicamente Fase 1**: los endpoints necesarios para que la pantalla de gestión de permisos funcione. Los componentes y elementos se registran por seed/script; la pantalla de administración solo lee esa configuración y permite al TENANT_ADMIN configurar los niveles de acceso por rol.
+
+| Fase | Responsabilidad | Estado |
+|---|---|---|
+| **Fase 1** | Consulta de componentes y elementos + gestión de permisos por rol | **Este documento** |
+| Fase 2 | CRUD de componentes y elementos vía API | Pendiente |
+| Fase 2 | Overrides de permisos por usuario | Pendiente |
+
+---
+
 ## 1. Contexto y propósito
 
-Este spec amplía el módulo `module-menu` (ver `02-nexcore-core-module-menu-specs.md`) con la responsabilidad de **gestionar componentes de UI, sus elementos interactivos y los permisos por rol**.
+Este spec amplía el módulo `module-menu` (ver `02-nexcore-core-module-menu-specs.md`) con la responsabilidad de **gestionar los permisos de UI por rol**.
 
-Hasta ahora el módulo solo exponía lectura del perfil de usuario (`UC-MNU-001`). En esta extensión, el módulo agrega el CRUD de las entidades de configuración de permisos que el administrador del tenant opera desde la interfaz de administración.
+Hasta ahora el módulo solo exponía lectura del perfil de usuario (`UC-MNU-001`). En esta extensión el módulo agrega los endpoints que el TENANT_ADMIN utiliza para configurar qué puede ver y ejecutar cada rol en la interfaz.
 
 El modelo de permisos opera en dos niveles:
 
@@ -21,8 +33,6 @@ El modelo de permisos opera en dos niveles:
 | **Componente** | `nxc_menu.component_permissions` | Acceso de un rol a un módulo/página completo |
 | **Elemento** | `nxc_menu.element_permissions` | Acceso granular de un rol a un botón, tab, campo o sección |
 
-Adicionalmente existe un nivel de **override por usuario** (`nxc_menu.user_element_overrides`) que permite excepciones individuales sobre los permisos de rol.
-
 **Dependencias de dominio:**
 
 ```
@@ -30,9 +40,7 @@ module-menu (permisos) → nxc_menu.components
                        → nxc_menu.component_elements
                        → nxc_menu.component_permissions
                        → nxc_menu.element_permissions
-                       → nxc_menu.user_element_overrides
                        → nxc_tenant.roles  (validación de existencia y tenant)
-                       → nxc_tenant.users  (validación para overrides)
 ```
 
 > **Nota de nomenclatura:** El nombre `menu` del módulo queda corto para describir su responsabilidad real. Se contempla renombrarlo a `module-component-web` en una iteración futura. Por ahora todo permanece bajo `module-menu` para no romper paquetes existentes.
@@ -45,7 +53,7 @@ module-menu (permisos) → nxc_menu.components
 
 ### 2.1 Component *(aggregate root)*
 
-Representa un módulo o página de la aplicación Angular. Es la unidad mínima de control de acceso a nivel de ruta.
+Representa un módulo o página de la aplicación Angular. Es la unidad mínima de control de acceso a nivel de ruta. En Fase 1 es de **solo lectura** vía API — se registra por seed/script.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
@@ -55,24 +63,16 @@ Representa un módulo o página de la aplicación Angular. Es la unidad mínima 
 | `name` | VARCHAR(150) | Nombre legible: `"Gestión de usuarios"` |
 | `route` | VARCHAR(255) | Ruta Angular: `"/admin/users"` |
 | `description` | VARCHAR(500) | Descripción del propósito del componente |
-| `isSystem` | BOOLEAN | `TRUE`: componente del sistema, no editable por el tenant |
+| `isSystem` | BOOLEAN | `TRUE`: componente del sistema, visible para todos los tenants |
 | `createdAt` | TIMESTAMPTZ | Fecha de creación |
-| `updatedAt` | TIMESTAMPTZ | Última modificación (trigger automático) |
-| `createdBy` | UUID | FK al usuario que lo creó |
-| `updatedBy` | UUID | FK al último modificador |
+| `updatedAt` | TIMESTAMPTZ | Última modificación |
 | `deletedAt` | TIMESTAMPTZ | Soft delete |
-| `version` | INTEGER | Control de concurrencia optimista |
-
-**Invariantes de negocio:**
-- `(tenantId, moduleKey)` es único entre componentes activos.
-- Los componentes con `isSystem = TRUE` no pueden eliminarse ni modificar `moduleKey`.
-- Los componentes de sistema (`is_system = TRUE`) pertenecen al tenant `system` pero son visibles para todos los tenants por la política RLS.
 
 ---
 
 ### 2.2 ComponentElement *(entidad)*
 
-Elemento de UI controlable individualmente dentro de un componente: botón, tab, campo, sección, acción.
+Elemento de UI controlable individualmente dentro de un componente: botón, tab, campo, sección, acción. En Fase 1 es de **solo lectura** vía API — se registra por seed/script.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
@@ -82,20 +82,13 @@ Elemento de UI controlable individualmente dentro de un componente: botón, tab,
 | `elementKey` | VARCHAR(150) | Clave técnica: `"btn-create-user"`, `"tab-roles"`, `"searchInput"` |
 | `label` | VARCHAR(200) | Descripción legible para el administrador |
 | `elementType` | VARCHAR(50) | `BUTTON \| TAB \| FIELD \| SECTION \| ACTION` |
-| `createdAt` | TIMESTAMPTZ | Fecha de creación |
-| `updatedAt` | TIMESTAMPTZ | Última modificación |
 | `deletedAt` | TIMESTAMPTZ | Soft delete |
-| `version` | INTEGER | Control de concurrencia optimista |
-
-**Invariantes de negocio:**
-- `(tenantId, componentId, elementKey)` es único entre elementos activos.
-- No puede existir un elemento sin su componente (`componentId` debe apuntar a un componente activo del mismo tenant).
 
 ---
 
 ### 2.3 ComponentPermission *(entidad)*
 
-Permiso de un rol sobre un componente completo. Si un rol tiene `EXECUTE` sobre un componente, hereda `EXECUTE` en todos sus elementos salvo que `ElementPermission` lo restrinja.
+Permiso de un rol sobre un componente completo. Si un rol tiene `EXECUTE` sobre un componente, todos sus elementos heredan `EXECUTE` salvo que `ElementPermission` lo restrinja individualmente.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
@@ -110,9 +103,8 @@ Permiso de un rol sobre un componente completo. Si un rol tiene `EXECUTE` sobre 
 | `updatedBy` | UUID | FK al último modificador |
 
 **Invariantes de negocio:**
-- `(tenantId, roleId, componentId)` es único — solo existe un permiso por combinación (upsert).
+- `(tenantId, roleId, componentId)` es único — solo un permiso por combinación (upsert).
 - `roleId` y `componentId` deben pertenecer al mismo `tenantId`.
-- Eliminar el permiso (DELETE) restaura el comportamiento por defecto (`default_access` del `menu_item`).
 
 ---
 
@@ -138,32 +130,7 @@ Permiso de un rol sobre un elemento específico. Permite granularidad fina: un r
 
 ---
 
-### 2.5 UserElementOverride *(entidad)*
-
-Override individual de un elemento para un usuario específico. Anula el permiso del rol. Útil para excepciones puntuales.
-
-| Campo | Tipo | Descripción |
-|---|---|---|
-| `id` | UUID | PK |
-| `tenantId` | UUID | FK a `nxc_tenant.tenants` |
-| `userId` | UUID | FK a `nxc_tenant.users` |
-| `elementId` | UUID | FK a `nxc_menu.component_elements` |
-| `access` | `access_level` | `HIDDEN \| VIEW \| EXECUTE` |
-| `reason` | VARCHAR(500) | Justificación del override (obligatoria) |
-| `expiresAt` | TIMESTAMPTZ | `NULL` = permanente. Permite overrides temporales |
-| `createdAt` | TIMESTAMPTZ | Fecha de creación |
-| `updatedAt` | TIMESTAMPTZ | Última modificación |
-| `createdBy` | UUID | FK al usuario que lo creó |
-| `updatedBy` | UUID | FK al último modificador |
-
-**Invariantes de negocio:**
-- `(tenantId, userId, elementId)` es único (upsert).
-- `reason` es obligatorio — el sistema rechaza overrides sin justificación.
-- Un override con `expiresAt` en el pasado se ignora en la resolución de acceso efectivo.
-
----
-
-### 2.6 AccessLevel *(enum, compartido con module-menu existente)*
+### 2.5 AccessLevel *(enum, compartido con module-menu existente)*
 
 | Valor | Descripción |
 |---|---|
@@ -178,7 +145,7 @@ Override individual de un elemento para un usuario específico. Anula el permiso
 La jerarquía de resolución, de mayor a menor prioridad:
 
 ```
-1. UserElementOverride (válido, no expirado)   ← gana siempre
+1. UserElementOverride (válido, no expirado)   ← gana siempre  [Fase 2]
 2. ElementPermission   (máximo entre roles)
 3. ComponentPermission (máximo entre roles)    ← hereda a elementos sin ElementPermission
 4. default_access del menu_item                ← fallback final
@@ -190,9 +157,11 @@ Para usuarios con múltiples roles, se aplica el **máximo** entre los valores d
 EXECUTE (2) > VIEW (1) > HIDDEN (0)
 ```
 
+> En Fase 1 el nivel 1 (UserElementOverride) ya es tenido en cuenta por `UserProfileService` al construir el perfil (UC-MNU-001). Su gestión vía API se implementa en Fase 2.
+
 ---
 
-## 4. Casos de uso
+## 4. Casos de uso — Fase 1
 
 ---
 
@@ -203,8 +172,8 @@ EXECUTE (2) > VIEW (1) > HIDDEN (0)
 
 **Flujo principal:**
 1. El sistema extrae `tenant_id` del contexto de seguridad.
-2. El sistema consulta `nxc_menu.components` filtrando por `tenant_id` y `deleted_at IS NULL`.
-3. El sistema aplica paginación y filtros opcionales.
+2. Consulta `nxc_menu.components` filtrando por `tenant_id` y `deleted_at IS NULL`. Incluye los componentes de sistema (`is_system = TRUE`) visibles para el tenant.
+3. Aplica paginación y filtros opcionales.
 4. Retorna HTTP 200 con `PageResponse<ComponentSummaryResponse>`.
 
 **Filtros soportados:** `search` (sobre `name` y `moduleKey`), `isSystem`.
@@ -226,275 +195,108 @@ EXECUTE (2) > VIEW (1) > HIDDEN (0)
 
 ---
 
-### UC-PRM-003 — Crear componente
-
-**Actor:** TENANT_ADMIN  
-**Precondición:** El actor no intenta crear un componente con `isSystem = TRUE` (reservado para SUPER_ADMIN).
-
-**Flujo principal:**
-1. El actor envía `POST /api/v1/menu/components` con `moduleKey`, `name`, `route`.
-2. El sistema valida que `(tenantId, moduleKey)` no exista.
-3. El sistema persiste el componente con `isSystem = FALSE`.
-4. Retorna HTTP 201 con `ComponentSummaryResponse` y header `Location`.
-
-**Flujos alternativos:**
-- `moduleKey` duplicado en el tenant → HTTP 409 con código `NXC-CMP-0002`.
-- TENANT_ADMIN intenta `isSystem = TRUE` → HTTP 403 con código `NXC-CMP-0003`.
-
----
-
-### UC-PRM-004 — Actualizar componente
-
-**Actor:** TENANT_ADMIN / SUPER_ADMIN  
-**Restricciones:** Los componentes con `isSystem = TRUE` no pueden cambiar su `moduleKey`.
-
-**Flujo principal:**
-1. El actor envía `PATCH /api/v1/menu/components/{componentId}`.
-2. El sistema valida que el componente pertenece al tenant.
-3. El sistema aplica los cambios permitidos según el rol del actor.
-4. Incrementa `version` y persiste con `updatedBy`.
-5. Retorna HTTP 200.
-
-**Flujos alternativos:**
-- Conflicto de versión → HTTP 409 con código `NXC-CMP-0004`.
-- Intento de cambiar `moduleKey` de un componente de sistema → HTTP 422 con código `NXC-CMP-0005`.
-
----
-
-### UC-PRM-005 — Eliminar componente (soft delete)
-
-**Actor:** TENANT_ADMIN  
-**Precondición:** El componente no es de sistema (`isSystem = FALSE`).
-
-**Flujo principal:**
-1. El actor envía `DELETE /api/v1/menu/components/{componentId}`.
-2. El sistema verifica que `isSystem = FALSE`.
-3. El sistema hace soft delete del componente y en cascada de sus elementos (`deletedAt = NOW()`).
-4. El sistema elimina los `component_permissions` y `element_permissions` asociados.
-5. Retorna HTTP 204.
-
-**Flujos alternativos:**
-- Componente de sistema → HTTP 422 con código `NXC-CMP-0006`.
-
----
-
-### UC-PRM-006 — Crear elemento de un componente
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `POST /api/v1/menu/components/{componentId}/elements`
-
-**Flujo principal:**
-1. El actor envía `elementKey`, `label`, `elementType`.
-2. El sistema valida que `(tenantId, componentId, elementKey)` no exista.
-3. El sistema persiste el elemento.
-4. Retorna HTTP 201.
-
-**Flujo alternativo:**
-- `elementKey` duplicado en el componente → HTTP 409 con código `NXC-ELM-0001`.
-
----
-
-### UC-PRM-007 — Actualizar elemento
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `PATCH /api/v1/menu/components/{componentId}/elements/{elementId}`
-
-**Flujo principal:**
-1. El actor modifica `label` y/o `elementType`.
-2. El sistema valida que el elemento pertenece al componente y al tenant.
-3. Persiste los cambios con `version` incrementado.
-4. Retorna HTTP 200.
-
----
-
-### UC-PRM-008 — Eliminar elemento (soft delete)
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `DELETE /api/v1/menu/components/{componentId}/elements/{elementId}`
-
-**Flujo principal:**
-1. El sistema hace soft delete del elemento.
-2. El sistema elimina los `element_permissions` y `user_element_overrides` asociados.
-3. Retorna HTTP 204.
-
----
-
-### UC-PRM-009 — Obtener matriz de permisos de un rol
+### UC-PRM-003 — Obtener matriz de permisos de un rol
 
 **Actor:** TENANT_ADMIN  
 **Endpoint:** `GET /api/v1/menu/permissions/roles/{roleId}`
 
-Esta es la **API central** del módulo de gestión de permisos. Retorna la matriz completa del rol: todos los componentes del tenant con su acceso configurado, y dentro de cada componente todos sus elementos con su acceso.
+Esta es la **API central** de la pantalla de gestión de permisos. Retorna todos los componentes del tenant con su acceso configurado para el rol, y dentro de cada componente todos sus elementos con su acceso y si es heredado.
 
 **Flujo principal:**
 1. El sistema valida que `roleId` pertenece al tenant activo.
-2. El sistema consulta todos los componentes del tenant (activos).
-3. Para cada componente busca la entrada en `component_permissions` para el `roleId`. Si no existe, el acceso es `HIDDEN` (sin permiso explícito = sin acceso).
+2. Consulta todos los componentes del tenant activos.
+3. Para cada componente busca la entrada en `component_permissions` para el `roleId`. Si no existe, el acceso es `HIDDEN`.
 4. Para cada componente carga sus elementos y busca las entradas en `element_permissions`. Si no existe para un elemento, el acceso se hereda del componente (`inherited: true`).
 5. Retorna HTTP 200 con `RolePermissionMatrixResponse`.
 
 **Flujo alternativo:**
 - `roleId` no pertenece al tenant → HTTP 404 con código `NXC-PRM-0001`.
 
+**Estrategia de consulta (máximo 3 queries):**
+
+```sql
+-- 1. Componentes del tenant (incluye is_system = TRUE)
+SELECT id, module_key, name, route, description, is_system
+FROM nxc_menu.components
+WHERE (tenant_id = :tenantId OR is_system = TRUE)
+  AND deleted_at IS NULL;
+
+-- 2. Permisos del rol sobre componentes
+SELECT component_id, access
+FROM nxc_menu.component_permissions
+WHERE tenant_id = :tenantId
+  AND role_id = :roleId;
+
+-- 3. Elementos con sus permisos de rol
+SELECT ce.id, ce.component_id, ce.element_key, ce.label, ce.element_type,
+       ep.access AS explicit_access
+FROM nxc_menu.component_elements ce
+LEFT JOIN nxc_menu.element_permissions ep
+    ON ep.element_id = ce.id
+    AND ep.tenant_id = :tenantId
+    AND ep.role_id = :roleId
+WHERE ce.tenant_id = :tenantId
+  AND ce.deleted_at IS NULL;
+```
+
 ---
 
-### UC-PRM-010 — Actualizar permiso de un componente para un rol (upsert)
+### UC-PRM-004 — Actualizar permiso de un componente para un rol (upsert)
 
 **Actor:** TENANT_ADMIN  
 **Endpoint:** `PUT /api/v1/menu/permissions/roles/{roleId}/components/{componentId}`
 
 **Flujo principal:**
 1. El actor envía `{ "access": "EXECUTE" }`.
-2. El sistema valida que `roleId` y `componentId` pertenecen al mismo tenant.
-3. El sistema ejecuta upsert en `component_permissions` (`ON CONFLICT DO UPDATE`).
-4. Persiste `updatedBy` con el actor.
+2. El sistema valida que `roleId` pertenece al tenant activo.
+3. El sistema valida que `componentId` pertenece al tenant activo (o es `isSystem = TRUE`).
+4. Ejecuta upsert en `component_permissions` (`ON CONFLICT (tenant_id, role_id, component_id) DO UPDATE SET access = EXCLUDED.access, updated_by = EXCLUDED.updated_by, updated_at = NOW()`).
 5. Retorna HTTP 200 con el permiso resultante.
 
 **Flujos alternativos:**
 - `roleId` no pertenece al tenant → HTTP 404 con código `NXC-PRM-0001`.
-- `componentId` no pertenece al tenant → HTTP 404 con código `NXC-CMP-0001`.
+- `componentId` no encontrado en el tenant → HTTP 404 con código `NXC-CMP-0001`.
 
 ---
 
-### UC-PRM-011 — Eliminar permiso de componente para un rol
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `DELETE /api/v1/menu/permissions/roles/{roleId}/components/{componentId}`
-
-**Flujo principal:**
-1. El sistema elimina la entrada en `component_permissions`.
-2. El acceso vuelve al `default_access` del `menu_item` asociado.
-3. Retorna HTTP 204.
-
----
-
-### UC-PRM-012 — Actualización masiva de permisos de componentes para un rol
+### UC-PRM-005 — Actualización masiva de permisos de componentes para un rol
 
 **Actor:** TENANT_ADMIN  
 **Endpoint:** `PUT /api/v1/menu/permissions/roles/{roleId}/components/batch`
 
-Permite actualizar los permisos de múltiples componentes en una sola operación (útil para el UI de "aplicar a todos").
+Permite actualizar los permisos de múltiples componentes en una sola operación. Útil para la acción "aplicar a todos" en el UI.
 
 **Flujo principal:**
 1. El actor envía un array de `{ componentId, access }`.
-2. El sistema valida que todos los `componentId` pertenecen al tenant.
-3. El sistema ejecuta upsert masivo dentro de una transacción.
-4. Retorna HTTP 200 con la lista de permisos resultantes.
+2. El sistema valida que `roleId` pertenece al tenant.
+3. El sistema valida que **todos** los `componentId` del array pertenecen al tenant. Si alguno falla, rechaza toda la operación.
+4. Ejecuta upsert masivo dentro de una única transacción `@Transactional`.
+5. Retorna HTTP 200 con la lista de permisos resultantes.
 
 **Flujo alternativo:**
-- Algún `componentId` no pertenece al tenant → HTTP 422 con código `NXC-PRM-0002`, indicando los IDs inválidos.
+- Algún `componentId` inválido → HTTP 422 con código `NXC-PRM-0002`, listando los IDs inválidos.
 
 ---
 
-### UC-PRM-013 — Actualizar permiso de un elemento para un rol (upsert)
+### UC-PRM-006 — Actualizar permiso de un elemento para un rol (upsert)
 
 **Actor:** TENANT_ADMIN  
 **Endpoint:** `PUT /api/v1/menu/permissions/roles/{roleId}/elements/{elementId}`
 
 **Flujo principal:**
 1. El actor envía `{ "access": "VIEW" }`.
-2. El sistema valida que `roleId` y el componente padre del `elementId` pertenecen al mismo tenant.
-3. El sistema ejecuta upsert en `element_permissions`.
-4. Retorna HTTP 200.
-
----
-
-### UC-PRM-014 — Eliminar permiso de elemento para un rol
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `DELETE /api/v1/menu/permissions/roles/{roleId}/elements/{elementId}`
-
-**Flujo principal:**
-1. El sistema elimina la entrada en `element_permissions`.
-2. El acceso del elemento vuelve a heredarse del `ComponentPermission` del rol.
-3. Retorna HTTP 204.
-
----
-
-### UC-PRM-015 — Actualización masiva de permisos de elementos para un rol
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `PUT /api/v1/menu/permissions/roles/{roleId}/elements/batch`
-
-**Flujo principal:**
-1. El actor envía un array de `{ elementId, access }`.
-2. El sistema valida que todos los `elementId` pertenecen a componentes del tenant.
-3. El sistema ejecuta upsert masivo en transacción.
-4. Retorna HTTP 200.
-
----
-
-### UC-PRM-016 — Listar overrides de elemento por usuario
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `GET /api/v1/menu/permissions/users/{userId}/overrides`
-
-**Flujo principal:**
-1. El sistema valida que `userId` pertenece al tenant activo.
-2. El sistema consulta `user_element_overrides` para ese usuario.
-3. Retorna HTTP 200 con lista de `UserOverrideResponse` (incluyendo los expirados marcados como `expired: true`).
-
----
-
-### UC-PRM-017 — Crear o actualizar override de elemento para un usuario (upsert)
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `PUT /api/v1/menu/permissions/users/{userId}/overrides/{elementId}`
-
-**Flujo principal:**
-1. El actor envía `{ "access": "EXECUTE", "reason": "Justificación", "expiresAt": "2026-12-31T23:59:59Z" }`.
-2. El sistema valida que `userId` y el componente padre del `elementId` pertenecen al tenant.
-3. El sistema valida que `reason` no está vacío.
-4. El sistema ejecuta upsert en `user_element_overrides`.
-5. Retorna HTTP 200.
+2. El sistema valida que `roleId` pertenece al tenant.
+3. El sistema valida que `elementId` existe y su componente pertenece al tenant.
+4. Ejecuta upsert en `element_permissions`.
+5. Retorna HTTP 200 con el permiso resultante.
 
 **Flujos alternativos:**
-- `reason` vacío → HTTP 422 con código `NXC-PRM-0003`.
-- `userId` no pertenece al tenant → HTTP 404 con código `NXC-PRM-0004`.
-
----
-
-### UC-PRM-018 — Eliminar override de elemento para un usuario
-
-**Actor:** TENANT_ADMIN  
-**Endpoint:** `DELETE /api/v1/menu/permissions/users/{userId}/overrides/{elementId}`
-
-**Flujo principal:**
-1. El sistema elimina la entrada en `user_element_overrides`.
-2. El acceso del elemento vuelve a calcularse desde el permiso de rol del usuario.
-3. Retorna HTTP 204.
+- `roleId` no pertenece al tenant → HTTP 404 con código `NXC-PRM-0001`.
+- `elementId` no encontrado → HTTP 404 con código `NXC-ELM-0001`.
 
 ---
 
 ## 5. DTOs de request
-
-### ComponentCreateRequest
-```
-moduleKey       String  REQUERIDO  Patrón: ^[a-z0-9]+(-[a-z0-9]+)*$  Max: 150
-name            String  REQUERIDO  Min: 2  Max: 150
-route           String  OPCIONAL   Max: 255
-description     String  OPCIONAL   Max: 500
-```
-
-### ComponentUpdateRequest (PATCH — todos opcionales)
-```
-name            String  OPCIONAL  Min: 2  Max: 150
-route           String  OPCIONAL  Max: 255
-description     String  OPCIONAL  Max: 500
-```
-
-### ComponentElementCreateRequest
-```
-elementKey      String  REQUERIDO  Patrón: ^[a-zA-Z0-9._#-]+$  Max: 150
-label           String  OPCIONAL   Max: 200
-elementType     String  OPCIONAL   Enum: BUTTON | TAB | FIELD | SECTION | ACTION
-```
-
-### ComponentElementUpdateRequest (PATCH)
-```
-label           String  OPCIONAL  Max: 200
-elementType     String  OPCIONAL  Enum: BUTTON | TAB | FIELD | SECTION | ACTION
-```
 
 ### ComponentPermissionUpsertRequest
 ```
@@ -503,23 +305,14 @@ access          String  REQUERIDO  Enum: HIDDEN | VIEW | EXECUTE
 
 ### BatchComponentPermissionRequest
 ```
-permissions     ComponentPermissionItem[]  REQUERIDO  Min: 1
+permissions     ComponentPermissionItem[]  REQUERIDO  Min: 1  Max: 100
   componentId   UUID    REQUERIDO
   access        String  REQUERIDO  Enum: HIDDEN | VIEW | EXECUTE
 ```
 
-### BatchElementPermissionRequest
-```
-permissions     ElementPermissionItem[]  REQUERIDO  Min: 1
-  elementId     UUID    REQUERIDO
-  access        String  REQUERIDO  Enum: HIDDEN | VIEW | EXECUTE
-```
-
-### UserElementOverrideRequest
+### ElementPermissionUpsertRequest
 ```
 access          String  REQUERIDO  Enum: HIDDEN | VIEW | EXECUTE
-reason          String  REQUERIDO  Min: 5  Max: 500
-expiresAt       String  OPCIONAL   ISO-8601. NULL = permanente
 ```
 
 ---
@@ -560,14 +353,12 @@ id              UUID
 componentId     UUID
 elementKey      String
 label           String
-elementType     String
-createdAt       String
-updatedAt       String
+elementType     String     BUTTON | TAB | FIELD | SECTION | ACTION
 ```
 
 ### RolePermissionMatrixResponse
 
-Respuesta principal del módulo de gestión de permisos. Alimenta la pantalla de configuración de permisos del TENANT_ADMIN.
+Respuesta principal del módulo. Alimenta la pantalla de configuración de permisos.
 
 ```
 roleId          UUID
@@ -582,7 +373,7 @@ componentId     UUID
 moduleKey       String
 name            String
 route           String
-access          String     "execute" | "view" | "hidden" (minúscula, igual que el perfil)
+access          String     "execute" | "view" | "hidden"  (minúscula)
 elements        RoleElementPermissionResponse[]
 ```
 
@@ -593,7 +384,7 @@ elementKey      String
 label           String
 elementType     String
 access          String     "execute" | "view" | "hidden"
-inherited       Boolean    TRUE si el acceso es heredado del componente, no de un ElementPermission explícito
+inherited       Boolean    TRUE si hereda el acceso del componente (sin ElementPermission explícita)
 ```
 
 **Ejemplo de `RolePermissionMatrixResponse`:**
@@ -649,314 +440,207 @@ inherited       Boolean    TRUE si el acceso es heredado del componente, no de u
 }
 ```
 
-### UserOverrideResponse
+### ComponentPermissionResultResponse
 ```
-id              UUID
-userId          UUID
+componentId     UUID
+moduleKey       String
+access          String     "execute" | "view" | "hidden"
+updatedAt       String     ISO-8601
+```
+> Usado como respuesta de `PUT .../components/{componentId}` y en el array del batch.
+
+### ElementPermissionResultResponse
+```
 elementId       UUID
 elementKey      String
-componentModuleKey  String
 access          String     "execute" | "view" | "hidden"
-reason          String
-expiresAt       String     ISO-8601. null si permanente
-expired         Boolean    TRUE si expiresAt < NOW()
-createdAt       String
-updatedAt       String
-createdBy       UUID
+inherited       Boolean    Siempre false — al hacer PUT se crea un permiso explícito
+updatedAt       String     ISO-8601
 ```
 
 ---
 
-## 7. Endpoints REST
+## 7. Endpoints REST — Fase 1
 
-> **Criterio de priorización:**
-> - `FASE 1` — Requerido para que la pantalla de gestión de permisos funcione. Se implementa en esta iteración.
-> - `FASE 2` — Funcionalidad avanzada o poco frecuente. Los componentes y elementos se gestionan por script/seed en la fase inicial; los overrides por usuario son una feature posterior. Se especifica el contrato ahora para no romper el diseño al añadirlos.
+| Método | Ruta | UC | Descripción | Roles |
+|---|---|---|---|---|
+| `GET` | `/api/v1/menu/components` | UC-PRM-001 | Lista paginada de componentes del tenant (incluye componentes de sistema). Soporta filtros `search` e `isSystem`. Alimenta el selector de componentes en la pantalla de permisos. | TENANT_ADMIN |
+| `GET` | `/api/v1/menu/components/{componentId}` | UC-PRM-002 | Retorna el detalle de un componente con la lista completa de sus elementos de UI activos. | TENANT_ADMIN |
+| `GET` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-002 | Lista los elementos de UI activos de un componente. Alimenta la tabla de elementos en la pantalla de permisos. | TENANT_ADMIN |
+| `GET` | `/api/v1/menu/permissions/roles/{roleId}` | UC-PRM-003 | Retorna la **matriz completa de permisos** del rol: todos los componentes con su acceso y, dentro de cada uno, todos sus elementos con su acceso y el campo `inherited`. Es la API principal de la pantalla de gestión de permisos. | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-004 | Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un componente. Si no existía el permiso lo crea; si ya existía lo actualiza. | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/batch` | UC-PRM-005 | Asigna o actualiza (upsert) en una sola transacción los permisos de un rol sobre múltiples componentes. Útil para la acción "aplicar a todos". | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-006 | Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un elemento de UI específico. Sobreescribe la herencia del componente con un permiso granular. | TENANT_ADMIN |
 
----
-
-### 7.1 Gestión de componentes
-
-| Fase | Método | Ruta | UC | Descripción | Roles |
-|---|---|---|---|---|---|
-| `FASE 1` | `GET` | `/api/v1/menu/components` | UC-PRM-001 | Lista paginada de componentes del tenant. Soporta filtros `search` (sobre `name` y `moduleKey`) e `isSystem`. Alimenta el selector de componentes en la pantalla de permisos. | TENANT_ADMIN |
-| `FASE 1` | `GET` | `/api/v1/menu/components/{componentId}` | UC-PRM-002 | Retorna el detalle completo de un componente incluyendo la lista de todos sus elementos de UI activos. | TENANT_ADMIN |
-| `FASE 2` | `POST` | `/api/v1/menu/components` | UC-PRM-003 | Crea un nuevo componente de UI en el tenant. En la fase inicial los componentes se registran por seed/script. Se expone cuando el UI incorpore un formulario de alta de componentes. | TENANT_ADMIN |
-| `FASE 2` | `PATCH` | `/api/v1/menu/components/{componentId}` | UC-PRM-004 | Actualiza los campos editables de un componente (`name`, `route`, `description`). El `moduleKey` de los componentes de sistema no puede modificarse. | TENANT_ADMIN |
-| `FASE 2` | `DELETE` | `/api/v1/menu/components/{componentId}` | UC-PRM-005 | Elimina (soft delete) un componente y en cascada todos sus elementos. También limpia los `component_permissions` y `element_permissions` asociados. Solo aplica a componentes con `isSystem = FALSE`. | TENANT_ADMIN |
-
-### 7.2 Gestión de elementos de un componente
-
-| Fase | Método | Ruta | UC | Descripción | Roles |
-|---|---|---|---|---|---|
-| `FASE 1` | `GET` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-002 | Lista todos los elementos de UI activos de un componente (botones, tabs, campos, secciones). Alimenta la tabla de elementos en la pantalla de permisos. | TENANT_ADMIN |
-| `FASE 2` | `POST` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-006 | Registra un nuevo elemento de UI dentro del componente. En la fase inicial los elementos se registran por seed/script. | TENANT_ADMIN |
-| `FASE 2` | `PATCH` | `/api/v1/menu/components/{componentId}/elements/{elementId}` | UC-PRM-007 | Actualiza la etiqueta (`label`) y/o el tipo (`elementType`) de un elemento de UI. | TENANT_ADMIN |
-| `FASE 2` | `DELETE` | `/api/v1/menu/components/{componentId}/elements/{elementId}` | UC-PRM-008 | Elimina (soft delete) un elemento. Limpia sus `element_permissions` y `user_element_overrides` asociados. | TENANT_ADMIN |
-
-### 7.3 Permisos por rol
-
-| Fase | Método | Ruta | UC | Descripción | Roles |
-|---|---|---|---|---|---|
-| `FASE 1` | `GET` | `/api/v1/menu/permissions/roles/{roleId}` | UC-PRM-009 | Retorna la **matriz completa de permisos** del rol: todos los componentes del tenant con su nivel de acceso (`hidden`/`view`/`execute`) y, dentro de cada uno, todos sus elementos con su acceso y si es heredado del componente (`inherited: true`) o configurado explícitamente. Es la API principal que alimenta la pantalla de gestión de permisos. | TENANT_ADMIN |
-| `FASE 1` | `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-010 | Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un componente completo. Si no existía el permiso, lo crea; si ya existía, lo actualiza. | TENANT_ADMIN |
-| `FASE 1` | `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/batch` | UC-PRM-012 | Asigna o actualiza (upsert) los permisos de un rol sobre múltiples componentes en una sola transacción. Útil para operaciones "aplicar a todos" desde el UI. | TENANT_ADMIN |
-| `FASE 1` | `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-013 | Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un elemento de UI específico. Sobreescribe la herencia del componente con un permiso granular. | TENANT_ADMIN |
-| `FASE 2` | `DELETE` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-011 | Elimina el permiso explícito del rol sobre el componente. El acceso vuelve al `default_access` del ítem de menú. En Fase 1 basta con hacer PUT a `HIDDEN` para el mismo efecto. | TENANT_ADMIN |
-| `FASE 2` | `DELETE` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-014 | Elimina el permiso explícito del rol sobre el elemento. El elemento vuelve a heredar el acceso del `ComponentPermission` del rol. En Fase 1 basta con hacer PUT a `HIDDEN`. | TENANT_ADMIN |
-| `FASE 2` | `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/batch` | UC-PRM-015 | Asigna o actualiza (upsert) los permisos de un rol sobre múltiples elementos en una sola transacción. | TENANT_ADMIN |
-
-### 7.4 Overrides por usuario
-
-| Fase | Método | Ruta | UC | Descripción | Roles |
-|---|---|---|---|---|---|
-| `FASE 2` | `GET` | `/api/v1/menu/permissions/users/{userId}/overrides` | UC-PRM-016 | Lista todos los overrides de elementos configurados para un usuario específico, incluyendo los ya expirados (marcados con `expired: true`). | TENANT_ADMIN |
-| `FASE 2` | `PUT` | `/api/v1/menu/permissions/users/{userId}/overrides/{elementId}` | UC-PRM-017 | Crea o actualiza (upsert) un override de acceso para un usuario sobre un elemento de UI. Requiere justificación (`reason`). Puede configurarse con fecha de expiración (`expiresAt`). Este permiso tiene prioridad sobre cualquier permiso de rol. | TENANT_ADMIN |
-| `FASE 2` | `DELETE` | `/api/v1/menu/permissions/users/{userId}/overrides/{elementId}` | UC-PRM-018 | Elimina el override del usuario sobre el elemento. El acceso efectivo vuelve a calcularse desde los permisos de rol del usuario. | TENANT_ADMIN |
+> **7 endpoints — Fase 1**
 
 ---
 
-### Resumen de implementación por fase
-
-| | FASE 1 | FASE 2 |
-|---|---|---|
-| **Componentes** | GET lista + GET detalle | POST, PATCH, DELETE |
-| **Elementos** | GET lista | POST, PATCH, DELETE |
-| **Permisos por rol** | GET matriz, PUT componente, PUT componente batch, PUT elemento | DELETE componente, DELETE elemento, PUT elemento batch |
-| **Overrides por usuario** | — | GET, PUT, DELETE (toda la sección) |
-| **Total endpoints** | **6** | **13** |
-
----
-
-## 8. Catálogo de códigos de error del módulo
+## 8. Catálogo de códigos de error — Fase 1
 
 | Código | HTTP | Descripción |
 |---|---|---|
 | `NXC-CMP-0001` | 404 | Component not found in this tenant |
-| `NXC-CMP-0002` | 409 | Module key already exists in this tenant |
-| `NXC-CMP-0003` | 403 | TENANT_ADMIN cannot create system components |
-| `NXC-CMP-0004` | 409 | Version conflict while updating component |
-| `NXC-CMP-0005` | 422 | Module key of a system component cannot be changed |
-| `NXC-CMP-0006` | 422 | System components cannot be deleted |
-| `NXC-ELM-0001` | 409 | Element key already exists in this component |
-| `NXC-ELM-0002` | 404 | Element not found in this component |
+| `NXC-ELM-0001` | 404 | Element not found in this component |
 | `NXC-PRM-0001` | 404 | Role not found in this tenant |
 | `NXC-PRM-0002` | 422 | One or more componentIds do not belong to this tenant |
-| `NXC-PRM-0003` | 422 | Override reason is required and cannot be empty |
-| `NXC-PRM-0004` | 404 | User not found in this tenant |
-| `NXC-PRM-0005` | 422 | One or more elementIds do not belong to this tenant |
 | `NXC-VALIDATION-0001` | 422 | Bean Validation failure; field detail included in message |
 | `NXC-INTERNAL-0001` | 500 | Unexpected internal server error |
 
 ---
 
-## 9. Criterios de aceptación
+## 9. Criterios de aceptación — Fase 1
 
-### CA-PRM-001 — Crear componente con moduleKey único
+### CA-PRM-001 — Lista de componentes del tenant
 
 **Dado** un TENANT_ADMIN del tenant demo,  
-**cuando** crea un componente con `moduleKey = "incident-manager"`,  
+**cuando** invoca `GET /api/v1/menu/components`,  
 **entonces:**
-- El sistema persiste el componente con `isSystem = FALSE`, `tenantId` del actor, `createdBy` del actor.
-- Retorna HTTP 201 con `ComponentSummaryResponse` y header `Location`.
-- Un segundo intento con el mismo `moduleKey` retorna HTTP 409 con código `NXC-CMP-0002`.
+- Retorna HTTP 200 con `PageResponse<ComponentSummaryResponse>`.
+- Incluye los componentes propios del tenant y los componentes de sistema (`isSystem = TRUE`).
+- El campo `elementCount` refleja la cantidad de elementos activos de cada componente.
+- Los componentes con `deleted_at IS NOT NULL` no aparecen.
 
 ---
 
-### CA-PRM-002 — Soft delete en cascada de componente
+### CA-PRM-002 — Detalle de componente con elementos
 
-**Dado** un componente con 3 elementos activos y permisos configurados para 2 roles,  
-**cuando** un TENANT_ADMIN lo elimina (`DELETE /api/v1/menu/components/{id}`),  
+**Dado** el componente `user-management` con 8 elementos activos,  
+**cuando** se invoca `GET /api/v1/menu/components/{componentId}`,  
 **entonces:**
-- El componente queda con `deleted_at` poblado (no se elimina físicamente).
-- Los 3 elementos también quedan con `deleted_at` poblado.
-- Las entradas en `component_permissions` y `element_permissions` para ese componente son eliminadas.
-- `GET /api/v1/menu/components/{id}` retorna HTTP 404.
+- Retorna HTTP 200 con `ComponentDetailResponse`.
+- El campo `elements` contiene los 8 elementos activos con `elementKey`, `label` y `elementType`.
+- Un `componentId` de otro tenant retorna HTTP 404 con código `NXC-CMP-0001`.
 
 ---
 
-### CA-PRM-003 — Componente de sistema no eliminable
+### CA-PRM-003 — Matriz de permisos para rol sin configurar
 
-**Dado** el componente `user-management` con `isSystem = TRUE`,  
-**cuando** un TENANT_ADMIN intenta eliminarlo,  
-**entonces:**
-- El sistema retorna HTTP 422 con código `NXC-CMP-0006`.
-- El componente permanece sin cambios.
-
----
-
-### CA-PRM-004 — Matriz de permisos para un rol sin configurar
-
-**Dado** un rol `EDITOR` recién creado sin ningún permiso explícito configurado,  
+**Dado** un rol `EDITOR` recién creado sin ningún permiso explícito,  
 **cuando** se invoca `GET /api/v1/menu/permissions/roles/{roleId}`,  
 **entonces:**
-- La respuesta retorna HTTP 200.
-- Todos los componentes del tenant aparecen en `components` con `access = "hidden"`.
-- Para cada componente, todos sus elementos aparecen con `access = "hidden"` e `inherited = true`.
+- Retorna HTTP 200.
+- Todos los componentes aparecen con `access = "hidden"`.
+- Todos los elementos aparecen con `access = "hidden"` e `inherited = true`.
+- Un `roleId` de otro tenant retorna HTTP 404 con código `NXC-PRM-0001`.
 
 ---
 
-### CA-PRM-005 — Upsert de permiso de componente
+### CA-PRM-004 — Upsert de permiso de componente (crear y actualizar)
 
 **Dado** un rol `EDITOR` sin permiso sobre `user-management`,  
-**cuando** un TENANT_ADMIN invoca `PUT /api/v1/menu/permissions/roles/{roleId}/components/{componentId}` con `{ "access": "EXECUTE" }`,  
+**cuando** se invoca `PUT /api/v1/menu/permissions/roles/{roleId}/components/{componentId}` con `{ "access": "EXECUTE" }`,  
 **entonces:**
-- El sistema crea la entrada en `component_permissions`.
-- Retorna HTTP 200 con el permiso configurado.
-- Una segunda invocación con `{ "access": "VIEW" }` actualiza el registro existente (no crea uno nuevo).
-- `GET /api/v1/menu/permissions/roles/{roleId}` refleja el cambio.
+- El sistema crea la entrada en `component_permissions` con `createdBy` del actor.
+- Retorna HTTP 200 con `ComponentPermissionResultResponse`.
+- Una segunda invocación con `{ "access": "VIEW" }` actualiza el registro (no crea uno nuevo).
+- `GET /api/v1/menu/permissions/roles/{roleId}` refleja el nuevo valor.
 
 ---
 
-### CA-PRM-006 — Herencia de acceso de componente a elemento
+### CA-PRM-005 — Herencia de acceso de componente a elemento
 
-**Dado** un rol `EDITOR` con `EXECUTE` sobre el componente `user-management` y sin `ElementPermission` explícita para `searchInput`,  
+**Dado** un rol `EDITOR` con `EXECUTE` sobre `user-management` y sin `ElementPermission` explícita para `searchInput`,  
 **cuando** se invoca `GET /api/v1/menu/permissions/roles/{roleId}`,  
 **entonces:**
 - El elemento `searchInput` aparece con `access = "execute"` e `inherited = true`.
-- Los elementos con `ElementPermission` explícita diferente aparecen con `inherited = false`.
+- Un elemento con `ElementPermission` explícita diferente aparece con `inherited = false`.
 
 ---
 
-### CA-PRM-007 — Override de usuario tiene prioridad sobre rol
+### CA-PRM-006 — Upsert de permiso de elemento
 
-**Dado** un usuario con rol `VIEWER` (sin acceso a `btn-delete-user`) que tiene un override activo `EXECUTE` sobre ese elemento,  
-**cuando** el `UserProfileService` resuelve su acceso efectivo (UC-MNU-001),  
+**Dado** un rol `EDITOR` con `EXECUTE` heredado en `btn-delete-user`,  
+**cuando** se invoca `PUT /api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` con `{ "access": "VIEW" }`,  
 **entonces:**
-- El elemento `btn-delete-user` aparece en el perfil con `access = "execute"`.
-- La resolución tiene en cuenta `expires_at IS NULL OR expires_at > NOW()`.
+- El sistema crea la entrada en `element_permissions`.
+- El elemento pasa a tener `access = "view"` e `inherited = false` en la matriz.
+- El perfil del usuario (`GET /api/v1/me/profile`) refleja el nuevo acceso en la próxima llamada.
 
 ---
 
-### CA-PRM-008 — Override expirado se ignora
+### CA-PRM-007 — Actualización masiva de permisos (batch)
 
-**Dado** un usuario con override `EXECUTE` sobre `btn-create-user` con `expiresAt` en el pasado,  
-**cuando** el sistema resuelve el acceso efectivo,  
-**entonces:**
-- El override expirado es ignorado.
-- El acceso efectivo se calcula desde el permiso de rol del usuario.
-- `GET /api/v1/menu/permissions/users/{userId}/overrides` muestra el override con `expired = true`.
-
----
-
-### CA-PRM-009 — Override requiere justificación
-
-**Dado** un TENANT_ADMIN que intenta crear un override,  
-**cuando** envía `PUT /api/v1/menu/permissions/users/{userId}/overrides/{elementId}` con `reason = ""`,  
-**entonces:**
-- El sistema retorna HTTP 422 con código `NXC-PRM-0003`.
-- No se crea ningún registro en `user_element_overrides`.
-
----
-
-### CA-PRM-010 — Actualización masiva de permisos de componentes
-
-**Dado** un tenant con 5 componentes y un rol `VIEWER`,  
-**cuando** un TENANT_ADMIN invoca `PUT /api/v1/menu/permissions/roles/{roleId}/components/batch` con los 5 componentIds y `access = "VIEW"`,  
+**Dado** un tenant con 5 componentes y un rol `VIEWER` sin permisos,  
+**cuando** se invoca `PUT /api/v1/menu/permissions/roles/{roleId}/components/batch` con los 5 componentIds y `access = "VIEW"`,  
 **entonces:**
 - El sistema ejecuta upsert para los 5 componentes en una sola transacción.
-- Si el permiso de alguno ya existía con otro valor, queda actualizado a `VIEW`.
-- Retorna HTTP 200 con los 5 permisos resultantes.
-- Si algún `componentId` no pertenece al tenant, la operación entera falla con HTTP 422 y código `NXC-PRM-0002`.
+- Retorna HTTP 200 con los 5 `ComponentPermissionResultResponse`.
+- Si algún `componentId` no pertenece al tenant, la operación entera falla con HTTP 422, código `NXC-PRM-0002` y la lista de IDs inválidos. Ningún permiso es modificado.
 
 ---
 
-### CA-PRM-011 — Eliminar permiso restaura acceso por defecto
-
-**Dado** un rol `EDITOR` con `ElementPermission EXECUTE` sobre `btn-delete-user`,  
-**cuando** se invoca `DELETE /api/v1/menu/permissions/roles/{roleId}/elements/{elementId}`,  
-**entonces:**
-- El registro en `element_permissions` es eliminado.
-- En la matriz de permisos (`GET /api/v1/menu/permissions/roles/{roleId}`), el elemento `btn-delete-user` aparece con `inherited = true` y el acceso heredado del `ComponentPermission` del rol.
-
----
-
-### CA-PRM-012 — Aislamiento multi-tenant en permisos
+### CA-PRM-008 — Aislamiento multi-tenant
 
 **Dado** un TENANT_ADMIN del tenant A,  
-**cuando** consulta o modifica permisos para roleIds y componentIds,  
+**cuando** consulta o modifica permisos,  
 **entonces:**
-- El sistema no devuelve ni acepta roleIds, componentIds ni elementIds del tenant B.
-- Los intentos de acceder a recursos de otro tenant retornan HTTP 404.
-- El aislamiento está garantizado tanto por la capa de aplicación como por RLS de PostgreSQL.
+- `GET /api/v1/menu/components` solo retorna componentes del tenant A (más los de sistema).
+- `GET /api/v1/menu/permissions/roles/{roleId}` retorna HTTP 404 si el `roleId` pertenece al tenant B.
+- `PUT /api/v1/menu/permissions/roles/{roleId}/components/{componentId}` retorna HTTP 404 si el `componentId` pertenece al tenant B.
+- El aislamiento está garantizado por la capa de aplicación y por RLS de PostgreSQL.
 
 ---
 
-### CA-PRM-013 — Validación de pertenencia al mismo tenant
-
-**Dado** que un TENANT_ADMIN intenta asignar un permiso usando un `roleId` de su tenant pero un `componentId` de otro tenant,  
-**cuando** invoca `PUT /api/v1/menu/permissions/roles/{roleId}/components/{componentId}`,  
-**entonces:**
-- El sistema retorna HTTP 404 con código `NXC-CMP-0001` (el componentId no existe en su tenant).
-
----
-
-### CA-PRM-014 — Rendimiento de la matriz de permisos
+### CA-PRM-009 — Rendimiento de la matriz de permisos
 
 - `GET /api/v1/menu/permissions/roles/{roleId}` para un tenant con 15 componentes y 80 elementos responde en menos de **400ms en p95**.
-- El sistema ejecuta como máximo **3 consultas SQL**: (1) componentes del tenant, (2) `component_permissions` del rol, (3) `element_permissions` del rol con JOIN a `component_elements`.
+- El sistema ejecuta como máximo **3 consultas SQL** por invocación (componentes, permisos de componente, elementos con permisos de elemento).
 
 ---
 
 ## 10. Restricciones técnicas
 
-**Upsert en permisos:** Las operaciones `PUT` sobre `component_permissions` y `element_permissions` son siempre upsert (`INSERT ON CONFLICT DO UPDATE`). No existen endpoints separados de creación y actualización para permisos.
+**Solo upsert en permisos:** Los endpoints `PUT` sobre `component_permissions` y `element_permissions` son siempre upsert (`INSERT ON CONFLICT DO UPDATE`). No hay endpoint de creación separado del de actualización.
 
-**Transacciones en batch:** Las operaciones batch (`/batch`) ejecutan todos los upserts dentro de una única transacción `@Transactional`. El fallo de una validación cancela toda la operación.
+**Transacciones en batch:** La operación batch ejecuta todos los upserts dentro de una única transacción `@Transactional`. El fallo de una validación previa cancela toda la operación antes de ejecutar ningún upsert.
 
-**RLS activo:** El interceptor de Hibernate establece `SET LOCAL app.tenant_id = ':tenantId'` antes de cada operación. No es posible operar sobre datos de otro tenant aunque se proporcione el UUID correcto.
+**RLS activo:** El interceptor de Hibernate establece `SET LOCAL app.tenant_id = ':tenantId'` antes de cada operación. No es posible leer ni escribir datos de otro tenant aunque se proporcione el UUID correcto.
 
-**Cascade delete lógico:** El soft delete de un componente debe propagar `deletedAt` a sus elementos en la misma transacción. La eliminación de `component_permissions` y `element_permissions` es física (DELETE) dado que son tablas de configuración sin auditoría propia.
+**Componentes de sistema:** Los componentes con `is_system = TRUE` pertenecen al tenant `system` pero son visibles para todos los tenants por la política RLS. Los permisos sobre estos componentes se registran en `component_permissions` con el `tenant_id` del tenant que configura (no el tenant `system`).
 
-**MapStruct:** Los mapeos dominio ↔ DTOs se implementan con MapStruct en `application/mapper/`. Los mapeos proyecciones SQL ↔ dominio en `infrastructure/persistence/mapper/`. Ningún servicio ni controlador mapea manualmente.
+**Solo lectura de componentes y elementos:** En Fase 1 los controladores no exponen `POST`, `PATCH` ni `DELETE` sobre componentes ni elementos. Los servicios `ComponentService` y `ComponentElementService` solo implementan métodos de consulta.
 
-**ArchUnit:** El módulo debe pasar las reglas de `HexagonalArchTest.java` y `ModuleBoundaryTest.java`. Ninguna clase de `domain` importa de `infrastructure` ni de `module.tenant`.
+**MapStruct:** Los mapeos dominio ↔ DTOs en `application/mapper/`. Los mapeos proyecciones SQL ↔ dominio en `infrastructure/persistence/mapper/`. Ningún servicio ni controlador mapea manualmente.
+
+**ArchUnit:** El módulo debe pasar `HexagonalArchTest.java` y `ModuleBoundaryTest.java`. Ninguna clase de `domain` importa de `infrastructure` ni de `module.tenant`.
 
 **Manejo de errores:** Reutiliza el `GlobalExceptionHandler` de `module-tenant`. Los códigos `NXC-CMP-*`, `NXC-ELM-*` y `NXC-PRM-*` se añaden como factory methods a `BusinessException`.
 
 ---
 
-## 11. Estructura de archivos del módulo (extensión)
+## 11. Estructura de archivos del módulo — Fase 1
 
-Los archivos nuevos se añaden al módulo existente en:  
 `nexcore-core/src/main/java/com/nexore/core/module/menu/`
 
-> Los archivos existentes del perfil de usuario (`UserProfileService`, `UserProfileController`, etc.) no se modifican.
+> Los archivos existentes del perfil de usuario no se modifican.
 
 ```
 module/menu/
 ├── domain/
 │   ├── model/
 │   │   ├── [existente] AccessLevel.java
-│   │   ├── [existente] ComponentPermission.java   ← extender con campo id y tenantId para escritura
+│   │   ├── [existente] ComponentPermission.java   ← extender con id, tenantId, createdBy, updatedBy
 │   │   ├── [existente] ElementPermission.java     ← ídem
 │   │   ├── [nuevo] Component.java
-│   │   ├── [nuevo] ComponentElement.java
-│   │   └── [nuevo] UserElementOverride.java
+│   │   └── [nuevo] ComponentElement.java
 │   └── repository/
 │       ├── [existente] UserProfileRepository.java
-│       ├── [nuevo] ComponentRepository.java
-│       ├── [nuevo] ComponentElementRepository.java
-│       ├── [nuevo] ComponentPermissionRepository.java
-│       ├── [nuevo] ElementPermissionRepository.java
-│       └── [nuevo] UserElementOverrideRepository.java
+│       ├── [nuevo] ComponentRepository.java          ← findByTenant(), findById()
+│       ├── [nuevo] ComponentElementRepository.java   ← findByComponent()
+│       ├── [nuevo] ComponentPermissionRepository.java  ← upsert(), findByRoleId()
+│       └── [nuevo] ElementPermissionRepository.java    ← upsert(), findByRoleId()
 │
 ├── application/
 │   ├── service/
 │   │   ├── [existente] UserProfileService.java
-│   │   ├── [nuevo] ComponentService.java             ← UC-PRM-001 a UC-PRM-005
-│   │   ├── [nuevo] ComponentElementService.java      ← UC-PRM-006 a UC-PRM-008
-│   │   └── [nuevo] PermissionService.java            ← UC-PRM-009 a UC-PRM-018
+│   │   ├── [nuevo] ComponentService.java          ← UC-PRM-001, UC-PRM-002
+│   │   └── [nuevo] PermissionService.java         ← UC-PRM-003 a UC-PRM-006
 │   ├── dto/
 │   │   ├── request/
-│   │   │   ├── [nuevo] ComponentCreateRequest.java
-│   │   │   ├── [nuevo] ComponentUpdateRequest.java
-│   │   │   ├── [nuevo] ComponentElementCreateRequest.java
-│   │   │   ├── [nuevo] ComponentElementUpdateRequest.java
 │   │   │   ├── [nuevo] ComponentPermissionUpsertRequest.java
 │   │   │   ├── [nuevo] BatchComponentPermissionRequest.java
-│   │   │   ├── [nuevo] BatchElementPermissionRequest.java
-│   │   │   └── [nuevo] UserElementOverrideRequest.java
+│   │   │   └── [nuevo] ElementPermissionUpsertRequest.java
 │   │   └── response/
 │   │       ├── [existente] ComponentPermissionResponse.java
 │   │       ├── [existente] ElementPermissionResponse.java
@@ -966,7 +650,8 @@ module/menu/
 │   │       ├── [nuevo] RolePermissionMatrixResponse.java
 │   │       ├── [nuevo] RoleComponentPermissionResponse.java
 │   │       ├── [nuevo] RoleElementPermissionResponse.java
-│   │       └── [nuevo] UserOverrideResponse.java
+│   │       ├── [nuevo] ComponentPermissionResultResponse.java
+│   │       └── [nuevo] ElementPermissionResultResponse.java
 │   └── mapper/
 │       ├── [existente] UserProfileMapper.java
 │       ├── [nuevo] ComponentMapper.java
@@ -975,28 +660,24 @@ module/menu/
 └── infrastructure/
     ├── web/
     │   ├── [existente] UserProfileController.java
-    │   ├── [nuevo] ComponentController.java           ← GET|POST /components, PATCH|DELETE /{id}
-    │   ├── [nuevo] ComponentElementController.java    ← GET|POST /{componentId}/elements, PATCH|DELETE /{id}
-    │   └── [nuevo] PermissionController.java          ← todos los endpoints /permissions/**
+    │   ├── [nuevo] ComponentController.java      ← GET /components, GET /components/{id}, GET /{id}/elements
+    │   └── [nuevo] PermissionController.java     ← GET y PUT /permissions/**
     └── persistence/
         ├── [existente] JpaUserProfileRepositoryAdapter.java
         ├── [nuevo] JpaComponentRepositoryAdapter.java
         ├── [nuevo] JpaComponentElementRepositoryAdapter.java
         ├── [nuevo] JpaComponentPermissionRepositoryAdapter.java
-        ├── [nuevo] JpaElementPermissionRepositoryAdapter.java
-        ├── [nuevo] JpaUserElementOverrideRepositoryAdapter.java
+        └── [nuevo] JpaElementPermissionRepositoryAdapter.java
         ├── entity/
         │   ├── [nuevo] ComponentJpaEntity.java
         │   ├── [nuevo] ComponentElementJpaEntity.java
         │   ├── [nuevo] ComponentPermissionJpaEntity.java
-        │   ├── [nuevo] ElementPermissionJpaEntity.java
-        │   └── [nuevo] UserElementOverrideJpaEntity.java
+        │   └── [nuevo] ElementPermissionJpaEntity.java
         ├── jpa/
         │   ├── [nuevo] SpringDataComponentRepository.java
         │   ├── [nuevo] SpringDataComponentElementRepository.java
         │   ├── [nuevo] SpringDataComponentPermissionRepository.java
-        │   ├── [nuevo] SpringDataElementPermissionRepository.java
-        │   └── [nuevo] SpringDataUserElementOverrideRepository.java
+        │   └── [nuevo] SpringDataElementPermissionRepository.java
         └── mapper/
             ├── [existente] UserProfilePersistenceMapper.java
             ├── [nuevo] ComponentPersistenceMapper.java
@@ -1011,19 +692,21 @@ module/menu/
 
 | Header | Tipo | Controlador | Descripción |
 |---|---|---|---|
-| `X-Tenant-Id` | UUID | `ComponentController`, `ComponentElementController`, `PermissionController` | Tenant del actor autenticado |
+| `X-Tenant-Id` | UUID | `ComponentController`, `PermissionController` | Tenant del actor autenticado |
 | `X-Actor-Id` | UUID | Los mismos | UUID del usuario autenticado |
 | `X-Is-Tenant-Admin` | boolean | Los mismos | `true` si el actor tiene rol TENANT_ADMIN |
 
 ---
 
-## 13. Pendientes
+## 13. Pendientes / Fase 2
 
-| Área | Estado | Descripción |
+| Área | Endpoints diferidos | Descripción |
 |---|---|---|
-| Renombre de módulo | `PENDIENTE` | Evaluar renombrar `module-menu` a `module-component-web` para reflejar mejor su responsabilidad real. Requiere refactorizar paquetes y rutas de API |
-| Eventos de dominio | `PENDIENTE` | Los cambios de permisos deberían emitir eventos (`ComponentPermissionChangedEvent`, `UserOverrideCreatedEvent`) para auditoría vía Kafka. No implementado aún |
-| Invalidación de caché de perfil | `PENDIENTE` | Cuando se modifica un permiso, el perfil cacheado en Redis del usuario afectado debe invalidarse. Requiere coordinar con el futuro módulo de caché |
-| SUPER_ADMIN — CRUD de componentes de sistema | `PENDIENTE` | Los componentes con `isSystem = TRUE` solo pueden gestionarlos usuarios del tenant `system` con rol `SUPER_ADMIN`. Los endpoints actuales solo contemplan TENANT_ADMIN |
-| Paginación en `GET /elements` | `PENDIENTE` | Los componentes con muchos elementos (>100) deberían paginar. En esta versión se retorna la lista completa |
-```
+| **CRUD de componentes** | `POST /components`, `PATCH /components/{id}`, `DELETE /components/{id}` | En Fase 1 los componentes se registran por seed/script. Se expone cuando el UI incorpore un formulario de alta y edición. Requiere: `ComponentCreateRequest`, `ComponentUpdateRequest`, códigos `NXC-CMP-0002` a `NXC-CMP-0006` |
+| **CRUD de elementos** | `POST /components/{id}/elements`, `PATCH /{id}/elements/{elmId}`, `DELETE /{id}/elements/{elmId}` | Ídem para elementos. Requiere: `ComponentElementCreateRequest`, `ComponentElementUpdateRequest`, códigos `NXC-ELM-0001`, `NXC-ELM-0002` |
+| **DELETE de permisos** | `DELETE /permissions/roles/{roleId}/components/{componentId}`, `DELETE /permissions/roles/{roleId}/elements/{elementId}` | Elimina el permiso explícito y vuelve al `default_access`. En Fase 1 basta con hacer `PUT` a `HIDDEN` para el mismo efecto práctico |
+| **Batch de elementos** | `PUT /permissions/roles/{roleId}/elements/batch` | Actualización masiva de permisos de elementos. Baja prioridad: el UI actualiza elemento a elemento |
+| **Overrides por usuario** | `GET/PUT/DELETE /permissions/users/{userId}/overrides/{elementId}` | Excepción individual de permiso por usuario. La resolución del override en el perfil (`UC-MNU-001`) ya funciona; solo falta la gestión vía API. Requiere: `UserElementOverride` domain model, entidad JPA, repositorio, `UserElementOverrideRequest`, `UserOverrideResponse`, códigos `NXC-PRM-0003`, `NXC-PRM-0004` |
+| **Renombre de módulo** | — | Evaluar renombrar `module-menu` a `module-component-web`. Requiere refactorizar paquetes y rutas |
+| **Eventos de dominio** | — | Los cambios de permisos deberían emitir `ComponentPermissionChangedEvent` para auditoría vía Kafka |
+| **Invalidación de caché** | — | Al modificar un permiso, invalidar el perfil cacheado en Redis del usuario afectado |

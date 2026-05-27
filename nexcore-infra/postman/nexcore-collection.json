@@ -19,7 +19,10 @@
     { "key": "access_token",      "value": "", "description": "JWT access token" },
     { "key": "refresh_token",     "value": "", "description": "Refresh token" },
     { "key": "session_id",        "value": "", "description": "Current session ID" },
-    { "key": "user_id",           "value": "", "description": "Current user ID" }
+    { "key": "user_id",           "value": "", "description": "Current user ID" },
+    { "key": "component_id",      "value": "", "description": "UUID del componente (completar con UUID real de la BD)" },
+    { "key": "role_id",           "value": "00000000-0000-0000-0000-000000000010", "description": "UUID del rol (TENANT_ADMIN del tenant demo)" },
+    { "key": "element_id",        "value": "", "description": "UUID del elemento de componente (completar con UUID real de la BD)" }
   ],
   "item": [
     {
@@ -521,6 +524,154 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}" }
             ],
             "description": "Sin X-Actor-Id. Debe retornar HTTP 400 (header requerido faltante)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Componentes (Permisos)",
+      "description": "Módulo permisos — Phase 1: consulta de componentes y sus elementos de UI. Los componentes se registran por seed/script; estos endpoints son de solo lectura.",
+      "item": [
+        {
+          "name": "Listar componentes del tenant",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/components?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "components"],
+              "query": [
+                { "key": "page",     "value": "0" },
+                { "key": "size",     "value": "20" },
+                { "key": "search",   "value": "", "disabled": true, "description": "Filtro sobre name y moduleKey" },
+                { "key": "isSystem", "value": "true", "disabled": true, "description": "true = solo componentes de sistema" }
+              ]
+            },
+            "header": [
+              { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
+            ],
+            "description": "UC-PRM-001 — Lista paginada de componentes del tenant, incluye componentes de sistema (is_system = TRUE). Soporta filtros: search (sobre name y moduleKey) e isSystem.\n\nRetorna: PageResponse<ComponentSummaryResponse> con elementCount por componente."
+          }
+        },
+        {
+          "name": "Obtener detalle de componente",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/components/{{component_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "components", "{{component_id}}"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
+            ],
+            "description": "UC-PRM-002 — Retorna el detalle del componente con la lista completa de sus elementos de UI activos.\n\nError: 404 NXC-CMP-0001 si el componente no existe en el tenant."
+          }
+        },
+        {
+          "name": "Listar elementos de un componente",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/components/{{component_id}}/elements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "components", "{{component_id}}", "elements"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
+            ],
+            "description": "UC-PRM-002 — Lista los elementos de UI activos del componente (buttons, tabs, fields, sections, actions). Alimenta la tabla de elementos en la pantalla de permisos.\n\nError: 404 NXC-CMP-0001 si el componente no existe en el tenant."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Permisos por Rol",
+      "description": "Módulo permisos — Phase 1: gestión de permisos de UI por rol. Soporta asignación a nivel de componente y de elemento individual.",
+      "item": [
+        {
+          "name": "Matriz de permisos del rol",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/permissions/roles/{{role_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "permissions", "roles", "{{role_id}}"]
+            },
+            "header": [
+              { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
+            ],
+            "description": "UC-PRM-003 — API principal de la pantalla de gestión de permisos. Retorna todos los componentes del tenant con el nivel de acceso configurado para el rol, y dentro de cada componente todos sus elementos con el campo `inherited` indicando si el acceso viene del componente padre o de una regla explícita de elemento.\n\nEjemplo de response:\n{\n  \"roleId\": \"...\",\n  \"roleName\": \"EDITOR\",\n  \"tenantId\": \"...\",\n  \"components\": [\n    {\n      \"componentId\": \"...\",\n      \"moduleKey\": \"user-management\",\n      \"name\": \"Gestión de usuarios\",\n      \"route\": \"/admin/users\",\n      \"access\": \"execute\",\n      \"elements\": [\n        { \"elementId\": \"...\", \"elementKey\": \"btn-delete-user\", \"access\": \"view\", \"inherited\": false },\n        { \"elementId\": \"...\", \"elementKey\": \"searchInput\",     \"access\": \"execute\", \"inherited\": true }\n      ]\n    }\n  ]\n}\n\nError: 404 NXC-PRM-0001 si el rol no pertenece al tenant."
+          }
+        },
+        {
+          "name": "Asignar permiso a un componente (upsert)",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/permissions/roles/{{role_id}}/components/{{component_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "permissions", "roles", "{{role_id}}", "components", "{{component_id}}"]
+            },
+            "header": [
+              { "key": "Content-Type",      "value": "application/json" },
+              { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin",  "value": "true" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access\": \"EXECUTE\"\n}"
+            },
+            "description": "UC-PRM-004 — Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un componente completo. Si no existía el registro lo crea; si ya existía lo actualiza. Usa INSERT ON CONFLICT DO UPDATE.\n\nValores válidos para access: HIDDEN | VIEW | EXECUTE\n\nRetorna: ComponentPermissionResultResponse\n\nErrores:\n- 404 NXC-PRM-0001: rol no encontrado en el tenant\n- 404 NXC-CMP-0001: componente no encontrado en el tenant"
+          }
+        },
+        {
+          "name": "Asignar permisos a múltiples componentes (batch upsert)",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/permissions/roles/{{role_id}}/components/batch",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "permissions", "roles", "{{role_id}}", "components", "batch"]
+            },
+            "header": [
+              { "key": "Content-Type",      "value": "application/json" },
+              { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin",  "value": "true" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissions\": [\n    { \"componentId\": \"{{component_id}}\", \"access\": \"EXECUTE\" }\n  ]\n}"
+            },
+            "description": "UC-PRM-005 — Asigna o actualiza (upsert) en una sola transacción los permisos de un rol sobre múltiples componentes. Útil para la acción 'aplicar a todos' en el UI. Máximo 100 componentes por request.\n\nSi algún componentId no pertenece al tenant, la operación entera falla antes de ejecutar ningún upsert.\n\nRetorna: List<ComponentPermissionResultResponse>\n\nErrores:\n- 404 NXC-PRM-0001: rol no encontrado\n- 422 NXC-PRM-0002: uno o más componentIds no pertenecen al tenant (incluye la lista de IDs inválidos)"
+          }
+        },
+        {
+          "name": "Asignar permiso a un elemento (upsert)",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/permissions/roles/{{role_id}}/elements/{{element_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "menu", "permissions", "roles", "{{role_id}}", "elements", "{{element_id}}"]
+            },
+            "header": [
+              { "key": "Content-Type",      "value": "application/json" },
+              { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin",  "value": "true" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access\": \"VIEW\"\n}"
+            },
+            "description": "UC-PRM-006 — Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un elemento de UI específico. Sobrescribe la herencia del componente padre con un permiso granular. El campo `inherited` en la respuesta será siempre false tras este upsert.\n\nValores válidos para access: HIDDEN | VIEW | EXECUTE\n\nRetorna: ElementPermissionResultResponse\n\nErrores:\n- 404 NXC-PRM-0001: rol no encontrado en el tenant\n- 404 NXC-ELM-0001: elemento no encontrado"
           }
         }
       ]
