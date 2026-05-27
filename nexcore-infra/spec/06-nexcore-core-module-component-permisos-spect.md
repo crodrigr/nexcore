@@ -669,27 +669,44 @@ createdBy       UUID
 
 ## 7. Endpoints REST
 
-| Método | Ruta | Caso de uso | Roles permitidos |
-|---|---|---|---|
-| `GET` | `/api/v1/menu/components` | UC-PRM-001 | TENANT_ADMIN |
-| `POST` | `/api/v1/menu/components` | UC-PRM-003 | TENANT_ADMIN |
-| `GET` | `/api/v1/menu/components/{componentId}` | UC-PRM-002 | TENANT_ADMIN |
-| `PATCH` | `/api/v1/menu/components/{componentId}` | UC-PRM-004 | TENANT_ADMIN |
-| `DELETE` | `/api/v1/menu/components/{componentId}` | UC-PRM-005 | TENANT_ADMIN |
-| `GET` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-002 | TENANT_ADMIN |
-| `POST` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-006 | TENANT_ADMIN |
-| `PATCH` | `/api/v1/menu/components/{componentId}/elements/{elementId}` | UC-PRM-007 | TENANT_ADMIN |
-| `DELETE` | `/api/v1/menu/components/{componentId}/elements/{elementId}` | UC-PRM-008 | TENANT_ADMIN |
-| `GET` | `/api/v1/menu/permissions/roles/{roleId}` | UC-PRM-009 | TENANT_ADMIN |
-| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-010 | TENANT_ADMIN |
-| `DELETE` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-011 | TENANT_ADMIN |
-| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/batch` | UC-PRM-012 | TENANT_ADMIN |
-| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-013 | TENANT_ADMIN |
-| `DELETE` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-014 | TENANT_ADMIN |
-| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/batch` | UC-PRM-015 | TENANT_ADMIN |
-| `GET` | `/api/v1/menu/permissions/users/{userId}/overrides` | UC-PRM-016 | TENANT_ADMIN |
-| `PUT` | `/api/v1/menu/permissions/users/{userId}/overrides/{elementId}` | UC-PRM-017 | TENANT_ADMIN |
-| `DELETE` | `/api/v1/menu/permissions/users/{userId}/overrides/{elementId}` | UC-PRM-018 | TENANT_ADMIN |
+### 7.1 Gestión de componentes
+
+| Método | Ruta | UC | Descripción | Roles |
+|---|---|---|---|---|
+| `GET` | `/api/v1/menu/components` | UC-PRM-001 | Lista paginada de componentes del tenant. Soporta filtros `search` (sobre `name` y `moduleKey`) e `isSystem`. | TENANT_ADMIN |
+| `POST` | `/api/v1/menu/components` | UC-PRM-003 | Crea un nuevo componente de UI en el tenant. El `moduleKey` debe ser único dentro del tenant. Solo puede crear componentes con `isSystem = FALSE`. | TENANT_ADMIN |
+| `GET` | `/api/v1/menu/components/{componentId}` | UC-PRM-002 | Retorna el detalle completo de un componente incluyendo la lista de todos sus elementos de UI activos. | TENANT_ADMIN |
+| `PATCH` | `/api/v1/menu/components/{componentId}` | UC-PRM-004 | Actualiza los campos editables de un componente (`name`, `route`, `description`). El `moduleKey` de los componentes de sistema no puede modificarse. | TENANT_ADMIN |
+| `DELETE` | `/api/v1/menu/components/{componentId}` | UC-PRM-005 | Elimina (soft delete) un componente y en cascada todos sus elementos. También limpia los `component_permissions` y `element_permissions` asociados. Solo aplica a componentes con `isSystem = FALSE`. | TENANT_ADMIN |
+
+### 7.2 Gestión de elementos de un componente
+
+| Método | Ruta | UC | Descripción | Roles |
+|---|---|---|---|---|
+| `GET` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-002 | Lista todos los elementos de UI activos de un componente (botones, tabs, campos, secciones). | TENANT_ADMIN |
+| `POST` | `/api/v1/menu/components/{componentId}/elements` | UC-PRM-006 | Registra un nuevo elemento de UI dentro del componente. El `elementKey` debe ser único dentro del componente. | TENANT_ADMIN |
+| `PATCH` | `/api/v1/menu/components/{componentId}/elements/{elementId}` | UC-PRM-007 | Actualiza la etiqueta (`label`) y/o el tipo (`elementType`) de un elemento de UI. | TENANT_ADMIN |
+| `DELETE` | `/api/v1/menu/components/{componentId}/elements/{elementId}` | UC-PRM-008 | Elimina (soft delete) un elemento. Limpia sus `element_permissions` y `user_element_overrides` asociados. | TENANT_ADMIN |
+
+### 7.3 Permisos por rol
+
+| Método | Ruta | UC | Descripción | Roles |
+|---|---|---|---|---|
+| `GET` | `/api/v1/menu/permissions/roles/{roleId}` | UC-PRM-009 | Retorna la **matriz completa de permisos** del rol: todos los componentes del tenant con su nivel de acceso (`hidden`/`view`/`execute`) y, dentro de cada uno, todos sus elementos con su acceso y si es heredado del componente (`inherited: true`) o configurado explícitamente. Es la API principal que alimenta la pantalla de gestión de permisos. | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-010 | Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un componente completo. Si no existía el permiso, lo crea; si ya existía, lo actualiza. | TENANT_ADMIN |
+| `DELETE` | `/api/v1/menu/permissions/roles/{roleId}/components/{componentId}` | UC-PRM-011 | Elimina el permiso explícito del rol sobre el componente. El acceso del componente vuelve al `default_access` definido en el ítem de menú asociado. | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/components/batch` | UC-PRM-012 | Asigna o actualiza (upsert) los permisos de un rol sobre múltiples componentes en una sola transacción. Útil para operaciones "aplicar a todos" desde el UI. | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-013 | Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un elemento de UI específico. Sobreescribe la herencia del componente con un permiso granular. | TENANT_ADMIN |
+| `DELETE` | `/api/v1/menu/permissions/roles/{roleId}/elements/{elementId}` | UC-PRM-014 | Elimina el permiso explícito del rol sobre el elemento. El elemento vuelve a heredar el acceso del `ComponentPermission` del rol. | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/roles/{roleId}/elements/batch` | UC-PRM-015 | Asigna o actualiza (upsert) los permisos de un rol sobre múltiples elementos en una sola transacción. | TENANT_ADMIN |
+
+### 7.4 Overrides por usuario
+
+| Método | Ruta | UC | Descripción | Roles |
+|---|---|---|---|---|
+| `GET` | `/api/v1/menu/permissions/users/{userId}/overrides` | UC-PRM-016 | Lista todos los overrides de elementos configurados para un usuario específico, incluyendo los ya expirados (marcados con `expired: true`). | TENANT_ADMIN |
+| `PUT` | `/api/v1/menu/permissions/users/{userId}/overrides/{elementId}` | UC-PRM-017 | Crea o actualiza (upsert) un override de acceso para un usuario sobre un elemento de UI. Requiere justificación (`reason`). Puede configurarse con fecha de expiración (`expiresAt`). Este permiso tiene prioridad sobre cualquier permiso de rol. | TENANT_ADMIN |
+| `DELETE` | `/api/v1/menu/permissions/users/{userId}/overrides/{elementId}` | UC-PRM-018 | Elimina el override del usuario sobre el elemento. El acceso efectivo vuelve a calcularse desde los permisos de rol del usuario. | TENANT_ADMIN |
 
 ---
 
