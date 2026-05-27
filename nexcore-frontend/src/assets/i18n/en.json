@@ -331,7 +331,8 @@
       "loadingRoles": "Loading roles...",
       "empty": "No users found for the current filters.",
       "emptyInvitations": "No invitations found.",
-      "emptyRoles": "No custom roles created yet."
+      "emptyRoles": "No custom roles created yet.",
+      "noResults": "No results found for the applied filters."
     },
     "status": {
       "active": "ACTIVE",

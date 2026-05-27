@@ -238,8 +238,57 @@
       <ng-container *ngIf="activeTab === 'invitations'">
 
         <section class="card module-card toolbar module-toolbar">
-          <div></div>
-          <div class="toolbar-actions">
+          <div class="search-block">
+            <label for="inv-search">{{ 'user.search.label' | transloco }}</label>
+            <input
+              id="inv-search"
+              type="text"
+              [placeholder]="'user.search.placeholder' | transloco"
+              [value]="invSearchTerm"
+              (input)="onInvSearchChange($any($event.target).value)"
+            />
+          </div>
+          <div class="toolbar-actions module-toolbar-actions">
+            <div class="filter-block">
+              <label for="inv-status-filter">{{ 'user.filter.status' | transloco }}</label>
+              <select
+                id="inv-status-filter"
+                [ngModel]="invStatusFilter"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onInvStatusChange($event)">
+                <option *ngFor="let opt of invStatusOptions" [value]="opt.value">
+                  {{ opt.label | transloco }}
+                </option>
+              </select>
+            </div>
+            <div class="toolbar-pager" *ngIf="!invitationsLoading">
+              <div class="pager-left">
+                <span class="pager-meta">
+                  {{ 'user.pager.range' | transloco: { start: invPageStart, end: invPageEnd, total: invTotalElements } }}
+                </span>
+                <select
+                  class="page-size-select"
+                  [ngModel]="invSize"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="onInvPageSizeChange($event)">
+                  <option *ngFor="let opt of pageSizeOptions" [ngValue]="opt">{{ opt }}</option>
+                </select>
+              </div>
+              <div class="pager-controls">
+                <button class="pager-btn" type="button" [disabled]="invPage === 0" (click)="goToInvPage(0)">
+                  <span class="pager-icon">&laquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="invPage === 0" (click)="goToInvPage(invPage - 1)">
+                  <span class="pager-icon">&lsaquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="invPage >= invTotalPages - 1" (click)="goToInvPage(invPage + 1)">
+                  <span class="pager-icon">&rsaquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="invPage >= invTotalPages - 1" (click)="goToInvPage(invTotalPages - 1)">
+                  <span class="pager-icon">&raquo;</span>
+                </button>
+              </div>
+            </div>
             <button class="btn btn-primary" type="button" (click)="openInviteModal()">
               {{ 'user.actions.invite' | transloco }}
             </button>
@@ -263,16 +312,51 @@
               <table>
                 <thead>
                   <tr>
-                    <th>{{ 'user.invitations.email' | transloco }}</th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleInvSort('email')">
+                        {{ 'user.invitations.email' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscInv('email')" [class.desc]="isSortedDescInv('email')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
                     <th>{{ 'user.invitations.roles' | transloco }}</th>
-                    <th>{{ 'user.invitations.status' | transloco }}</th>
-                    <th>{{ 'user.invitations.sentAt' | transloco }}</th>
-                    <th>{{ 'user.invitations.expiresAt' | transloco }}</th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleInvSort('status')">
+                        {{ 'user.invitations.status' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscInv('status')" [class.desc]="isSortedDescInv('status')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleInvSort('invitedAt')">
+                        {{ 'user.invitations.sentAt' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscInv('invitedAt')" [class.desc]="isSortedDescInv('invitedAt')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleInvSort('expiresAt')">
+                        {{ 'user.invitations.expiresAt' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscInv('expiresAt')" [class.desc]="isSortedDescInv('expiresAt')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
                     <th>{{ 'user.table.actions' | transloco }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let inv of invitations">
+                  <tr *ngIf="!invitationsPaged.length">
+                    <td colspan="6" class="empty-row">{{ 'user.list.noResults' | transloco }}</td>
+                  </tr>
+                  <tr *ngFor="let inv of invitationsPaged">
                     <td>{{ inv.email }}</td>
                     <td>
                       <div class="role-chips">
@@ -326,8 +410,45 @@
       <ng-container *ngIf="activeTab === 'roles'">
 
         <section class="card module-card toolbar module-toolbar">
-          <div></div>
-          <div class="toolbar-actions">
+          <div class="search-block">
+            <label for="role-search">{{ 'user.search.label' | transloco }}</label>
+            <input
+              id="role-search"
+              type="text"
+              [placeholder]="'user.search.placeholder' | transloco"
+              [value]="roleSearchTerm"
+              (input)="onRoleSearchChange($any($event.target).value)"
+            />
+          </div>
+          <div class="toolbar-actions module-toolbar-actions">
+            <div class="toolbar-pager" *ngIf="!rolesLoading">
+              <div class="pager-left">
+                <span class="pager-meta">
+                  {{ 'user.pager.range' | transloco: { start: rolePageStart, end: rolePageEnd, total: roleTotalElements } }}
+                </span>
+                <select
+                  class="page-size-select"
+                  [ngModel]="roleSize"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="onRolePageSizeChange($event)">
+                  <option *ngFor="let opt of pageSizeOptions" [ngValue]="opt">{{ opt }}</option>
+                </select>
+              </div>
+              <div class="pager-controls">
+                <button class="pager-btn" type="button" [disabled]="rolePage === 0" (click)="goToRolePage(0)">
+                  <span class="pager-icon">&laquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="rolePage === 0" (click)="goToRolePage(rolePage - 1)">
+                  <span class="pager-icon">&lsaquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="rolePage >= roleTotalPages - 1" (click)="goToRolePage(rolePage + 1)">
+                  <span class="pager-icon">&rsaquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="rolePage >= roleTotalPages - 1" (click)="goToRolePage(roleTotalPages - 1)">
+                  <span class="pager-icon">&raquo;</span>
+                </button>
+              </div>
+            </div>
             <button class="btn btn-primary" type="button" (click)="openCreateRoleModal()">
               {{ 'user.actions.createRole' | transloco }}
             </button>
@@ -347,15 +468,42 @@
               <table>
                 <thead>
                   <tr>
-                    <th>{{ 'user.roles.name' | transloco }}</th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleRoleSort('name')">
+                        {{ 'user.roles.name' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscRole('name')" [class.desc]="isSortedDescRole('name')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
                     <th>{{ 'user.roles.description' | transloco }}</th>
-                    <th>{{ 'user.roles.type' | transloco }}</th>
-                    <th>{{ 'user.roles.activeUsers' | transloco }}</th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleRoleSort('isSystemRole')">
+                        {{ 'user.roles.type' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscRole('isSystemRole')" [class.desc]="isSortedDescRole('isSystemRole')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleRoleSort('activeUsersCount')">
+                        {{ 'user.roles.activeUsers' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAscRole('activeUsersCount')" [class.desc]="isSortedDescRole('activeUsersCount')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
                     <th>{{ 'user.table.actions' | transloco }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let role of roles">
+                  <tr *ngIf="!rolesPaged.length">
+                    <td colspan="5" class="empty-row">{{ 'user.list.noResults' | transloco }}</td>
+                  </tr>
+                  <tr *ngFor="let role of rolesPaged">
                     <td class="role-name-cell">
                       <strong>{{ role.name }}</strong>
                       <span class="default-badge" *ngIf="role.isDefault">{{ 'user.roles.default' | transloco }}</span>

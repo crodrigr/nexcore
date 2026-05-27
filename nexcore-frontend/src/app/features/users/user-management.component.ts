@@ -67,6 +67,12 @@ export class UserManagementComponent implements OnInit {
     { value: 'BLOCKED', label: 'user.status.blocked' },
   ];
   readonly pageSizeOptions = [5, 10, 20, 50];
+  readonly invStatusOptions = [
+    { value: '', label: 'user.filter.allStatuses' },
+    { value: 'PENDING', label: 'user.invitations.statusPENDING' },
+    { value: 'ACCEPTED', label: 'user.invitations.statusACCEPTED' },
+    { value: 'REVOKED', label: 'user.invitations.statusREVOKED' },
+  ];
 
   readonly createUserForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -94,6 +100,12 @@ export class UserManagementComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]],
   });
   inviteRoleIds: Set<string> = new Set();
+  invSearchTerm = '';
+  invStatusFilter = '';
+  invSortField: keyof InvitationRecord = 'invitedAt';
+  invSortDir: 'asc' | 'desc' = 'desc';
+  invPage = 0;
+  invSize = 10;
 
   // ── Roles tab state ───────────────────────────────────────────────────────
   rolesLoading = false;
@@ -104,6 +116,11 @@ export class UserManagementComponent implements OnInit {
   showDeleteRoleModal = false;
   selectedRole: RoleRecord | null = null;
   deleteRoleError = '';
+  roleSearchTerm = '';
+  roleSortField: keyof RoleRecord = 'name';
+  roleSortDir: 'asc' | 'desc' = 'asc';
+  rolePage = 0;
+  roleSize = 10;
 
   readonly createRoleForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
@@ -697,6 +714,138 @@ export class UserManagementComponent implements OnInit {
     } finally {
       this.rolesSubmitting = false;
     }
+  }
+
+  // ── Invitations: filter / sort / page (client-side) ──────────────────────
+
+  get invitationsFiltered(): InvitationRecord[] {
+    let list = this.invitations;
+    if (this.invStatusFilter) list = list.filter(i => i.status === this.invStatusFilter);
+    const term = this.invSearchTerm.trim().toLowerCase();
+    if (term) list = list.filter(i => i.email.toLowerCase().includes(term));
+    const field = this.invSortField;
+    const dir = this.invSortDir;
+    return [...list].sort((a, b) => {
+      const va = String((a as any)[field] ?? '');
+      const vb = String((b as any)[field] ?? '');
+      const cmp = va.localeCompare(vb, undefined, { sensitivity: 'base' });
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  }
+
+  get invTotalElements(): number { return this.invitationsFiltered.length; }
+  get invTotalPages(): number { return Math.max(1, Math.ceil(this.invTotalElements / this.invSize)); }
+  get invPageStart(): number { return this.invTotalElements === 0 ? 0 : this.invPage * this.invSize + 1; }
+  get invPageEnd(): number { return Math.min((this.invPage + 1) * this.invSize, this.invTotalElements); }
+
+  get invitationsPaged(): InvitationRecord[] {
+    const from = this.invPage * this.invSize;
+    return this.invitationsFiltered.slice(from, from + this.invSize);
+  }
+
+  isSortedAscInv(field: keyof InvitationRecord): boolean {
+    return this.invSortField === field && this.invSortDir === 'asc';
+  }
+
+  isSortedDescInv(field: keyof InvitationRecord): boolean {
+    return this.invSortField === field && this.invSortDir === 'desc';
+  }
+
+  toggleInvSort(field: keyof InvitationRecord): void {
+    if (this.invSortField === field) {
+      this.invSortDir = this.invSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.invSortField = field;
+      this.invSortDir = 'asc';
+    }
+    this.invPage = 0;
+  }
+
+  onInvSearchChange(value: string): void {
+    this.invSearchTerm = value;
+    this.invPage = 0;
+  }
+
+  onInvStatusChange(value: string): void {
+    this.invStatusFilter = value;
+    this.invPage = 0;
+  }
+
+  goToInvPage(page: number): void {
+    if (page < 0 || page >= this.invTotalPages || page === this.invPage) return;
+    this.invPage = page;
+  }
+
+  onInvPageSizeChange(val: number | string): void {
+    const n = Number(val);
+    if (!Number.isFinite(n) || n <= 0 || n === this.invSize) return;
+    this.invSize = n;
+    this.invPage = 0;
+  }
+
+  // ── Roles: filter / sort / page (client-side) ─────────────────────────────
+
+  get rolesFiltered(): RoleRecord[] {
+    let list = this.roles;
+    const term = this.roleSearchTerm.trim().toLowerCase();
+    if (term) list = list.filter(r =>
+      r.name.toLowerCase().includes(term) || (r.description ?? '').toLowerCase().includes(term)
+    );
+    const field = this.roleSortField;
+    const dir = this.roleSortDir;
+    return [...list].sort((a, b) => {
+      const va = (a as any)[field] ?? '';
+      const vb = (b as any)[field] ?? '';
+      const cmp = typeof va === 'number' && typeof vb === 'number'
+        ? va - vb
+        : String(va).localeCompare(String(vb), undefined, { sensitivity: 'base' });
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  }
+
+  get roleTotalElements(): number { return this.rolesFiltered.length; }
+  get roleTotalPages(): number { return Math.max(1, Math.ceil(this.roleTotalElements / this.roleSize)); }
+  get rolePageStart(): number { return this.roleTotalElements === 0 ? 0 : this.rolePage * this.roleSize + 1; }
+  get rolePageEnd(): number { return Math.min((this.rolePage + 1) * this.roleSize, this.roleTotalElements); }
+
+  get rolesPaged(): RoleRecord[] {
+    const from = this.rolePage * this.roleSize;
+    return this.rolesFiltered.slice(from, from + this.roleSize);
+  }
+
+  isSortedAscRole(field: keyof RoleRecord): boolean {
+    return this.roleSortField === field && this.roleSortDir === 'asc';
+  }
+
+  isSortedDescRole(field: keyof RoleRecord): boolean {
+    return this.roleSortField === field && this.roleSortDir === 'desc';
+  }
+
+  toggleRoleSort(field: keyof RoleRecord): void {
+    if (this.roleSortField === field) {
+      this.roleSortDir = this.roleSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.roleSortField = field;
+      this.roleSortDir = 'asc';
+    }
+    this.rolePage = 0;
+  }
+
+  onRoleSearchChange(value: string): void {
+    this.roleSearchTerm = value;
+    this.rolePage = 0;
+  }
+
+  goToRolePage(page: number): void {
+    if (page < 0 || page >= this.roleTotalPages || page === this.rolePage) return;
+    this.rolePage = page;
+  }
+
+  onRolePageSizeChange(val: number | string): void {
+    const n = Number(val);
+    if (!Number.isFinite(n) || n <= 0 || n === this.roleSize) return;
+    this.roleSize = n;
+    this.rolePage = 0;
   }
 
   // ── Internal ──────────────────────────────────────────────────────────────

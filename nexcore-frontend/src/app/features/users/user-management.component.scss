@@ -355,6 +355,8 @@ tbody tr:hover { background: var(--color-surface-hover, #fafafa); }
 .empty svg { color: var(--color-border-medium); }
 .empty p { margin: 0; font-size: .9rem; }
 
+.empty-row { text-align: center; color: var(--color-text-secondary); font-size: .88rem; padding: 24px 0; }
+
 // ── User avatar + meta ────────────────────────────────────────────────────────
 .user-cell { display: flex; align-items: center; gap: 10px; }
 
