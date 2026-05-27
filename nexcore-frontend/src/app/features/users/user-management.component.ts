@@ -324,18 +324,21 @@ export class UserManagementComponent implements OnInit {
     this.editUserForm.markAllAsTouched();
     if (this.editUserForm.invalid || !this.selectedUser) return;
 
+    const targetId = this.selectedUser.id;
     this.usersSubmitting = true;
     this.clearMessages();
     try {
       const v = this.editUserForm.getRawValue();
-      await firstValueFrom(this.userService.updateUser(this.selectedUser.id, {
+      await firstValueFrom(this.userService.updateUser(targetId, {
         fullName: v.fullName,
         phone: v.phone || undefined,
         photoUrl: v.photoUrl || undefined,
       }));
       this.successMessage = 'user.success.userUpdated';
       this.showEditUserModal = false;
-      await this.loadUsers(this.userPage);
+      this.users = this.users.map(u => u.id === targetId
+        ? { ...u, fullName: v.fullName, phone: v.phone || undefined, photoUrl: v.photoUrl || undefined }
+        : u);
     } catch (e: any) {
       this.errorMessage = e?.error?.message || 'user.errors.updateUser';
     } finally {
@@ -358,13 +361,14 @@ export class UserManagementComponent implements OnInit {
 
   async confirmSuspendUser(): Promise<void> {
     if (!this.selectedUser) return;
+    const targetId = this.selectedUser.id;
     this.usersSubmitting = true;
     this.clearMessages();
     try {
-      await firstValueFrom(this.userService.suspendUser(this.selectedUser.id));
+      await firstValueFrom(this.userService.suspendUser(targetId));
       this.successMessage = 'user.success.userSuspended';
       this.closeSuspendUserModal();
-      await this.loadUsers(this.userPage);
+      this.users = this.users.map(u => u.id === targetId ? { ...u, status: 'SUSPENDED' } : u);
     } catch (e: any) {
       this.errorMessage = e?.error?.message || 'user.errors.suspendUser';
     } finally {
@@ -387,13 +391,14 @@ export class UserManagementComponent implements OnInit {
 
   async confirmActivateUser(): Promise<void> {
     if (!this.selectedUser) return;
+    const targetId = this.selectedUser.id;
     this.usersSubmitting = true;
     this.clearMessages();
     try {
-      await firstValueFrom(this.userService.activateUser(this.selectedUser.id));
+      await firstValueFrom(this.userService.activateUser(targetId));
       this.successMessage = 'user.success.userActivated';
       this.closeActivateUserModal();
-      await this.loadUsers(this.userPage);
+      this.users = this.users.map(u => u.id === targetId ? { ...u, status: 'ACTIVE' } : u);
     } catch (e: any) {
       this.errorMessage = e?.error?.message || 'user.errors.activateUser';
     } finally {
@@ -416,13 +421,15 @@ export class UserManagementComponent implements OnInit {
 
   async confirmDeleteUser(): Promise<void> {
     if (!this.selectedUser) return;
+    const targetId = this.selectedUser.id;
     this.usersSubmitting = true;
     this.clearMessages();
     try {
-      await firstValueFrom(this.userService.deleteUser(this.selectedUser.id));
+      await firstValueFrom(this.userService.deleteUser(targetId));
       this.successMessage = 'user.success.userDeleted';
       this.closeDeleteUserModal();
-      await this.loadUsers(this.userPage);
+      this.users = this.users.filter(u => u.id !== targetId);
+      this.userTotalElements = Math.max(0, this.userTotalElements - 1);
     } catch (e: any) {
       this.errorMessage = e?.error?.message || 'user.errors.deleteUser';
     } finally {
@@ -459,14 +466,18 @@ export class UserManagementComponent implements OnInit {
 
   async confirmAssignRoles(): Promise<void> {
     if (!this.selectedUser) return;
+    const targetId = this.selectedUser.id;
     this.usersSubmitting = true;
     this.clearMessages();
     try {
       const assignments = Array.from(this.selectedRoleIds).map(roleId => ({ roleId, expiresAt: null }));
-      await firstValueFrom(this.userService.assignRoles(this.selectedUser.id, { assignments }));
+      await firstValueFrom(this.userService.assignRoles(targetId, { assignments }));
       this.successMessage = 'user.success.rolesAssigned';
+      const updatedRoles = Array.from(this.selectedRoleIds)
+        .map(id => this.allRoles.find(r => r.id === id))
+        .filter((r): r is RoleRecord => !!r);
       this.closeAssignRolesModal();
-      await this.loadUsers(this.userPage);
+      this.users = this.users.map(u => u.id === targetId ? { ...u, roles: updatedRoles } : u);
     } catch (e: any) {
       this.errorMessage = e?.error?.message || 'user.errors.assignRoles';
     } finally {
