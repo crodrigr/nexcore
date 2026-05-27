@@ -1,0 +1,231 @@
+// ── Layout (igual que módulo tenant/users) ─────────────────────
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--navbar-height, 64px));
+}
+
+.layout {
+  display: flex;
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+.content {
+  flex: 1 1 auto;
+  padding: calc(var(--navbar-height, 64px) + 12px) 32px 28px 32px;
+  background: linear-gradient(180deg, rgba(13,71,161,.02), transparent 40%), var(--color-bg-primary);
+  color: var(--color-text-primary);
+  min-height: calc(100vh - var(--navbar-height, 64px));
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+h1 {
+  font-size: var(--font-size-4xl, 2rem);
+  margin: 0 0 6px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin-top: 6px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg, 1rem);
+}
+
+// ── Feedback ───────────────────────────────────────────────────
+.feedback { margin-bottom: 12px; }
+
+.alert {
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: .92rem;
+
+  &.error   { background: rgba(239,68,68,.1);  color: #b91c1c; border: 1px solid rgba(239,68,68,.2); }
+  &.success { background: rgba(34,197,94,.1);  color: #15803d; border: 1px solid rgba(34,197,94,.2); }
+}
+
+// ── Card base ──────────────────────────────────────────────────
+.card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+
+// ── Selector de rol ────────────────────────────────────────────
+.role-selector-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+}
+
+.role-selector-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.role-selector-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-medium);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: .9rem;
+  min-width: 180px;
+  cursor: pointer;
+
+  &:focus { outline: 2px solid var(--color-interactive-primary); outline-offset: 1px; }
+}
+
+// ── Toolbar ─────────────────────────────────────────────────────
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.search-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+
+  label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: .875rem;
+
+    &:focus { outline: 2px solid var(--color-interactive-primary); outline-offset: 1px; }
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+// ── Botones ────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: .875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform .12s, filter .12s, opacity .12s;
+  box-sizing: border-box;
+
+  &:hover:not(:disabled) { transform: translateY(-1px); }
+  &:disabled { opacity: .55; cursor: not-allowed; }
+
+  &.btn-primary {
+    background: var(--color-interactive-primary);
+    color: #fff;
+    &:hover:not(:disabled) { filter: brightness(1.08); }
+  }
+
+  &.btn-secondary {
+    background: transparent;
+    border-color: var(--color-border-medium);
+    color: var(--color-text-primary);
+    &:hover:not(:disabled) { background: var(--color-surface); }
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Acordeón ──────────────────────────────────────────────────
+.accordion-card { padding: 16px; }
+
+.accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: .9rem;
+}
+
+.empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: .9rem;
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: .875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,.14);
+  animation: toast-slide-in .2s ease-out;
+
+  &.toast-success { background: #10b981; color: #fff; }
+}
+
+.toast-icon { font-size: 1.1rem; }
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -32,8 +32,9 @@ export class UserManagementComponent implements OnInit {
   activeTab: ActiveTab = 'users';
 
   // ── Feedback ──────────────────────────────────────────────────────────────
-  errorMessage = '';
-  successMessage = '';
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
 
   // ── Users tab state ───────────────────────────────────────────────────────
   usersLoading = false;
@@ -228,7 +229,7 @@ export class UserManagementComponent implements OnInit {
       this.userTotalElements = pr.totalElements ?? this.users.length;
       this.userTotalPages = pr.totalPages ?? 1;
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.loadUsers';
+      this.triggerToast(e?.error?.message || 'user.errors.loadUsers', 'error');
     } finally {
       this.usersLoading = false;
       this.usersRefreshing = false;
@@ -288,15 +289,15 @@ export class UserManagementComponent implements OnInit {
       }));
       this.showCreateUserModal = false;
       if (v.sendInvite) {
-        this.successMessage = 'user.success.inviteSent';
+        this.triggerToast('user.success.inviteSent');
         await this.loadInvitations();
         this.selectTab('invitations');
       } else {
-        this.successMessage = 'user.success.userCreated';
+        this.triggerToast('user.success.userCreated');
         await this.loadUsers(0);
       }
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.createUser';
+      this.triggerToast(e?.error?.message || 'user.errors.createUser', 'error');
     } finally {
       this.usersSubmitting = false;
     }
@@ -334,13 +335,13 @@ export class UserManagementComponent implements OnInit {
         phone: v.phone || undefined,
         photoUrl: v.photoUrl || undefined,
       }));
-      this.successMessage = 'user.success.userUpdated';
+      this.triggerToast('user.success.userUpdated');
       this.showEditUserModal = false;
       this.users = this.users.map(u => u.id === targetId
         ? { ...u, fullName: v.fullName, phone: v.phone || undefined, photoUrl: v.photoUrl || undefined }
         : u);
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.updateUser';
+      this.triggerToast(e?.error?.message || 'user.errors.updateUser', 'error');
     } finally {
       this.usersSubmitting = false;
     }
@@ -366,11 +367,11 @@ export class UserManagementComponent implements OnInit {
     this.clearMessages();
     try {
       await firstValueFrom(this.userService.suspendUser(targetId));
-      this.successMessage = 'user.success.userSuspended';
+      this.triggerToast('user.success.userSuspended');
       this.closeSuspendUserModal();
       this.users = this.users.map(u => u.id === targetId ? { ...u, status: 'SUSPENDED' } : u);
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.suspendUser';
+      this.triggerToast(e?.error?.message || 'user.errors.suspendUser', 'error');
     } finally {
       this.usersSubmitting = false;
     }
@@ -396,11 +397,11 @@ export class UserManagementComponent implements OnInit {
     this.clearMessages();
     try {
       await firstValueFrom(this.userService.activateUser(targetId));
-      this.successMessage = 'user.success.userActivated';
+      this.triggerToast('user.success.userActivated');
       this.closeActivateUserModal();
       this.users = this.users.map(u => u.id === targetId ? { ...u, status: 'ACTIVE' } : u);
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.activateUser';
+      this.triggerToast(e?.error?.message || 'user.errors.activateUser', 'error');
     } finally {
       this.usersSubmitting = false;
     }
@@ -426,12 +427,12 @@ export class UserManagementComponent implements OnInit {
     this.clearMessages();
     try {
       await firstValueFrom(this.userService.deleteUser(targetId));
-      this.successMessage = 'user.success.userDeleted';
+      this.triggerToast('user.success.userDeleted');
       this.closeDeleteUserModal();
       this.users = this.users.filter(u => u.id !== targetId);
       this.userTotalElements = Math.max(0, this.userTotalElements - 1);
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.deleteUser';
+      this.triggerToast(e?.error?.message || 'user.errors.deleteUser', 'error');
     } finally {
       this.usersSubmitting = false;
     }
@@ -470,16 +471,16 @@ export class UserManagementComponent implements OnInit {
     this.usersSubmitting = true;
     this.clearMessages();
     try {
-      const assignments = Array.from(this.selectedRoleIds).map(roleId => ({ roleId, expiresAt: null }));
-      await firstValueFrom(this.userService.assignRoles(targetId, { assignments }));
-      this.successMessage = 'user.success.rolesAssigned';
+      const roles = Array.from(this.selectedRoleIds).map(roleId => ({ roleId, expiresAt: null }));
+      await firstValueFrom(this.userService.assignRoles(targetId, { roles }));
+      this.triggerToast('user.success.rolesAssigned');
       const updatedRoles = Array.from(this.selectedRoleIds)
         .map(id => this.allRoles.find(r => r.id === id))
         .filter((r): r is RoleRecord => !!r);
       this.closeAssignRolesModal();
       this.users = this.users.map(u => u.id === targetId ? { ...u, roles: updatedRoles } : u);
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.assignRoles';
+      this.triggerToast(e?.error?.message || 'user.errors.assignRoles', 'error');
     } finally {
       this.usersSubmitting = false;
     }
@@ -505,7 +506,7 @@ export class UserManagementComponent implements OnInit {
       });
     } catch (e: any) {
       if (this.activeTab === 'invitations') {
-        this.errorMessage = e?.error?.message || 'user.errors.loadInvitations';
+        this.triggerToast(e?.error?.message || 'user.errors.loadInvitations', 'error');
       }
     } finally {
       this.invitationsLoading = false;
@@ -549,11 +550,11 @@ export class UserManagementComponent implements OnInit {
         email: v.email,
         roleIds: Array.from(this.inviteRoleIds),
       }));
-      this.successMessage = 'user.success.inviteSent';
+      this.triggerToast('user.success.inviteSent');
       this.showInviteModal = false;
       await this.loadInvitations();
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.invite';
+      this.triggerToast(e?.error?.message || 'user.errors.invite', 'error');
     } finally {
       this.invitationsSubmitting = false;
     }
@@ -566,10 +567,10 @@ export class UserManagementComponent implements OnInit {
     this.clearMessages();
     try {
       await firstValueFrom(this.userService.resendInvitation(invitation.id));
-      this.successMessage = 'user.success.inviteResent';
+      this.triggerToast('user.success.inviteResent');
       await this.loadInvitations();
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.resendInvitation';
+      this.triggerToast(e?.error?.message || 'user.errors.resendInvitation', 'error');
     } finally {
       this.invitationsSubmitting = false;
     }
@@ -592,11 +593,11 @@ export class UserManagementComponent implements OnInit {
     this.clearMessages();
     try {
       await firstValueFrom(this.userService.revokeInvitation(this.selectedInvitation.id));
-      this.successMessage = 'user.success.inviteRevoked';
+      this.triggerToast('user.success.inviteRevoked');
       this.closeRevokeModal();
       await this.loadInvitations();
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.revokeInvitation';
+      this.triggerToast(e?.error?.message || 'user.errors.revokeInvitation', 'error');
     } finally {
       this.invitationsSubmitting = false;
     }
@@ -611,7 +612,7 @@ export class UserManagementComponent implements OnInit {
       this.allRoles = this.roles;
     } catch (e: any) {
       if (this.activeTab === 'roles') {
-        this.errorMessage = e?.error?.message || 'user.errors.loadRoles';
+        this.triggerToast(e?.error?.message || 'user.errors.loadRoles', 'error');
       }
     } finally {
       this.rolesLoading = false;
@@ -643,11 +644,11 @@ export class UserManagementComponent implements OnInit {
         description: v.description || undefined,
         isDefault: v.isDefault,
       }));
-      this.successMessage = 'user.success.roleCreated';
+      this.triggerToast('user.success.roleCreated');
       this.showCreateRoleModal = false;
       await this.loadRoles();
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.createRole';
+      this.triggerToast(e?.error?.message || 'user.errors.createRole', 'error');
     } finally {
       this.rolesSubmitting = false;
     }
@@ -685,11 +686,11 @@ export class UserManagementComponent implements OnInit {
         description: v.description || undefined,
         isDefault: v.isDefault,
       }));
-      this.successMessage = 'user.success.roleUpdated';
+      this.triggerToast('user.success.roleUpdated');
       this.showEditRoleModal = false;
       await this.loadRoles();
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'user.errors.updateRole';
+      this.triggerToast(e?.error?.message || 'user.errors.updateRole', 'error');
     } finally {
       this.rolesSubmitting = false;
     }
@@ -717,7 +718,7 @@ export class UserManagementComponent implements OnInit {
     this.deleteRoleError = '';
     try {
       await firstValueFrom(this.userService.deleteRole(this.selectedRole.id));
-      this.successMessage = 'user.success.roleDeleted';
+      this.triggerToast('user.success.roleDeleted');
       this.closeDeleteRoleModal();
       await this.loadRoles();
     } catch (e: any) {
@@ -861,8 +862,12 @@ export class UserManagementComponent implements OnInit {
 
   // ── Internal ──────────────────────────────────────────────────────────────
 
-  private clearMessages(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+  private clearMessages(): void {}
+
+  private triggerToast(key: string, type: 'success' | 'error' = 'success'): void {
+    this.toastMessage = key;
+    this.toastType = type;
+    this.showToast = true;
+    setTimeout(() => { this.showToast = false; }, 3500);
   }
 }

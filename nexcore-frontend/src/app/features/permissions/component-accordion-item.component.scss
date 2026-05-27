@@ -1,0 +1,117 @@
+.accordion-item {
+  border: 1px solid var(--color-border-light);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color .15s;
+
+  &.dirty { border-color: var(--color-interactive-primary); }
+  &.expanded .accordion-header { border-bottom: 1px solid var(--color-border-light); }
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+  user-select: none;
+
+  &:hover { background: var(--color-surface); }
+}
+
+.accordion-arrow {
+  font-size: .75rem;
+  color: var(--color-text-secondary);
+  width: 14px;
+  flex-shrink: 0;
+}
+
+.accordion-info {
+  flex: 1;
+  min-width: 0;
+
+  .accordion-name {
+    display: block;
+    font-weight: 600;
+    font-size: .875rem;
+    color: var(--color-text-primary);
+  }
+
+  .accordion-route {
+    display: block;
+    font-size: .72rem;
+    color: var(--color-text-secondary);
+    font-family: monospace;
+  }
+}
+
+.accordion-body { padding: 0; }
+
+// ── Tabla de elementos ───────────────────────────────────────────
+
+.empty-elements {
+  padding: 16px;
+  font-size: .85rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.elements-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead th {
+    padding: 9px 16px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border-light);
+    background: var(--color-bg-primary);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--color-border-light);
+    transition: background .1s;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: rgba(0,0,0,.02); }
+    &.dirty { background: rgba(59, 130, 246, .04); }
+  }
+
+  td { padding: 10px 16px; font-size: .85rem; vertical-align: middle; }
+}
+
+.elem-key {
+  font-family: monospace;
+  font-size: .76rem;
+  color: var(--color-text-secondary);
+}
+
+.elem-type-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+
+  &.button { background: rgba(139, 92, 246, .12); color: #6d28d9; }
+  &.field  { background: rgba(59, 130, 246, .12);  color: #1d4ed8; }
+  &.tab    { background: rgba(16, 185, 129, .12);   color: #065f46; }
+}
+
+.inherit-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: .7rem;
+  font-weight: 600;
+
+  &.inherited  { background: rgba(107, 114, 128, .12); color: #6b7280; }
+  &.overridden { background: rgba(59, 130, 246, .12);   color: #1d4ed8; }
+}

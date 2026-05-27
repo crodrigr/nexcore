@@ -181,12 +181,13 @@ export class ProfileService {
   private normalizeProfile(profile: Profile): Profile {
     return {
       ...profile,
-      menus: this.normalizeMenus(profile.menus)
+      menus: this.normalizeMenus(profile.menus),
+      permissions: profile.permissions ?? [],
     };
   }
 
   private normalizeMenus(menus: MenuItem[]): MenuItem[] {
-    return menus.map(menu => ({
+    return (menus ?? []).map(menu => ({
       ...menu,
       location: menu.location === 'navbar' ? 'sidebar' : menu.location,
       children: menu.children ? this.normalizeMenus(menu.children) : []

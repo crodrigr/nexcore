@@ -506,5 +506,48 @@
       "roleUpdated": "Role updated successfully.",
       "roleDeleted": "Role deleted successfully."
     }
+  },
+  "permissions": {
+    "header": {
+      "title": "Component Permissions",
+      "subtitle": "Manage role-level access to each component and its UI elements."
+    },
+    "roleSelector": {
+      "label": "SELECTED ROLE"
+    },
+    "search": {
+      "label": "Search",
+      "placeholder": "Filter components..."
+    },
+    "actions": {
+      "applyViewAll": "Apply VIEW to all",
+      "save": "Save Changes",
+      "saving": "Saving..."
+    },
+    "list": {
+      "loading": "Loading components...",
+      "empty": "No components found."
+    },
+    "elements": {
+      "empty": "This component has no registered elements."
+    },
+    "table": {
+      "elementKey": "Element Key",
+      "label": "Label",
+      "type": "Type",
+      "accessLevel": "Access Level",
+      "status": "Status"
+    },
+    "badge": {
+      "inherited": "Inherited",
+      "overridden": "Overridden"
+    },
+    "success": {
+      "updated": "Permissions updated successfully."
+    },
+    "errors": {
+      "loadMatrix": "Failed to load the permission matrix.",
+      "save": "Failed to save changes. Please try again."
+    }
   }
 }

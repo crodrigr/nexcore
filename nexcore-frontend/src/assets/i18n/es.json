@@ -505,5 +505,48 @@
       "roleUpdated": "Rol actualizado correctamente.",
       "roleDeleted": "Rol eliminado correctamente."
     }
+  },
+  "permissions": {
+    "header": {
+      "title": "Permisos de Componentes",
+      "subtitle": "Gestiona el acceso por rol a cada componente y sus elementos de UI."
+    },
+    "roleSelector": {
+      "label": "ROL SELECCIONADO"
+    },
+    "search": {
+      "label": "Buscar",
+      "placeholder": "Filtrar componentes..."
+    },
+    "actions": {
+      "applyViewAll": "Aplicar VIEW a todos",
+      "save": "Guardar Cambios",
+      "saving": "Guardando..."
+    },
+    "list": {
+      "loading": "Cargando componentes...",
+      "empty": "No se encontraron componentes."
+    },
+    "elements": {
+      "empty": "Este componente no tiene elementos registrados."
+    },
+    "table": {
+      "elementKey": "Element Key",
+      "label": "Label",
+      "type": "Type",
+      "accessLevel": "Access Level",
+      "status": "Status"
+    },
+    "badge": {
+      "inherited": "Inherited",
+      "overridden": "Overridden"
+    },
+    "success": {
+      "updated": "Permisos guardados correctamente."
+    },
+    "errors": {
+      "loadMatrix": "Error al cargar la matriz de permisos.",
+      "save": "Error al guardar los cambios. Intente nuevamente."
+    }
   }
 }

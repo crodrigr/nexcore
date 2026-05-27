@@ -25,6 +25,12 @@ export const routes: Routes = [
     title: 'Usuarios & Roles'
   },
   {
+    path: 'permissions',
+    loadComponent: () =>
+      import('./features/permissions/permissions-page.component').then(m => m.PermissionsPageComponent),
+    title: 'Permisos de Componentes'
+  },
+  {
     path: 'tenant-management',
     redirectTo: 'tenants',
     pathMatch: 'full'

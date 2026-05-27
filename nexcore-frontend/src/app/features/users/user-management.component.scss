@@ -41,8 +41,7 @@ h1 {
   font-size: var(--font-size-lg, 1rem);
 }
 
-// ── Feedback ─────────────────────────────────────────────────────────────────
-.feedback { margin-bottom: 12px; }
+// ── Feedback (modal inline alerts) ───────────────────────────────────────────
 
 .alert {
   border-radius: 10px;
@@ -754,4 +753,34 @@ small.error { color: #c62828; font-size: .78rem; }
     margin: 0 -14px -14px;
     padding: 12px 14px;
   }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: .875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,.14);
+  animation: toast-slide-in .2s ease-out;
+
+  &.toast-success { background: #10b981; color: #fff; }
+  &.toast-error   { background: #ef4444; color: #fff; }
+}
+
+.toast-icon { font-size: 1.1rem; }
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

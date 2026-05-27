@@ -43,7 +43,7 @@ export interface RoleAssignment {
 }
 
 export interface AssignRolesRequest {
-  assignments: RoleAssignment[];
+  roles: RoleAssignment[];
 }
 
 // ── Role interfaces ────────────────────────────────────────────────────────

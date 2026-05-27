@@ -25,12 +25,6 @@ Nunca inventes estructuras nuevas; extiende las existentes.
         </div>
       </header>
 
-      <!-- Feedback global (error / éxito) -->
-      <section class="feedback module-feedback" *ngIf="errorMessage || successMessage">
-        <div class="alert module-alert error"   *ngIf="errorMessage">{{ errorMessage | transloco }}</div>
-        <div class="alert module-alert success" *ngIf="successMessage">{{ successMessage | transloco }}</div>
-      </section>
-
       <!-- Tabs (si aplica) -->
       <div class="tabs"> ... </div>
 
@@ -45,6 +39,14 @@ Nunca inventes estructuras nuevas; extiende las existentes.
 </div>
 
 <!-- Modales al final del template -->
+
+<!-- Toast (siempre al final, fuera del page-wrap) -->
+<div class="toast-container" *ngIf="showToast">
+  <div class="toast" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+    <span class="toast-icon">{{ toastType === 'success' ? '✓' : '✕' }}</span>
+    <span>{{ toastMessage | transloco }}</span>
+  </div>
+</div>
 ```
 
 ---
@@ -351,8 +353,11 @@ export class ModuleComponent implements OnInit {
   loading = false;
   refreshing = false;
   submitting = false;
-  errorMessage = '';
-  successMessage = '';
+
+  // ── Toast ──────────────────────────────────────────
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
 
   // ── Datos ─────────────────────────────────────────
   items: ItemRecord[] = [];
@@ -384,7 +389,12 @@ export class ModuleComponent implements OnInit {
     this.loadItems();
   }
 
-  private clearMessages(): void { this.errorMessage = ''; this.successMessage = ''; }
+  private triggerToast(key: string, type: 'success' | 'error' = 'success'): void {
+    this.toastMessage = key;
+    this.toastType = type;
+    this.showToast = true;
+    setTimeout(() => { this.showToast = false; }, 3500);
+  }
 
   async loadItems(): Promise<void> {
     this.loading = true;
@@ -394,7 +404,7 @@ export class ModuleComponent implements OnInit {
       this.totalElements = res.totalElements;
       this.totalPages = res.totalPages;
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'module.errors.loadItems';
+      this.triggerToast(e?.error?.message || 'module.errors.loadItems', 'error');
     } finally {
       this.loading = false;
     }
@@ -404,14 +414,13 @@ export class ModuleComponent implements OnInit {
     this.createForm.markAllAsTouched();
     if (this.createForm.invalid) return;
     this.submitting = true;
-    this.clearMessages();
     try {
       await firstValueFrom(this.service.create(this.createForm.getRawValue()));
-      this.successMessage = 'module.success.itemCreated';
+      this.triggerToast('module.success.itemCreated');
       this.closeCreateModal();
       await this.loadItems();
     } catch (e: any) {
-      this.errorMessage = e?.error?.message || 'module.errors.createItem';
+      this.triggerToast(e?.error?.message || 'module.errors.createItem', 'error');
     } finally {
       this.submitting = false;
     }
@@ -518,15 +527,53 @@ var(--color-interactive-primary)   // botón primary, focus ring
 
 ---
 
-## 10. Reglas generales
+## 10. Toast — estilos SCSS
+
+Agregar al final del archivo `.component.scss` del módulo:
+
+```scss
+// ── Toast ─────────────────────────────────────────────────────────────────────
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: .875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,.14);
+  animation: toast-slide-in .2s ease-out;
+
+  &.toast-success { background: #10b981; color: #fff; }
+  &.toast-error   { background: #ef4444; color: #fff; }
+}
+
+.toast-icon { font-size: 1.1rem; }
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+```
+
+---
+
+## 11. Reglas generales
 
 1. **Un archivo por módulo**: `module.component.ts`, `module.component.html`, `module.component.scss`.
 2. **standalone: true** en todos los componentes.
 3. **No `ngModel` en formularios reactivos**; usar `formControlName`.
 4. **`firstValueFrom`** para convertir Observables en promesas dentro de métodos `async`.
 5. **`debounceTime(300) + distinctUntilChanged()`** en campos de búsqueda.
-6. **Modales al final del template**, fuera del `<main>`.
-7. **`clearMessages()`** al inicio de cada acción async.
+6. **Modales y toast al final del template**, fuera del `<main>`.
+7. **`triggerToast(key, type?)`** para notificar éxito (`'success'`, default) o error (`'error'`); auto-dismiss a 3.5 s. Nunca usar `errorMessage`/`successMessage` en la parte superior.
 8. **El tab activo** controla qué sección cargar; solo mostrar errores del tab activo.
 9. **`loadRoles().then(() => loadInvitations())`** cuando una lista depende de un catálogo.
 10. **`box-sizing: border-box`** en `.btn` para que border no rompa alturas.

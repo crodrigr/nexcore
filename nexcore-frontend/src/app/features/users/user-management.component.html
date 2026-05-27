@@ -14,12 +14,6 @@
         </div>
       </header>
 
-      <!-- ── Feedback ── -->
-      <section class="feedback module-feedback" *ngIf="errorMessage || successMessage">
-        <div class="alert module-alert error" *ngIf="errorMessage">{{ errorMessage | transloco }}</div>
-        <div class="alert module-alert success" *ngIf="successMessage">{{ successMessage | transloco }}</div>
-      </section>
-
       <!-- ── Tabs ── -->
       <div class="tabs">
         <button class="tab-item" [class.active]="activeTab === 'users'" (click)="selectTab('users')">
@@ -982,4 +976,12 @@
       </button>
     </footer>
   </section>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" *ngIf="showToast">
+  <div class="toast" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+    <span class="toast-icon">{{ toastType === 'success' ? '✓' : '✕' }}</span>
+    <span>{{ toastMessage | transloco }}</span>
+  </div>
 </div>

@@ -1,0 +1,60 @@
+<div class="accordion-item" [class.expanded]="component.expanded" [class.dirty]="component.dirty">
+
+  <!-- Header -->
+  <div class="accordion-header" (click)="toggleExpand.emit(component.componentId)">
+    <span class="accordion-arrow">{{ component.expanded ? '▼' : '►' }}</span>
+    <div class="accordion-info">
+      <span class="accordion-name">{{ component.name }}</span>
+      <span class="accordion-route">{{ component.route }}</span>
+    </div>
+    <app-access-level-pill
+      [value]="component.access"
+      (levelChange)="onAccessClick($event)"
+      (click)="$event.stopPropagation()">
+    </app-access-level-pill>
+  </div>
+
+  <!-- Body: elementos -->
+  <div class="accordion-body" *ngIf="component.expanded">
+    <div class="empty-elements" *ngIf="!component.elements.length">
+      {{ 'permissions.elements.empty' | transloco }}
+    </div>
+
+    <table class="elements-table" *ngIf="component.elements.length">
+      <thead>
+        <tr>
+          <th>{{ 'permissions.table.elementKey' | transloco }}</th>
+          <th>{{ 'permissions.table.label' | transloco }}</th>
+          <th>{{ 'permissions.table.type' | transloco }}</th>
+          <th>{{ 'permissions.table.accessLevel' | transloco }}</th>
+          <th>{{ 'permissions.table.status' | transloco }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let elem of component.elements" [class.dirty]="elem.dirty">
+          <td class="elem-key">{{ elem.elementKey }}</td>
+          <td>{{ elem.label }}</td>
+          <td>
+            <span class="elem-type-badge" [ngClass]="elem.elementType.toLowerCase()">
+              {{ elem.elementType }}
+            </span>
+          </td>
+          <td>
+            <app-access-level-pill
+              [value]="elem.access"
+              (levelChange)="onElementClick(elem.elementId, $event)">
+            </app-access-level-pill>
+          </td>
+          <td>
+            <span class="inherit-badge"
+                  [class.inherited]="elem.inherited"
+                  [class.overridden]="!elem.inherited">
+              {{ (elem.inherited ? 'permissions.badge.inherited' : 'permissions.badge.overridden') | transloco }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
