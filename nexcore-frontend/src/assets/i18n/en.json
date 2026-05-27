@@ -268,6 +268,26 @@
       "errorGeneric": "Failed to change password"
     }
   },
+  "invitation": {
+    "title": "Accept Invitation",
+    "subtitle": "Set up your account to get started",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "e.g. Jane Doe",
+    "fullNameError": "Full name is required (min. 2 characters).",
+    "username": "Username",
+    "usernamePlaceholder": "e.g. jane.doe",
+    "usernameError": "Only letters, numbers, dots, dashes and underscores (min. 3 characters).",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordError": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "accept": "Accept invitation",
+    "accepting": "Accepting...",
+    "backToLogin": "Back to login",
+    "successMessage": "Account created successfully. Redirecting to login...",
+    "invalidLink": "This invitation link is invalid or has expired.",
+    "errorGeneric": "Could not accept the invitation. Please try again."
+  },
   "shared": {
     "app": {
       "name": "NexCore",
@@ -283,5 +303,207 @@
     "required": "This field is required",
     "minLength": "Minimum {{min}} characters",
     "invalidEmail": "Invalid email"
+  },
+  "user": {
+    "header": {
+      "title": "Users & Roles",
+      "subtitle": "Manage users, roles and invitations for the active tenant."
+    },
+    "tabs": {
+      "users": "Users",
+      "invitations": "Invitations",
+      "roles": "Roles"
+    },
+    "search": {
+      "label": "Search user",
+      "placeholder": "Name, username or email..."
+    },
+    "filter": {
+      "status": "Status",
+      "allStatuses": "All"
+    },
+    "pager": {
+      "range": "{{start}}–{{end}} of {{total}}"
+    },
+    "list": {
+      "loading": "Loading users...",
+      "loadingInvitations": "Loading invitations...",
+      "loadingRoles": "Loading roles...",
+      "empty": "No users found for the current filters.",
+      "emptyInvitations": "No invitations found.",
+      "emptyRoles": "No custom roles created yet."
+    },
+    "status": {
+      "active": "ACTIVE",
+      "pending": "PENDING_ACTIVATION",
+      "suspended": "SUSPENDED",
+      "blocked": "BLOCKED"
+    },
+    "table": {
+      "user": "User",
+      "username": "Username",
+      "status": "Status",
+      "roles": "Roles",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "invitations": {
+      "email": "Email",
+      "roles": "Pre-assigned roles",
+      "status": "Status",
+      "sentAt": "Sent",
+      "expiresAt": "Expires",
+      "statusPENDING": "Pending",
+      "statusACCEPTED": "Accepted",
+      "statusREVOKED": "Revoked"
+    },
+    "roles": {
+      "name": "Name",
+      "description": "Description",
+      "type": "Type",
+      "activeUsers": "Active users",
+      "system": "System",
+      "custom": "Custom",
+      "default": "DEFAULT",
+      "systemTooltip": "System role — not editable",
+      "noRoles": "No roles available."
+    },
+    "actions": {
+      "create": "Create user",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "suspend": "Suspend",
+      "suspending": "Suspending...",
+      "activate": "Activate",
+      "activating": "Activating...",
+      "revoke": "Revoke",
+      "revoking": "Revoking...",
+      "resend": "Resend",
+      "resending": "Resending...",
+      "roles": "Roles",
+      "cancel": "Cancel",
+      "invite": "Invite user",
+      "sendInvite": "Send invitation",
+      "sending": "Sending...",
+      "createRole": "Create role"
+    },
+    "create": {
+      "title": "Create User",
+      "description": "Fill in the details to register a new user in the tenant."
+    },
+    "edit": {
+      "title": "Edit User"
+    },
+    "invite": {
+      "title": "Invite User",
+      "description": "The user will receive an activation link by email.",
+      "rolesHint": "Selected roles will be assigned when the invitation is accepted."
+    },
+    "assignRoles": {
+      "title": "Assign Roles",
+      "hint": "Select roles for {{name}}.",
+      "confirm": "Save assignment"
+    },
+    "suspend": {
+      "title": "Suspend User",
+      "message": "You are about to suspend user",
+      "warning": "The user will not be able to log in while suspended."
+    },
+    "activate": {
+      "title": "Activate User",
+      "message": "You are about to activate user"
+    },
+    "delete": {
+      "title": "Delete User",
+      "message": "You are about to delete user",
+      "warning": "This action is irreversible. The user will be soft-deleted and cannot authenticate."
+    },
+    "revoke": {
+      "title": "Revoke Invitation",
+      "message": "You are about to revoke the invitation for"
+    },
+    "createRole": {
+      "title": "Create Role"
+    },
+    "editRole": {
+      "title": "Edit Role"
+    },
+    "deleteRole": {
+      "title": "Delete Role",
+      "message": "You are about to delete role"
+    },
+    "sections": {
+      "personal": {
+        "title": "Personal data",
+        "description": "Basic user information."
+      },
+      "roles": {
+        "title": "Roles",
+        "description": "Assign initial roles to the user."
+      }
+    },
+    "fields": {
+      "fullName": "Full name",
+      "username": "Username",
+      "email": "Email",
+      "phone": "Phone",
+      "photoUrl": "Profile photo URL",
+      "sendInvite": "Send activation email",
+      "sendInviteHint": "The user will receive an email to activate their account.",
+      "roleName": "Role name",
+      "roleDescription": "Description",
+      "isDefault": "Default role",
+      "isDefaultHint": "Only one default role per tenant. Enabling this will remove the default flag from the previous one."
+    },
+    "placeholders": {
+      "fullName": "e.g. John Doe",
+      "username": "e.g. john.doe",
+      "email": "user@company.com",
+      "phone": "+1 555 000 0000",
+      "photoUrl": "https://cdn.example.com/photo.png",
+      "roleName": "e.g. SUPERVISOR",
+      "roleDescription": "Describe the purpose of this role"
+    },
+    "validation": {
+      "fullName": "Full name is required (min. 3 characters).",
+      "username": "Only lowercase letters, numbers, dot and dash (min. 3 characters).",
+      "email": "Enter a valid email.",
+      "roleName": "Role name is required (min. 3 characters)."
+    },
+    "errors": {
+      "loadUsers": "Could not load users.",
+      "createUser": "Could not create user.",
+      "updateUser": "Could not update user.",
+      "suspendUser": "Could not suspend user.",
+      "activateUser": "Could not activate user.",
+      "deleteUser": "Could not delete user.",
+      "assignRoles": "Could not assign roles.",
+      "loadInvitations": "Could not load invitations.",
+      "invite": "Could not send invitation.",
+      "revokeInvitation": "Could not revoke invitation.",
+      "resendInvitation": "Could not resend invitation.",
+      "loadRoles": "Could not load roles.",
+      "createRole": "Could not create role.",
+      "updateRole": "Could not update role.",
+      "deleteRole": "Could not delete role."
+    },
+    "success": {
+      "userCreated": "User created successfully.",
+      "userUpdated": "User updated successfully.",
+      "userSuspended": "User suspended successfully.",
+      "userActivated": "User activated successfully.",
+      "userDeleted": "User deleted successfully.",
+      "rolesAssigned": "Roles assigned successfully.",
+      "inviteSent": "Invitation sent successfully.",
+      "inviteRevoked": "Invitation revoked successfully.",
+      "inviteResent": "Invitation resent successfully.",
+      "roleCreated": "Role created successfully.",
+      "roleUpdated": "Role updated successfully.",
+      "roleDeleted": "Role deleted successfully."
+    }
   }
 }

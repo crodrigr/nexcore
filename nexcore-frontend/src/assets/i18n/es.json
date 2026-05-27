@@ -267,6 +267,26 @@
       "errorGeneric": "Error al cambiar la contraseña"
     }
   },
+  "invitation": {
+    "title": "Aceptar Invitación",
+    "subtitle": "Configura tu cuenta para comenzar",
+    "fullName": "Nombre completo",
+    "fullNamePlaceholder": "ej. Juan Pérez",
+    "fullNameError": "El nombre completo es requerido (mín. 2 caracteres).",
+    "username": "Usuario",
+    "usernamePlaceholder": "ej. juan.perez",
+    "usernameError": "Solo letras, números, puntos, guiones y guiones bajos (mín. 3 caracteres).",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "passwordError": "La contraseña debe tener al menos 8 caracteres.",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "accept": "Aceptar invitación",
+    "accepting": "Aceptando...",
+    "backToLogin": "Volver al inicio de sesión",
+    "successMessage": "Cuenta creada exitosamente. Redirigiendo al inicio de sesión...",
+    "invalidLink": "Este enlace de invitación no es válido o ha expirado.",
+    "errorGeneric": "No se pudo aceptar la invitación. Por favor intenta de nuevo."
+  },
   "shared": {
     "app": {
       "name": "NexCore",
@@ -282,5 +302,207 @@
     "required": "Este campo es obligatorio",
     "minLength": "Mínimo {{min}} caracteres",
     "invalidEmail": "Correo inválido"
+  },
+  "user": {
+    "header": {
+      "title": "Usuarios & Roles",
+      "subtitle": "Gestiona los usuarios, roles e invitaciones del tenant activo."
+    },
+    "tabs": {
+      "users": "Usuarios",
+      "invitations": "Invitaciones",
+      "roles": "Roles"
+    },
+    "search": {
+      "label": "Buscar usuario",
+      "placeholder": "Nombre, username o email..."
+    },
+    "filter": {
+      "status": "Estado",
+      "allStatuses": "Todos"
+    },
+    "pager": {
+      "range": "{{start}}–{{end}} de {{total}}"
+    },
+    "list": {
+      "loading": "Cargando usuarios...",
+      "loadingInvitations": "Cargando invitaciones...",
+      "loadingRoles": "Cargando roles...",
+      "empty": "No se encontraron usuarios para los filtros actuales.",
+      "emptyInvitations": "No hay invitaciones registradas.",
+      "emptyRoles": "No hay roles personalizados creados aún."
+    },
+    "status": {
+      "active": "ACTIVE",
+      "pending": "PENDING_ACTIVATION",
+      "suspended": "SUSPENDED",
+      "blocked": "BLOCKED"
+    },
+    "table": {
+      "user": "Usuario",
+      "username": "Username",
+      "status": "Estado",
+      "roles": "Roles",
+      "createdAt": "Creado",
+      "actions": "Acciones"
+    },
+    "invitations": {
+      "email": "Email",
+      "roles": "Roles pre-asignados",
+      "status": "Estado",
+      "sentAt": "Enviada",
+      "expiresAt": "Expira",
+      "statusPENDING": "Pendiente",
+      "statusACCEPTED": "Aceptada",
+      "statusREVOKED": "Revocada"
+    },
+    "roles": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "type": "Tipo",
+      "activeUsers": "Usuarios activos",
+      "system": "Sistema",
+      "custom": "Custom",
+      "default": "DEFAULT",
+      "systemTooltip": "Rol de sistema — no editable",
+      "noRoles": "No hay roles disponibles."
+    },
+    "actions": {
+      "create": "Crear usuario",
+      "creating": "Creando...",
+      "save": "Guardar cambios",
+      "saving": "Guardando...",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "deleting": "Eliminando...",
+      "suspend": "Suspender",
+      "suspending": "Suspendiendo...",
+      "activate": "Activar",
+      "activating": "Activando...",
+      "revoke": "Revocar",
+      "revoking": "Revocando...",
+      "resend": "Reenviar",
+      "resending": "Reenviando...",
+      "roles": "Roles",
+      "cancel": "Cancelar",
+      "invite": "Invitar usuario",
+      "sendInvite": "Enviar invitación",
+      "sending": "Enviando...",
+      "createRole": "Crear rol"
+    },
+    "create": {
+      "title": "Crear Usuario",
+      "description": "Completa los datos para registrar un nuevo usuario en el tenant."
+    },
+    "edit": {
+      "title": "Editar Usuario"
+    },
+    "invite": {
+      "title": "Invitar Usuario",
+      "description": "El usuario recibirá un enlace de activación en su email.",
+      "rolesHint": "Los roles seleccionados se asignarán al aceptar la invitación."
+    },
+    "assignRoles": {
+      "title": "Asignar Roles",
+      "hint": "Selecciona los roles para {{name}}.",
+      "confirm": "Guardar asignación"
+    },
+    "suspend": {
+      "title": "Suspender Usuario",
+      "message": "Estás a punto de suspender al usuario",
+      "warning": "El usuario no podrá iniciar sesión mientras esté suspendido."
+    },
+    "activate": {
+      "title": "Activar Usuario",
+      "message": "Estás a punto de activar al usuario"
+    },
+    "delete": {
+      "title": "Eliminar Usuario",
+      "message": "Estás a punto de eliminar al usuario",
+      "warning": "Esta acción es irreversible. El usuario será marcado como eliminado y no podrá autenticarse."
+    },
+    "revoke": {
+      "title": "Revocar Invitación",
+      "message": "Estás a punto de revocar la invitación de"
+    },
+    "createRole": {
+      "title": "Crear Rol"
+    },
+    "editRole": {
+      "title": "Editar Rol"
+    },
+    "deleteRole": {
+      "title": "Eliminar Rol",
+      "message": "Estás a punto de eliminar el rol"
+    },
+    "sections": {
+      "personal": {
+        "title": "Datos personales",
+        "description": "Información básica del usuario."
+      },
+      "roles": {
+        "title": "Roles",
+        "description": "Asigna los roles iniciales al usuario."
+      }
+    },
+    "fields": {
+      "fullName": "Nombre completo",
+      "username": "Username",
+      "email": "Email",
+      "phone": "Teléfono",
+      "photoUrl": "URL foto de perfil",
+      "sendInvite": "Enviar correo de activación",
+      "sendInviteHint": "El usuario recibirá un email para activar su cuenta.",
+      "roleName": "Nombre del rol",
+      "roleDescription": "Descripción",
+      "isDefault": "Rol predeterminado",
+      "isDefaultHint": "Solo puede existir un rol predeterminado por tenant. Al activar este, el anterior perderá esa condición."
+    },
+    "placeholders": {
+      "fullName": "Ej. Juan Pérez",
+      "username": "ej. juan.perez",
+      "email": "usuario@empresa.com",
+      "phone": "+57 300 000 0000",
+      "photoUrl": "https://cdn.ejemplo.com/foto.png",
+      "roleName": "Ej. SUPERVISOR",
+      "roleDescription": "Descripción del propósito del rol"
+    },
+    "validation": {
+      "fullName": "El nombre es requerido (mín. 3 caracteres).",
+      "username": "Solo letras minúsculas, números, punto y guion (mín. 3 caracteres).",
+      "email": "Ingresa un email válido.",
+      "roleName": "El nombre del rol es requerido (mín. 3 caracteres)."
+    },
+    "errors": {
+      "loadUsers": "No fue posible cargar los usuarios.",
+      "createUser": "No fue posible crear el usuario.",
+      "updateUser": "No fue posible actualizar el usuario.",
+      "suspendUser": "No fue posible suspender el usuario.",
+      "activateUser": "No fue posible activar el usuario.",
+      "deleteUser": "No fue posible eliminar el usuario.",
+      "assignRoles": "No fue posible asignar los roles.",
+      "loadInvitations": "No fue posible cargar las invitaciones.",
+      "invite": "No fue posible enviar la invitación.",
+      "revokeInvitation": "No fue posible revocar la invitación.",
+      "resendInvitation": "No fue posible reenviar la invitación.",
+      "loadRoles": "No fue posible cargar los roles.",
+      "createRole": "No fue posible crear el rol.",
+      "updateRole": "No fue posible actualizar el rol.",
+      "deleteRole": "No fue posible eliminar el rol."
+    },
+    "success": {
+      "userCreated": "Usuario creado correctamente.",
+      "userUpdated": "Usuario actualizado correctamente.",
+      "userSuspended": "Usuario suspendido correctamente.",
+      "userActivated": "Usuario activado correctamente.",
+      "userDeleted": "Usuario eliminado correctamente.",
+      "rolesAssigned": "Roles asignados correctamente.",
+      "inviteSent": "Invitación enviada correctamente.",
+      "inviteRevoked": "Invitación revocada correctamente.",
+      "inviteResent": "Invitación reenviada correctamente.",
+      "roleCreated": "Rol creado correctamente.",
+      "roleUpdated": "Rol actualizado correctamente.",
+      "roleDeleted": "Rol eliminado correctamente."
+    }
   }
 }

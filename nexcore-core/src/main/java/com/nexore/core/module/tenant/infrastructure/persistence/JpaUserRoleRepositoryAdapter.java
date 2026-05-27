@@ -43,4 +43,15 @@ public class JpaUserRoleRepositoryAdapter implements UserRoleRepository {
     public boolean existsActiveTenantAdminRole(UUID tenantId, UUID roleId) {
         return delegate.existsActiveTenantAdminRole(tenantId, roleId);
     }
+
+    @Override
+    public boolean existsByTenantIdAndUserIdAndRoleId(UUID tenantId, UUID userId, UUID roleId) {
+        return delegate.existsByTenantIdAndUserIdAndRoleId(tenantId, userId, roleId);
+    }
+
+    @Override
+    @Transactional
+    public void insertIgnoreDuplicate(UUID id, UUID tenantId, UUID userId, UUID roleId, UUID assignedBy, java.time.OffsetDateTime expiresAt) {
+        delegate.insertIgnoreDuplicate(id, tenantId, userId, roleId, assignedBy, expiresAt);
+    }
 }

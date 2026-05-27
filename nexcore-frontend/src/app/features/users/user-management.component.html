@@ -1,0 +1,834 @@
+<app-navbar></app-navbar>
+
+<div class="page-wrap module-shell">
+  <div class="layout module-layout">
+    <app-sidebar></app-sidebar>
+
+    <main class="content module-content">
+
+      <!-- ── Page header ── -->
+      <header class="page-header module-header">
+        <div class="module-title-group">
+          <h1 class="module-title">{{ 'user.header.title' | transloco }}</h1>
+          <p class="subtitle module-subtitle">{{ 'user.header.subtitle' | transloco }}</p>
+        </div>
+      </header>
+
+      <!-- ── Feedback ── -->
+      <section class="feedback module-feedback" *ngIf="errorMessage || successMessage">
+        <div class="alert module-alert error" *ngIf="errorMessage">{{ errorMessage | transloco }}</div>
+        <div class="alert module-alert success" *ngIf="successMessage">{{ successMessage | transloco }}</div>
+      </section>
+
+      <!-- ── Tabs ── -->
+      <div class="tabs">
+        <button class="tab-item" [class.active]="activeTab === 'users'" (click)="selectTab('users')">
+          {{ 'user.tabs.users' | transloco }}
+          <span class="tab-badge">{{ userTotalElements }}</span>
+        </button>
+        <button class="tab-item" [class.active]="activeTab === 'invitations'" (click)="selectTab('invitations')">
+          {{ 'user.tabs.invitations' | transloco }}
+          <span class="tab-badge">{{ invitations.length }}</span>
+        </button>
+        <button class="tab-item" [class.active]="activeTab === 'roles'" (click)="selectTab('roles')">
+          {{ 'user.tabs.roles' | transloco }}
+          <span class="tab-badge">{{ roles.length }}</span>
+        </button>
+      </div>
+
+      <!-- ════════════════════════════════════════════════
+           TAB: USUARIOS
+           ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeTab === 'users'">
+
+        <!-- Toolbar -->
+        <section class="card module-card toolbar module-toolbar">
+          <div class="search-block">
+            <label for="user-search">{{ 'user.search.label' | transloco }}</label>
+            <input
+              id="user-search"
+              type="text"
+              [placeholder]="'user.search.placeholder' | transloco"
+              [value]="userSearchTerm"
+              (input)="onUserSearchChange($any($event.target).value)"
+            />
+          </div>
+
+          <div class="toolbar-actions module-toolbar-actions">
+            <!-- Status filter -->
+            <div class="filter-block">
+              <label for="user-status-filter">{{ 'user.filter.status' | transloco }}</label>
+              <select
+                id="user-status-filter"
+                [ngModel]="userStatusFilter"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onUserStatusChange($event)">
+                <option *ngFor="let opt of userStatusOptions" [value]="opt.value">
+                  {{ opt.label | transloco }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Pager -->
+            <div class="toolbar-pager" *ngIf="!usersLoading">
+              <div class="pager-left">
+                <span class="pager-meta">
+                  {{ 'user.pager.range' | transloco: { start: userPageStart, end: userPageEnd, total: userTotalElements } }}
+                </span>
+                <select
+                  class="page-size-select"
+                  [ngModel]="userSize"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="onUserPageSizeChange($event)">
+                  <option *ngFor="let opt of pageSizeOptions" [ngValue]="opt">{{ opt }}</option>
+                </select>
+              </div>
+              <div class="pager-controls">
+                <button class="pager-btn" type="button" [disabled]="userPage === 0" (click)="goToUserPage(0)">
+                  <span class="pager-icon">&laquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="userPage === 0" (click)="goToUserPage(userPage - 1)">
+                  <span class="pager-icon">&lsaquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="userPage >= userTotalPages - 1" (click)="goToUserPage(userPage + 1)">
+                  <span class="pager-icon">&rsaquo;</span>
+                </button>
+                <button class="pager-btn" type="button" [disabled]="userPage >= userTotalPages - 1" (click)="goToUserPage(userTotalPages - 1)">
+                  <span class="pager-icon">&raquo;</span>
+                </button>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" type="button" (click)="openInviteModal()">
+              {{ 'user.actions.invite' | transloco }}
+            </button>
+            <button class="btn btn-secondary" type="button" (click)="openCreateUserModal()">
+              {{ 'user.actions.create' | transloco }}
+            </button>
+          </div>
+        </section>
+
+        <!-- Table -->
+        <section class="card module-card table-card">
+          <div class="loading" *ngIf="usersLoading">{{ 'user.list.loading' | transloco }}</div>
+
+          <ng-container *ngIf="!usersLoading">
+            <div class="empty" *ngIf="!users.length">
+              <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <p>{{ 'user.list.empty' | transloco }}</p>
+              <button class="btn btn-primary" type="button" (click)="openInviteModal()">
+                {{ 'user.actions.invite' | transloco }}
+              </button>
+            </div>
+
+            <div class="table-wrap" *ngIf="users.length" [class.refreshing]="usersRefreshing">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleSort('fullName')">
+                        {{ 'user.table.user' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAsc('fullName')" [class.desc]="isSortedDesc('fullName')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleSort('username')">
+                        {{ 'user.table.username' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAsc('username')" [class.desc]="isSortedDesc('username')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleSort('status')">
+                        {{ 'user.table.status' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAsc('status')" [class.desc]="isSortedDesc('status')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>{{ 'user.table.roles' | transloco }}</th>
+                    <th>
+                      <button class="sort-btn" type="button" (click)="toggleSort('createdAt')">
+                        {{ 'user.table.createdAt' | transloco }}
+                        <span class="sort-indicator" [class.asc]="isSortedAsc('createdAt')" [class.desc]="isSortedDesc('createdAt')">
+                          <span class="sort-chevron up">▲</span>
+                          <span class="sort-chevron down">▼</span>
+                        </span>
+                      </button>
+                    </th>
+                    <th>{{ 'user.table.actions' | transloco }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users">
+                    <td>
+                      <div class="user-cell">
+                        <div class="user-avatar" [ngClass]="avatarClass(user)">{{ userInitials(user) }}</div>
+                        <div class="user-meta">
+                          <div class="user-name">{{ user.fullName }}</div>
+                          <div class="user-email">{{ user.email }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                      <span class="status-chip" [ngClass]="userStatusClass(user.status)">{{ user.status }}</span>
+                    </td>
+                    <td>
+                      <div class="role-chips">
+                        <span
+                          *ngFor="let role of (user.roles || [])"
+                          class="role-chip"
+                          [class.system]="isSystemRole(role)">
+                          {{ role.name }}
+                        </span>
+                        <span *ngIf="!(user.roles?.length)" class="role-chip-empty">—</span>
+                      </div>
+                    </td>
+                    <td class="date-cell">{{ user.createdAt ? (user.createdAt | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
+                    <td>
+                      <div class="actions">
+                        <button class="btn btn-secondary btn-sm" type="button" (click)="openEditUserModal(user)">
+                          {{ 'user.actions.edit' | transloco }}
+                        </button>
+                        <button class="btn btn-secondary btn-sm" type="button" (click)="openAssignRolesModal(user)">
+                          {{ 'user.actions.roles' | transloco }}
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          type="button"
+                          *ngIf="user.status !== 'SUSPENDED'"
+                          (click)="openSuspendUserModal(user)">
+                          {{ 'user.actions.suspend' | transloco }}
+                        </button>
+                        <button
+                          class="btn btn-success btn-sm"
+                          type="button"
+                          *ngIf="user.status === 'SUSPENDED'"
+                          (click)="openActivateUserModal(user)">
+                          {{ 'user.actions.activate' | transloco }}
+                        </button>
+                        <button class="btn btn-ghost btn-sm" type="button" (click)="openDeleteUserModal(user)">
+                          {{ 'user.actions.delete' | transloco }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
+        </section>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           TAB: INVITACIONES
+           ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeTab === 'invitations'">
+
+        <section class="card module-card toolbar module-toolbar">
+          <div></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-primary" type="button" (click)="openInviteModal()">
+              {{ 'user.actions.invite' | transloco }}
+            </button>
+          </div>
+        </section>
+
+        <section class="card module-card table-card">
+          <div class="loading" *ngIf="invitationsLoading">{{ 'user.list.loadingInvitations' | transloco }}</div>
+
+          <ng-container *ngIf="!invitationsLoading">
+            <div class="empty" *ngIf="!invitations.length">
+              <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <p>{{ 'user.list.emptyInvitations' | transloco }}</p>
+              <button class="btn btn-primary" type="button" (click)="openInviteModal()">{{ 'user.actions.invite' | transloco }}</button>
+            </div>
+
+            <div class="table-wrap" *ngIf="invitations.length">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'user.invitations.email' | transloco }}</th>
+                    <th>{{ 'user.invitations.roles' | transloco }}</th>
+                    <th>{{ 'user.invitations.status' | transloco }}</th>
+                    <th>{{ 'user.invitations.sentAt' | transloco }}</th>
+                    <th>{{ 'user.invitations.expiresAt' | transloco }}</th>
+                    <th>{{ 'user.table.actions' | transloco }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let inv of invitations">
+                    <td>{{ inv.email }}</td>
+                    <td>
+                      <div class="role-chips">
+                        <span *ngFor="let r of (inv.roles || [])" class="role-chip" [class.system]="isSystemRole(r)">{{ r.name }}</span>
+                        <span *ngIf="!(inv.roles?.length)" class="role-chip-empty">—</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="invitation-status-cell">
+                        <span class="status-chip" [ngClass]="invitationStatusClass(inv.status)">
+                          {{ ('user.invitations.status' + inv.status) | transloco }}
+                        </span>
+                        <span *ngIf="inv.status === 'ACCEPTED' && inv.acceptedAt" class="date-sub">
+                          {{ inv.acceptedAt | date:'dd/MM/yyyy HH:mm' }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="date-cell">{{ inv.invitedAt ? (inv.invitedAt | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
+                    <td class="date-cell">{{ inv.expiresAt ? (inv.expiresAt | date:'yyyy-MM-dd') : '—' }}</td>
+                    <td>
+                      <div class="actions">
+                        <button
+                          class="btn btn-secondary btn-sm"
+                          type="button"
+                          *ngIf="inv.status === 'PENDING'"
+                          [disabled]="invitationsSubmitting"
+                          (click)="resendInvitation(inv)">
+                          {{ 'user.actions.resend' | transloco }}
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          type="button"
+                          *ngIf="inv.status === 'PENDING'"
+                          (click)="openRevokeModal(inv)">
+                          {{ 'user.actions.revoke' | transloco }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
+        </section>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           TAB: ROLES
+           ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeTab === 'roles'">
+
+        <section class="card module-card toolbar module-toolbar">
+          <div></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-primary" type="button" (click)="openCreateRoleModal()">
+              {{ 'user.actions.createRole' | transloco }}
+            </button>
+          </div>
+        </section>
+
+        <section class="card module-card table-card">
+          <div class="loading" *ngIf="rolesLoading">{{ 'user.list.loadingRoles' | transloco }}</div>
+
+          <ng-container *ngIf="!rolesLoading">
+            <div class="empty" *ngIf="!roles.length">
+              <p>{{ 'user.list.emptyRoles' | transloco }}</p>
+              <button class="btn btn-primary" type="button" (click)="openCreateRoleModal()">{{ 'user.actions.createRole' | transloco }}</button>
+            </div>
+
+            <div class="table-wrap" *ngIf="roles.length">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'user.roles.name' | transloco }}</th>
+                    <th>{{ 'user.roles.description' | transloco }}</th>
+                    <th>{{ 'user.roles.type' | transloco }}</th>
+                    <th>{{ 'user.roles.activeUsers' | transloco }}</th>
+                    <th>{{ 'user.table.actions' | transloco }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let role of roles">
+                    <td class="role-name-cell">
+                      <strong>{{ role.name }}</strong>
+                      <span class="default-badge" *ngIf="role.isDefault">{{ 'user.roles.default' | transloco }}</span>
+                    </td>
+                    <td class="role-desc-cell">{{ role.description || '—' }}</td>
+                    <td>
+                      <span class="role-type-badge" [class.system]="isSystemRole(role)">
+                        {{ isSystemRole(role) ? ('user.roles.system' | transloco) : ('user.roles.custom' | transloco) }}
+                      </span>
+                    </td>
+                    <td>{{ role.activeUsersCount ?? '—' }}</td>
+                    <td>
+                      <div class="actions">
+                        <button
+                          class="btn btn-secondary btn-sm"
+                          type="button"
+                          [disabled]="isSystemRole(role)"
+                          [title]="isSystemRole(role) ? ('user.roles.systemTooltip' | transloco) : ''"
+                          (click)="openEditRoleModal(role)">
+                          {{ 'user.actions.edit' | transloco }}
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          type="button"
+                          [disabled]="isSystemRole(role)"
+                          [title]="isSystemRole(role) ? ('user.roles.systemTooltip' | transloco) : ''"
+                          (click)="openDeleteRoleModal(role)">
+                          {{ 'user.actions.delete' | transloco }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
+        </section>
+      </ng-container>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Crear Usuario
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showCreateUserModal">
+  <section class="modal modal-lg user-form-shell">
+    <header class="modal-header user-topbar">
+      <div class="user-head">
+        <h2>{{ 'user.create.title' | transloco }}</h2>
+        <p>{{ 'user.create.description' | transloco }}</p>
+      </div>
+      <button class="icon-btn" type="button" (click)="closeCreateUserModal()">✕</button>
+    </header>
+
+    <form [formGroup]="createUserForm" (ngSubmit)="submitCreateUser()" class="user-form-body">
+
+      <section class="user-form-card">
+        <header class="user-section-head">
+          <div class="section-icon blue">UD</div>
+          <div>
+            <h3>{{ 'user.sections.personal.title' | transloco }}</h3>
+            <p>{{ 'user.sections.personal.description' | transloco }}</p>
+          </div>
+        </header>
+        <div class="field-grid two-col">
+          <label>{{ 'user.fields.fullName' | transloco }} *
+            <input formControlName="fullName" [placeholder]="'user.placeholders.fullName' | transloco" />
+            <small class="error" *ngIf="createUserForm.controls.fullName.touched && createUserForm.controls.fullName.invalid">
+              {{ 'user.validation.fullName' | transloco }}
+            </small>
+          </label>
+          <label>{{ 'user.fields.username' | transloco }} *
+            <input formControlName="username" [placeholder]="'user.placeholders.username' | transloco" autocomplete="off" />
+            <small class="error" *ngIf="createUserForm.controls.username.touched && createUserForm.controls.username.invalid">
+              {{ 'user.validation.username' | transloco }}
+            </small>
+          </label>
+          <label>{{ 'user.fields.email' | transloco }} *
+            <input formControlName="email" type="email" [placeholder]="'user.placeholders.email' | transloco" />
+            <small class="error" *ngIf="createUserForm.controls.email.touched && createUserForm.controls.email.invalid">
+              {{ 'user.validation.email' | transloco }}
+            </small>
+          </label>
+          <label>{{ 'user.fields.phone' | transloco }}
+            <input formControlName="phone" type="tel" [placeholder]="'user.placeholders.phone' | transloco" />
+          </label>
+        </div>
+      </section>
+
+      <section class="user-form-card">
+        <header class="user-section-head">
+          <div class="section-icon sky">RL</div>
+          <div>
+            <h3>{{ 'user.sections.roles.title' | transloco }}</h3>
+            <p>{{ 'user.sections.roles.description' | transloco }}</p>
+          </div>
+        </header>
+        <div class="role-select-list">
+          <label class="role-select-item" *ngFor="let role of allRoles">
+            <input
+              type="checkbox"
+              [checked]="isRoleSelected(role.id)"
+              (change)="toggleRoleSelection(role.id)" />
+            <div class="role-select-info">
+              <div class="role-name">{{ role.name }}</div>
+              <div class="role-desc">{{ role.description || '—' }}</div>
+            </div>
+            <span class="role-select-badge" [class.system]="isSystemRole(role)">
+              {{ isSystemRole(role) ? ('user.roles.system' | transloco) : ('user.roles.custom' | transloco) }}
+            </span>
+          </label>
+          <div class="role-select-empty" *ngIf="!allRoles.length">{{ 'user.roles.noRoles' | transloco }}</div>
+        </div>
+      </section>
+
+      <section class="user-form-card">
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">{{ 'user.fields.sendInvite' | transloco }}</div>
+            <div class="toggle-desc">{{ 'user.fields.sendInviteHint' | transloco }}</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" formControlName="sendInvite" />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </section>
+
+      <div class="user-form-footer-gap" aria-hidden="true"></div>
+      <footer class="user-form-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateUserModal()">{{ 'user.actions.cancel' | transloco }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="usersSubmitting">
+            {{ usersSubmitting ? ('user.actions.creating' | transloco) : ('user.actions.create' | transloco) }}
+          </button>
+        </div>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Editar Usuario
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showEditUserModal">
+  <section class="modal modal-lg user-form-shell">
+    <header class="modal-header user-topbar">
+      <div class="user-head">
+        <h2>{{ 'user.edit.title' | transloco }}</h2>
+        <p>{{ selectedUser?.fullName }}</p>
+      </div>
+      <button class="icon-btn" type="button" (click)="closeEditUserModal()">✕</button>
+    </header>
+
+    <form [formGroup]="editUserForm" (ngSubmit)="submitEditUser()" class="user-form-body">
+      <section class="user-form-card">
+        <div class="field-grid two-col">
+          <label>{{ 'user.fields.email' | transloco }}
+            <input [value]="selectedUser?.email" disabled class="field-readonly" />
+          </label>
+          <label>{{ 'user.fields.username' | transloco }}
+            <input [value]="selectedUser?.username" disabled class="field-readonly" />
+          </label>
+          <label>{{ 'user.fields.fullName' | transloco }} *
+            <input formControlName="fullName" />
+            <small class="error" *ngIf="editUserForm.controls.fullName.touched && editUserForm.controls.fullName.invalid">
+              {{ 'user.validation.fullName' | transloco }}
+            </small>
+          </label>
+          <label>{{ 'user.fields.phone' | transloco }}
+            <input formControlName="phone" type="tel" />
+          </label>
+          <label class="span-2">{{ 'user.fields.photoUrl' | transloco }}
+            <input formControlName="photoUrl" type="url" [placeholder]="'user.placeholders.photoUrl' | transloco" />
+          </label>
+        </div>
+      </section>
+
+      <div class="user-form-footer-gap" aria-hidden="true"></div>
+      <footer class="user-form-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeEditUserModal()">{{ 'user.actions.cancel' | transloco }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="usersSubmitting">
+            {{ usersSubmitting ? ('user.actions.saving' | transloco) : ('user.actions.save' | transloco) }}
+          </button>
+        </div>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Asignar Roles
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showAssignRolesModal">
+  <section class="modal">
+    <header class="modal-header">
+      <h2>{{ 'user.assignRoles.title' | transloco }}</h2>
+      <button class="icon-btn" type="button" (click)="closeAssignRolesModal()">✕</button>
+    </header>
+    <div class="modal-body">
+      <p class="modal-hint">{{ 'user.assignRoles.hint' | transloco: { name: selectedUser?.fullName } }}</p>
+      <div class="role-select-list mt-8">
+        <label class="role-select-item" *ngFor="let role of allRoles">
+          <input type="checkbox" [checked]="isRoleSelected(role.id)" (change)="toggleRoleSelection(role.id)" />
+          <div class="role-select-info">
+            <div class="role-name">{{ role.name }}</div>
+            <div class="role-desc">{{ role.description || '—' }}</div>
+          </div>
+          <span class="role-select-badge" [class.system]="isSystemRole(role)">
+            {{ isSystemRole(role) ? ('user.roles.system' | transloco) : ('user.roles.custom' | transloco) }}
+          </span>
+        </label>
+      </div>
+    </div>
+    <footer class="modal-actions">
+      <button class="btn btn-secondary" type="button" (click)="closeAssignRolesModal()">{{ 'user.actions.cancel' | transloco }}</button>
+      <button class="btn btn-primary" type="button" [disabled]="usersSubmitting" (click)="confirmAssignRoles()">
+        {{ usersSubmitting ? ('user.actions.saving' | transloco) : ('user.assignRoles.confirm' | transloco) }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Suspender Usuario
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showSuspendUserModal">
+  <section class="modal">
+    <header class="modal-header danger-header">
+      <h2>{{ 'user.suspend.title' | transloco }}</h2>
+    </header>
+    <div class="modal-body">
+      <p>{{ 'user.suspend.message' | transloco }} <strong>{{ selectedUser?.fullName }}</strong>.</p>
+      <p class="modal-warning">{{ 'user.suspend.warning' | transloco }}</p>
+    </div>
+    <footer class="modal-actions">
+      <button class="btn btn-secondary" type="button" (click)="closeSuspendUserModal()">{{ 'user.actions.cancel' | transloco }}</button>
+      <button class="btn btn-danger" type="button" [disabled]="usersSubmitting" (click)="confirmSuspendUser()">
+        {{ usersSubmitting ? ('user.actions.suspending' | transloco) : ('user.actions.suspend' | transloco) }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Activar Usuario
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showActivateUserModal">
+  <section class="modal">
+    <header class="modal-header">
+      <h2>{{ 'user.activate.title' | transloco }}</h2>
+    </header>
+    <div class="modal-body">
+      <p>{{ 'user.activate.message' | transloco }} <strong>{{ selectedUser?.fullName }}</strong>.</p>
+    </div>
+    <footer class="modal-actions">
+      <button class="btn btn-secondary" type="button" (click)="closeActivateUserModal()">{{ 'user.actions.cancel' | transloco }}</button>
+      <button class="btn btn-success" type="button" [disabled]="usersSubmitting" (click)="confirmActivateUser()">
+        {{ usersSubmitting ? ('user.actions.activating' | transloco) : ('user.actions.activate' | transloco) }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Eliminar Usuario
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showDeleteUserModal">
+  <section class="modal">
+    <header class="modal-header danger-header">
+      <h2>{{ 'user.delete.title' | transloco }}</h2>
+    </header>
+    <div class="modal-body">
+      <p>{{ 'user.delete.message' | transloco }} <strong>{{ selectedUser?.fullName }}</strong>.</p>
+      <p class="modal-warning">{{ 'user.delete.warning' | transloco }}</p>
+    </div>
+    <footer class="modal-actions">
+      <button class="btn btn-secondary" type="button" (click)="closeDeleteUserModal()">{{ 'user.actions.cancel' | transloco }}</button>
+      <button class="btn btn-danger" type="button" [disabled]="usersSubmitting" (click)="confirmDeleteUser()">
+        {{ usersSubmitting ? ('user.actions.deleting' | transloco) : ('user.actions.delete' | transloco) }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Invitar Usuario
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showInviteModal">
+  <section class="modal modal-lg user-form-shell">
+    <header class="modal-header user-topbar">
+      <div class="user-head">
+        <h2>{{ 'user.invite.title' | transloco }}</h2>
+        <p>{{ 'user.invite.description' | transloco }}</p>
+      </div>
+      <button class="icon-btn" type="button" (click)="closeInviteModal()">✕</button>
+    </header>
+
+    <form [formGroup]="inviteForm" (ngSubmit)="submitInvite()" class="user-form-body">
+      <section class="user-form-card">
+        <div class="field-grid one-col">
+          <label>{{ 'user.fields.email' | transloco }} *
+            <input formControlName="email" type="email" [placeholder]="'user.placeholders.email' | transloco" />
+            <small class="error" *ngIf="inviteForm.controls.email.touched && inviteForm.controls.email.invalid">
+              {{ 'user.validation.email' | transloco }}
+            </small>
+          </label>
+        </div>
+      </section>
+
+      <section class="user-form-card">
+        <header class="user-section-head">
+          <div class="section-icon sky">RL</div>
+          <div>
+            <h3>{{ 'user.sections.roles.title' | transloco }}</h3>
+            <p>{{ 'user.invite.rolesHint' | transloco }}</p>
+          </div>
+        </header>
+        <div class="role-select-list">
+          <label class="role-select-item" *ngFor="let role of allRoles">
+            <input type="checkbox" [checked]="isInviteRoleSelected(role.id)" (change)="toggleInviteRole(role.id)" />
+            <div class="role-select-info">
+              <div class="role-name">{{ role.name }}</div>
+              <div class="role-desc">{{ role.description || '—' }}</div>
+            </div>
+            <span class="role-select-badge" [class.system]="isSystemRole(role)">
+              {{ isSystemRole(role) ? ('user.roles.system' | transloco) : ('user.roles.custom' | transloco) }}
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <div class="user-form-footer-gap" aria-hidden="true"></div>
+      <footer class="user-form-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeInviteModal()">{{ 'user.actions.cancel' | transloco }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="invitationsSubmitting">
+            {{ invitationsSubmitting ? ('user.actions.sending' | transloco) : ('user.actions.sendInvite' | transloco) }}
+          </button>
+        </div>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Revocar Invitación
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showRevokeModal">
+  <section class="modal">
+    <header class="modal-header danger-header">
+      <h2>{{ 'user.revoke.title' | transloco }}</h2>
+    </header>
+    <div class="modal-body">
+      <p>{{ 'user.revoke.message' | transloco }} <strong>{{ selectedInvitation?.email }}</strong>.</p>
+    </div>
+    <footer class="modal-actions">
+      <button class="btn btn-secondary" type="button" (click)="closeRevokeModal()">{{ 'user.actions.cancel' | transloco }}</button>
+      <button class="btn btn-danger" type="button" [disabled]="invitationsSubmitting" (click)="confirmRevoke()">
+        {{ invitationsSubmitting ? ('user.actions.revoking' | transloco) : ('user.actions.revoke' | transloco) }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Crear Rol
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showCreateRoleModal">
+  <section class="modal">
+    <header class="modal-header">
+      <h2>{{ 'user.createRole.title' | transloco }}</h2>
+      <button class="icon-btn" type="button" (click)="closeCreateRoleModal()">✕</button>
+    </header>
+    <form [formGroup]="createRoleForm" (ngSubmit)="submitCreateRole()">
+      <div class="modal-body">
+        <div class="field-grid one-col">
+          <label>{{ 'user.fields.roleName' | transloco }} *
+            <input formControlName="name" [placeholder]="'user.placeholders.roleName' | transloco" style="text-transform:uppercase" />
+            <small class="error" *ngIf="createRoleForm.controls.name.touched && createRoleForm.controls.name.invalid">
+              {{ 'user.validation.roleName' | transloco }}
+            </small>
+          </label>
+          <label>{{ 'user.fields.roleDescription' | transloco }}
+            <textarea formControlName="description" rows="3" [placeholder]="'user.placeholders.roleDescription' | transloco"></textarea>
+          </label>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">{{ 'user.fields.isDefault' | transloco }}</div>
+              <div class="toggle-desc">{{ 'user.fields.isDefaultHint' | transloco }}</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" formControlName="isDefault" />
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeCreateRoleModal()">{{ 'user.actions.cancel' | transloco }}</button>
+        <button class="btn btn-primary" type="submit" [disabled]="rolesSubmitting">
+          {{ rolesSubmitting ? ('user.actions.creating' | transloco) : ('user.actions.createRole' | transloco) }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Editar Rol
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showEditRoleModal">
+  <section class="modal">
+    <header class="modal-header">
+      <h2>{{ 'user.editRole.title' | transloco }}</h2>
+      <button class="icon-btn" type="button" (click)="closeEditRoleModal()">✕</button>
+    </header>
+    <form [formGroup]="editRoleForm" (ngSubmit)="submitEditRole()">
+      <div class="modal-body">
+        <div class="field-grid one-col">
+          <label>{{ 'user.fields.roleName' | transloco }} *
+            <input formControlName="name" style="text-transform:uppercase" />
+            <small class="error" *ngIf="editRoleForm.controls.name.touched && editRoleForm.controls.name.invalid">
+              {{ 'user.validation.roleName' | transloco }}
+            </small>
+          </label>
+          <label>{{ 'user.fields.roleDescription' | transloco }}
+            <textarea formControlName="description" rows="3"></textarea>
+          </label>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">{{ 'user.fields.isDefault' | transloco }}</div>
+              <div class="toggle-desc">{{ 'user.fields.isDefaultHint' | transloco }}</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" formControlName="isDefault" />
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeEditRoleModal()">{{ 'user.actions.cancel' | transloco }}</button>
+        <button class="btn btn-primary" type="submit" [disabled]="rolesSubmitting">
+          {{ rolesSubmitting ? ('user.actions.saving' | transloco) : ('user.actions.save' | transloco) }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: Eliminar Rol
+     ══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showDeleteRoleModal">
+  <section class="modal">
+    <header class="modal-header danger-header">
+      <h2>{{ 'user.deleteRole.title' | transloco }}</h2>
+    </header>
+    <div class="modal-body">
+      <p>{{ 'user.deleteRole.message' | transloco }} <strong>{{ selectedRole?.name }}</strong>.</p>
+      <div class="alert error" *ngIf="deleteRoleError">{{ deleteRoleError }}</div>
+    </div>
+    <footer class="modal-actions">
+      <button class="btn btn-secondary" type="button" (click)="closeDeleteRoleModal()">{{ 'user.actions.cancel' | transloco }}</button>
+      <button class="btn btn-danger" type="button" [disabled]="rolesSubmitting" (click)="confirmDeleteRole()">
+        {{ rolesSubmitting ? ('user.actions.deleting' | transloco) : ('user.actions.delete' | transloco) }}
+      </button>
+    </footer>
+  </section>
+</div>

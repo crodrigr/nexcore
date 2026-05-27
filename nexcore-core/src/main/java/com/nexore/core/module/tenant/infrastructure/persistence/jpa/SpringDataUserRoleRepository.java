@@ -22,4 +22,23 @@ public interface SpringDataUserRoleRepository extends JpaRepository<UserRoleJpaE
     @Query("SELECT COUNT(ur) > 0 FROM UserRole ur WHERE ur.tenantId = :tenantId AND ur.roleId = :roleId " +
            "AND (ur.expiresAt IS NULL OR ur.expiresAt > CURRENT_TIMESTAMP)")
     boolean existsActiveTenantAdminRole(@Param("tenantId") UUID tenantId, @Param("roleId") UUID roleId);
+
+    boolean existsByTenantIdAndUserIdAndRoleId(UUID tenantId, UUID userId, UUID roleId);
+
+    @Modifying
+    @Query(value = """
+        INSERT INTO nxc_tenant.user_roles
+            (id, tenant_id, user_id, role_id, assigned_by, assigned_at, expires_at)
+        VALUES
+            (:id, :tenantId, :userId, :roleId, :assignedBy, NOW(), :expiresAt)
+        ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING
+        """, nativeQuery = true)
+    void insertIgnoreDuplicate(
+        @Param("id")         UUID id,
+        @Param("tenantId")   UUID tenantId,
+        @Param("userId")     UUID userId,
+        @Param("roleId")     UUID roleId,
+        @Param("assignedBy") UUID assignedBy,
+        @Param("expiresAt")  java.time.OffsetDateTime expiresAt
+    );
 }

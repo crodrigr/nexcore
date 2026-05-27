@@ -16,4 +16,8 @@ public interface UserRoleRepository {
     void deleteByTenantIdAndUserId(UUID tenantId, UUID userId);
 
     boolean existsActiveTenantAdminRole(UUID tenantId, UUID roleId);
+
+    boolean existsByTenantIdAndUserIdAndRoleId(UUID tenantId, UUID userId, UUID roleId);
+
+    void insertIgnoreDuplicate(UUID id, UUID tenantId, UUID userId, UUID roleId, UUID assignedBy, java.time.OffsetDateTime expiresAt);
 }

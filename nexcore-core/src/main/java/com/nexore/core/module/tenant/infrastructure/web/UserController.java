@@ -127,12 +127,11 @@ public class UserController {
         return ResponseEntity.status(201).body(response);
     }
 
-    /** POST /api/v1/users/invitations/accept */
+    /** POST /api/v1/users/invitations/accept — public, no X-Tenant-Id required */
     @PostMapping("/users/invitations/accept")
     public ResponseEntity<UserResponse> acceptInvitation(
-            @RequestHeader("X-Tenant-Id") UUID tenantId,
             @Valid @RequestBody AcceptInvitationRequest request) {
-        return ResponseEntity.status(201).body(userService.acceptInvitation(tenantId, request));
+        return ResponseEntity.status(201).body(userService.acceptInvitation(request));
     }
 
     /** GET /api/v1/users/invitations */

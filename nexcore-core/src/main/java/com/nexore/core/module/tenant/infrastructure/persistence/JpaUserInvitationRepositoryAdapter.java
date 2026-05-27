@@ -7,6 +7,7 @@ import com.nexore.core.module.tenant.infrastructure.persistence.mapper.UserInvit
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +42,11 @@ public class JpaUserInvitationRepositoryAdapter implements UserInvitationReposit
     @Override
     public boolean existsPendingByTenantIdAndEmail(UUID tenantId, String email) {
         return delegate.existsPendingByTenantIdAndEmail(tenantId, email);
+    }
+
+    @Override
+    public int resendUpdateToken(UUID tenantId, UUID id, String tokenHash, OffsetDateTime expiresAt) {
+        return delegate.resendUpdateToken(tenantId, id, tokenHash, expiresAt);
     }
 
     @Override

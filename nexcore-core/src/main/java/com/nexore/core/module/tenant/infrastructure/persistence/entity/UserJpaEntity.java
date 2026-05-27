@@ -4,7 +4,9 @@ import com.nexore.core.module.tenant.domain.model.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -74,6 +76,7 @@ public class UserJpaEntity {
     @Column(name = "totp_enabled", nullable = false)
     private boolean totpEnabled;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "totp_backup_codes", columnDefinition = "jsonb")
     private String totpBackupCodes;
 

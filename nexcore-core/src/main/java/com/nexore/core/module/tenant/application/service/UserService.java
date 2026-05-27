@@ -7,8 +7,13 @@ import com.nexore.core.module.tenant.application.mapper.UserMapper;
 import com.nexore.core.module.tenant.domain.model.*;
 import com.nexore.core.module.tenant.domain.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -16,11 +21,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    private static final Set<String> SYSTEM_ROLE_NAMES = Set.of("TENANT_ADMIN", "EDITOR", "VIEWER");
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -28,18 +32,20 @@ public class UserService {
     private final UserInvitationRepository invitationRepository;
     private final TenantRepository tenantRepository;
     private final UserMapper userMapper;
+    private final EmailService emailService;
 
     /** UC-005 — Invite user */
     @Transactional
     public UserInvitationResponse inviteUser(UUID tenantId, UserInviteRequest request, UUID actorId) {
+        return doInviteUser(tenantId, request, actorId);
+    }
+
+    private UserInvitationResponse doInviteUser(UUID tenantId, UserInviteRequest request, UUID actorId) {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(BusinessException::tenantNotFound);
 
-        if (tenant.getMaxUsers() != null) {
-            long count = userRepository.countByTenantIdAndDeletedAtIsNull(tenantId);
-            if (count >= tenant.getMaxUsers()) {
-                throw BusinessException.userQuotaReached();
-            }
+        if (tenant.getMaxUsers() != null && userRepository.countByTenantIdAndDeletedAtIsNull(tenantId) >= tenant.getMaxUsers()) {
+            throw BusinessException.userQuotaReached();
         }
         if (userRepository.existsByTenantIdAndEmailAndDeletedAtIsNull(tenantId, request.getEmail())) {
             throw BusinessException.userEmailAlreadyExists(request.getEmail());
@@ -61,20 +67,25 @@ public class UserService {
                 .build();
 
         UserInvitation saved = invitationRepository.save(invitation);
-        // TODO: publish UserInvitedEvent & send email via notification service
+        String emailAddr = request.getEmail();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCommit() {
+                emailService.sendInvitation(emailAddr, rawToken, tenantId);
+            }
+        });
         return toInvitationResponse(saved);
     }
 
-    /** UC-006 — Accept invitation */
+    /** UC-006 — Accept invitation (tenantId derived from token) */
     @Transactional
-    public UserResponse acceptInvitation(UUID tenantId, AcceptInvitationRequest request) {
+    public UserResponse acceptInvitation(AcceptInvitationRequest request) {
         String tokenHash = sha256(request.getToken());
+        log.debug("acceptInvitation: looking up tokenHash={}", tokenHash);
         UserInvitation invitation = invitationRepository.findByTokenHash(tokenHash)
                 .orElseThrow(BusinessException::invitationInvalidOrExpired);
 
-        if (!invitation.getTenantId().equals(tenantId)) {
-            throw BusinessException.invitationInvalidOrExpired();
-        }
+        UUID tenantId = invitation.getTenantId();
+
         if (invitation.isRevoked()) {
             throw BusinessException.invitationInvalidOrExpired();
         }
@@ -124,7 +135,7 @@ public class UserService {
             UserInviteRequest invite = new UserInviteRequest();
             invite.setEmail(request.getEmail());
             invite.setRoleIds(request.getRoleIds() != null ? request.getRoleIds() : List.of());
-            inviteUser(tenantId, invite, actorId);
+            doInviteUser(tenantId, invite, actorId);
             // Return minimal response for invite flow
             return UserResponse.builder()
                     .tenantId(tenantId)
@@ -134,10 +145,8 @@ public class UserService {
         }
 
         Tenant tenant = tenantRepository.findById(tenantId).orElseThrow(BusinessException::tenantNotFound);
-        if (tenant.getMaxUsers() != null) {
-            if (userRepository.countByTenantIdAndDeletedAtIsNull(tenantId) >= tenant.getMaxUsers()) {
-                throw BusinessException.userQuotaReached();
-            }
+        if (tenant.getMaxUsers() != null && userRepository.countByTenantIdAndDeletedAtIsNull(tenantId) >= tenant.getMaxUsers()) {
+            throw BusinessException.userQuotaReached();
         }
         if (userRepository.existsByTenantIdAndEmailAndDeletedAtIsNull(tenantId, request.getEmail())) {
             throw BusinessException.userEmailAlreadyExists(request.getEmail());
@@ -165,8 +174,6 @@ public class UserService {
             validateRolesBelongToTenant(tenantId, roleIds);
             assignRoles(tenantId, savedUser.getId(), roleIds, actorId);
         }
-        // TODO: publish UserCreatedEvent & send temp password email
-
         return buildUserResponse(savedUser, tenantId);
     }
 
@@ -218,7 +225,6 @@ public class UserService {
         user.setStatus(UserStatus.SUSPENDED);
         user.setUpdatedBy(actorId);
         userRepository.save(user);
-        // TODO: revoke sessions, publish UserSuspendedEvent
     }
 
     /** UC-011 — Activate user */
@@ -230,7 +236,6 @@ public class UserService {
         user.setStatus(UserStatus.ACTIVE);
         user.setUpdatedBy(actorId);
         userRepository.save(user);
-        // TODO: publish UserActivatedEvent
     }
 
     /** UC-012 — Soft delete user */
@@ -250,7 +255,6 @@ public class UserService {
         user.setDeletedAt(OffsetDateTime.now());
         user.setUpdatedBy(actorId);
         userRepository.save(user);
-        // TODO: revoke sessions, publish UserDeletedEvent
     }
 
     /** UC-013 — List users */
@@ -309,8 +313,6 @@ public class UserService {
                     .build();
             userRoleRepository.save(ur);
         }
-        // TODO: publish UserRolesChangedEvent
-
         return buildUserResponse(user, tenantId);
     }
 
@@ -329,34 +331,41 @@ public class UserService {
     /** UC-019 — Resend invitation */
     @Transactional
     public UserInvitationResponse resendInvitation(UUID tenantId, UUID invitationId, UUID actorId) {
-        UserInvitation old = invitationRepository.findByTenantIdAndId(tenantId, invitationId)
+        UserInvitation invitation = invitationRepository.findByTenantIdAndId(tenantId, invitationId)
                 .orElseThrow(BusinessException::invitationInvalidOrExpired);
-        if (old.getAcceptedAt() != null) {
+        if (invitation.getAcceptedAt() != null) {
             throw BusinessException.invitationAlreadyAccepted();
         }
-        old.setRevoked(true);
-        invitationRepository.save(old);
+        if (invitation.isRevoked()) {
+            throw BusinessException.invitationInvalidOrExpired();
+        }
 
         String rawToken = UUID.randomUUID().toString();
-        UserInvitation newInv = UserInvitation.builder()
-                .tenantId(tenantId)
-                .email(old.getEmail())
-                .tokenHash(sha256(rawToken))
-                .roleIds(old.getRoleIds())
-                .invitedBy(actorId)
-                .expiresAt(OffsetDateTime.now().plusHours(72))
-                .isRevoked(false)
-                .build();
+        String newTokenHash = sha256(rawToken);
+        OffsetDateTime newExpiry = OffsetDateTime.now().plusHours(72);
 
-        UserInvitation saved = invitationRepository.save(newInv);
-        // TODO: send email, publish UserInvitedEvent
-        return toInvitationResponse(saved);
+        int updated = invitationRepository.resendUpdateToken(tenantId, invitationId, newTokenHash, newExpiry);
+        log.debug("resendInvitation: updated={} id={} newTokenHash={}", updated, invitationId, newTokenHash);
+
+        String emailAddr = invitation.getEmail();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCommit() {
+                emailService.sendInvitation(emailAddr, rawToken, tenantId);
+            }
+        });
+
+        return toInvitationResponse(invitationRepository.findByTenantIdAndId(tenantId, invitationId)
+                .orElseThrow(BusinessException::invitationInvalidOrExpired));
     }
 
     /** UC-020 — Get own profile */
+    @SuppressWarnings("java:S4144")
     @Transactional(readOnly = true)
     public UserResponse getMyProfile(UUID tenantId, UUID userId) {
-        return getUser(tenantId, userId);
+        User user = userRepository.findByTenantIdAndId(tenantId, userId)
+                .filter(u -> u.getDeletedAt() == null)
+                .orElseThrow(BusinessException::userNotFound);
+        return buildUserResponse(user, tenantId);
     }
 
     /** List invitations of tenant */
@@ -378,15 +387,10 @@ public class UserService {
     }
 
     private void assignRoles(UUID tenantId, UUID userId, List<UUID> roleIds, UUID actorId) {
-        for (UUID roleId : roleIds) {
-            UserRole ur = UserRole.builder()
-                    .tenantId(tenantId)
-                    .userId(userId)
-                    .roleId(roleId)
-                    .assignedBy(actorId)
-                    .build();
-            userRoleRepository.save(ur);
-        }
+        roleIds.stream().distinct().forEach(roleId ->
+            userRoleRepository.insertIgnoreDuplicate(
+                UUID.randomUUID(), tenantId, userId, roleId, actorId, null)
+        );
     }
 
     private UserResponse buildUserResponse(User user, UUID tenantId) {
@@ -419,8 +423,7 @@ public class UserService {
     }
 
     private String hashPassword(String password) {
-        // Placeholder: in production use BCryptPasswordEncoder injected as a bean
-        return "$2a$12$placeholder_hash_for_" + password.hashCode();
+        return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 
     private String sha256(String input) {

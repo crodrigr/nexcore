@@ -19,6 +19,12 @@ export const routes: Routes = [
     title: 'Tenant Management'
   },
   {
+    path: 'users',
+    loadComponent: () =>
+      import('./features/users/user-management.component').then(m => m.UserManagementComponent),
+    title: 'Usuarios & Roles'
+  },
+  {
     path: 'tenant-management',
     redirectTo: 'tenants',
     pathMatch: 'full'
@@ -60,6 +66,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
         title: 'Change Password'
+      },
+      {
+        path: 'accept-invitation',
+        loadComponent: () =>
+          import('./features/auth/accept-invitation/accept-invitation.component').then(m => m.AcceptInvitationComponent),
+        title: 'Accept Invitation'
       },
       {
         path: '',
