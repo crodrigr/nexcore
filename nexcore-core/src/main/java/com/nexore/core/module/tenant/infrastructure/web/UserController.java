@@ -34,8 +34,10 @@ public class UserController {
             @RequestParam(required = false) UserStatus status,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(userService.listUsers(tenantId, status, search, page, size));
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "fullName") String sort,
+            @RequestParam(defaultValue = "asc") String dir) {
+        return ResponseEntity.ok(userService.listUsers(tenantId, status, search, page, size, sort, dir));
     }
 
     /** POST /api/v1/users */

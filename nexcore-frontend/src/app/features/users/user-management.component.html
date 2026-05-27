@@ -295,11 +295,12 @@
                     <td>
                       <div class="actions">
                         <button
-                          class="btn btn-secondary btn-sm"
+                          class="btn btn-secondary btn-sm btn-fixed"
                           type="button"
                           *ngIf="inv.status === 'PENDING'"
                           [disabled]="invitationsSubmitting"
                           (click)="resendInvitation(inv)">
+                          <span *ngIf="invitationsSubmitting" class="btn-spinner"></span>
                           {{ 'user.actions.resend' | transloco }}
                         </button>
                         <button
@@ -491,6 +492,7 @@
         <div class="footer-actions">
           <button type="button" class="btn btn-secondary" (click)="closeCreateUserModal()">{{ 'user.actions.cancel' | transloco }}</button>
           <button type="submit" class="btn btn-primary" [disabled]="usersSubmitting">
+            <span *ngIf="usersSubmitting" class="btn-spinner"></span>
             {{ usersSubmitting ? ('user.actions.creating' | transloco) : ('user.actions.create' | transloco) }}
           </button>
         </div>
@@ -696,6 +698,7 @@
         <div class="footer-actions">
           <button type="button" class="btn btn-secondary" (click)="closeInviteModal()">{{ 'user.actions.cancel' | transloco }}</button>
           <button type="submit" class="btn btn-primary" [disabled]="invitationsSubmitting">
+            <span *ngIf="invitationsSubmitting" class="btn-spinner"></span>
             {{ invitationsSubmitting ? ('user.actions.sending' | transloco) : ('user.actions.sendInvite' | transloco) }}
           </button>
         </div>

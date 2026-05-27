@@ -113,11 +113,15 @@ export class UserService {
     page: number,
     size: number,
     status?: string,
-    search?: string
+    search?: string,
+    sortField?: string,
+    sortDir?: string
   ): Observable<PageResponse<UserRecord>> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (status) params = params.set('status', status);
     if (search?.trim()) params = params.set('search', search.trim());
+    if (sortField) params = params.set('sort', sortField);
+    if (sortDir) params = params.set('dir', sortDir);
     return this.http.get<PageResponse<UserRecord>>(this.usersUrl, { params });
   }
 

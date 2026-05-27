@@ -203,7 +203,7 @@ export class UserManagementComponent implements OnInit {
     this.clearMessages();
     try {
       const resp = await firstValueFrom(
-        this.userService.listUsers(page, this.userSize, this.userStatusFilter, this.userSearchTerm)
+        this.userService.listUsers(page, this.userSize, this.userStatusFilter, this.userSearchTerm, this.userSortField, this.userSortDir)
       );
       const pr = resp as PageResponse<UserRecord>;
       this.users = pr.content || [];

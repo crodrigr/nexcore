@@ -8,6 +8,7 @@ import com.nexore.core.module.tenant.infrastructure.persistence.mapper.UserPersi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,13 +66,24 @@ public class JpaUserRepositoryAdapter implements UserRepository {
     }
 
     @Override
-    public List<User> findByTenantId(UUID tenantId, UserStatus status, String search, int page, int size) {
+    public List<User> findByTenantId(UUID tenantId, UserStatus status, String search, int page, int size, String sort, String dir) {
         String statusStr = status != null ? status.name() : null;
         List<User> all = delegate.findByTenantIdWithFilters(tenantId, statusStr, search)
                 .stream().map(mapper::toDomain).toList();
-        int fromIdx = Math.min(page * size, all.size());
-        int toIdx = Math.min(fromIdx + size, all.size());
-        return all.subList(fromIdx, toIdx);
+
+        Comparator<User> comparator = switch (sort != null ? sort : "fullName") {
+            case "username"  -> Comparator.comparing(User::getUsername,  Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+            case "email"     -> Comparator.comparing(User::getEmail,     Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+            case "status"    -> Comparator.comparing((User u) -> u.getStatus() != null ? u.getStatus().name() : "");
+            case "createdAt" -> Comparator.comparing(User::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()));
+            default          -> Comparator.comparing(User::getFullName,  Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+        };
+        if ("desc".equalsIgnoreCase(dir)) comparator = comparator.reversed();
+
+        List<User> sorted = all.stream().sorted(comparator).toList();
+        int fromIdx = Math.min(page * size, sorted.size());
+        int toIdx = Math.min(fromIdx + size, sorted.size());
+        return sorted.subList(fromIdx, toIdx);
     }
 
     @Override

@@ -260,8 +260,9 @@ public class UserService {
     /** UC-013 — List users */
     @Transactional(readOnly = true)
     public PageResponse<UserResponse> listUsers(UUID tenantId, UserStatus status,
-                                                 String search, int page, int size) {
-        List<User> users = userRepository.findByTenantId(tenantId, status, search, page, size);
+                                                 String search, int page, int size,
+                                                 String sort, String dir) {
+        List<User> users = userRepository.findByTenantId(tenantId, status, search, page, size, sort, dir);
         long total = userRepository.countByTenantId(tenantId, status, search);
         List<UserResponse> content = users.stream()
                 .map(u -> buildUserResponse(u, tenantId))

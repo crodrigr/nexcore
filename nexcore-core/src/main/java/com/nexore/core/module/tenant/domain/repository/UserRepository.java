@@ -27,7 +27,7 @@ public interface UserRepository {
 
     long countByTenantIdAndDeletedAtIsNull(UUID tenantId);
 
-    List<User> findByTenantId(UUID tenantId, UserStatus status, String search, int page, int size);
+    List<User> findByTenantId(UUID tenantId, UserStatus status, String search, int page, int size, String sort, String dir);
 
     long countByTenantId(UUID tenantId, UserStatus status, String search);
 }
