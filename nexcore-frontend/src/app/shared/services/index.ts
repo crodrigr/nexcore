@@ -5,3 +5,4 @@ export * from './profile.service';
 export * from './permission.service';
 export * from './menu.service';
 export * from './activity.service';
+export * from './layout.service';

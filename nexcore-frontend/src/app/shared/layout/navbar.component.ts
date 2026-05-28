@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ThemeToggleComponent } from '../theme/theme-toggle.component';
 import { NotificationComponent } from '../components/notification/notification.component';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
-import { ProfileService, MenuService, MenuItem, User } from '../services';
+import { ProfileService, MenuService, MenuItem, User, LayoutService } from '../services';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -37,13 +37,14 @@ export class NavbarComponent implements OnInit {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private hostRef: ElementRef, 
-    private injector: Injector, 
-    private appRef: ApplicationRef, 
-    private environmentInjector: EnvironmentInjector, 
+    private hostRef: ElementRef,
+    private injector: Injector,
+    private appRef: ApplicationRef,
+    private environmentInjector: EnvironmentInjector,
     private router: Router,
     private profileService: ProfileService,
-    private menuService: MenuService
+    private menuService: MenuService,
+    readonly layout: LayoutService
   ) {
     // Inicializar observables de menús
     this.navbarMenus$ = this.menuService.getNavbarMenus();

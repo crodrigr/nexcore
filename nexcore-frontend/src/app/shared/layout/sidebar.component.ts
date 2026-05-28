@@ -4,7 +4,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { MenuItem, MenuService, ProfileService } from '../services';
+import { MenuItem, MenuService, ProfileService, LayoutService } from '../services';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,7 +17,6 @@ export class SidebarComponent implements OnInit {
   sidebarMenus$: Observable<MenuItem[]>;
   activeRoute: string | null = null;
   expandedGroups: Record<string, boolean> = {};
-  isCollapsed = false;
   private readonly translocoService: TranslocoService;
   private readonly defaultIcon = 'menu';
 
@@ -38,10 +37,15 @@ export class SidebarComponent implements OnInit {
     users: 'users'
   };
 
+  get isCollapsed(): boolean {
+    return this.layout.isCollapsed;
+  }
+
   constructor(
     private readonly menuService: MenuService,
     private readonly profileService: ProfileService,
     private readonly router: Router,
+    readonly layout: LayoutService,
     translocoService: TranslocoService
   ) {
     this.sidebarMenus$ = this.menuService.getSidebarMenus();
@@ -49,16 +53,7 @@ export class SidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    try {
-      const saved = localStorage.getItem('nexcore-sidebar-collapsed');
-      if (saved === 'true') {
-        this.isCollapsed = true;
-        document.body.classList.add('sidebar-collapsed');
-      }
-    } catch (e) {
-      console.warn('[SidebarComponent] Could not read collapsed state from localStorage', e);
-    }
-
+    this.layout.init();
     this.activeRoute = this.normalizeRoute(this.router.url);
 
     this.profileService.loadProfile().subscribe({
@@ -72,20 +67,6 @@ export class SidebarComponent implements OnInit {
       .subscribe(event => {
         this.activeRoute = this.normalizeRoute(event.urlAfterRedirects);
       });
-  }
-
-  toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
-    if (this.isCollapsed) {
-      document.body.classList.add('sidebar-collapsed');
-    } else {
-      document.body.classList.remove('sidebar-collapsed');
-    }
-    try {
-      localStorage.setItem('nexcore-sidebar-collapsed', String(this.isCollapsed));
-    } catch (e) {
-      console.warn('[SidebarComponent] Could not persist collapsed state to localStorage', e);
-    }
   }
 
   isMenuDisabled(menu: MenuItem): boolean {
