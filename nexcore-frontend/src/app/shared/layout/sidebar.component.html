@@ -25,7 +25,7 @@
         </a>
 
         <!-- GROUP -->
-        <div *ngIf="menu.item_type === 'GROUP'" class="sidebar-group" [class.expanded]="isGroupExpanded(menu)">
+        <div *ngIf="menu.item_type === 'GROUP'" class="sidebar-group" [class.expanded]="isGroupExpanded(menu)" [class.has-active]="isGroupActive(menu)">
           <button type="button"
                   class="sidebar-group-toggle"
                   [attr.aria-expanded]="isGroupExpanded(menu)"

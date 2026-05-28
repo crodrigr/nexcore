@@ -368,6 +368,19 @@ body.sidebar-collapsed .sidebar-link.active .icon {
   filter: none;
 }
 
+/* Parent group with active child in collapsed state */
+.sidebar.collapsed .sidebar-group.has-active > .sidebar-group-toggle,
+body.sidebar-collapsed .sidebar-group.has-active > .sidebar-group-toggle {
+  background: rgba(10, 102, 168, 0.10);
+  box-shadow: inset 3px 0 0 0 var(--color-interactive-primary);
+  border-radius: 0 7px 7px 0;
+  color: var(--color-interactive-primary);
+}
+.sidebar.collapsed .sidebar-group.has-active > .sidebar-group-toggle .icon,
+body.sidebar-collapsed .sidebar-group.has-active > .sidebar-group-toggle .icon {
+  opacity: 1;
+}
+
 /* GROUP toggle collapsed: center icon, hide title + chevron */
 .sidebar.collapsed .sidebar-group-toggle,
 body.sidebar-collapsed .sidebar-group-toggle {

@@ -134,6 +134,10 @@ export class SidebarComponent implements OnInit {
     return hasActiveChild;
   }
 
+  isGroupActive(menu: MenuItem): boolean {
+    return (menu.children || []).some(child => this.isMenuActive(child.route));
+  }
+
   isMenuActive(route: string | null): boolean {
     const normalizedRoute = this.normalizeRoute(route);
     if (!normalizedRoute || !this.activeRoute) {
