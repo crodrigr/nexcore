@@ -517,10 +517,9 @@
     },
     "search": {
       "label": "Search",
-      "placeholder": "Filter components..."
+      "placeholder": "Filter by component or element..."
     },
     "actions": {
-      "applyViewAll": "Apply VIEW to all",
       "save": "Save Changes",
       "saving": "Saving..."
     },

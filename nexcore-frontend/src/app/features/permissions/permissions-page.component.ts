@@ -51,7 +51,12 @@ export class PermissionsPageComponent implements OnInit {
     const q = this.searchTerm.toLowerCase().trim();
     if (!q) return this.components;
     return this.components.filter(c =>
-      c.name.toLowerCase().includes(q) || c.route.toLowerCase().includes(q)
+      c.name.toLowerCase().includes(q) ||
+      (c.route ?? '').toLowerCase().includes(q) ||
+      c.elements.some(e =>
+        e.elementKey.toLowerCase().includes(q) ||
+        (e.label ?? '').toLowerCase().includes(q)
+      )
     );
   }
 
@@ -131,16 +136,6 @@ export class PermissionsPageComponent implements OnInit {
     elem.access = event.level;
     elem.dirty = true;
     elem.inherited = false;
-  }
-
-  applyViewToAll(): void {
-    this.components.forEach(c => {
-      c.access = 'view';
-      c.dirty = true;
-      c.elements.forEach(e => {
-        if (e.inherited) e.access = 'view';
-      });
-    });
   }
 
   async saveChanges(): Promise<void> {

@@ -516,10 +516,9 @@
     },
     "search": {
       "label": "Buscar",
-      "placeholder": "Filtrar componentes..."
+      "placeholder": "Filtrar por componente o elemento..."
     },
     "actions": {
-      "applyViewAll": "Aplicar VIEW a todos",
       "save": "Guardar Cambios",
       "saving": "Guardando..."
     },
@@ -531,15 +530,15 @@
       "empty": "Este componente no tiene elementos registrados."
     },
     "table": {
-      "elementKey": "Element Key",
-      "label": "Label",
-      "type": "Type",
-      "accessLevel": "Access Level",
-      "status": "Status"
+      "elementKey": "Clave de elemento",
+      "label": "Etiqueta",
+      "type": "Tipo",
+      "accessLevel": "Nivel de acceso",
+      "status": "Estado"
     },
     "badge": {
-      "inherited": "Inherited",
-      "overridden": "Overridden"
+      "inherited": "Heredado",
+      "overridden": "Personalizado"
     },
     "success": {
       "updated": "Permisos guardados correctamente."

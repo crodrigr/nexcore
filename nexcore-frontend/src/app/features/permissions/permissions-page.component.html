@@ -41,12 +41,6 @@
                  (input)="searchTerm = $any($event.target).value" />
         </div>
         <div class="toolbar-actions module-toolbar-actions">
-          <button class="btn btn-secondary"
-                  type="button"
-                  [disabled]="saving"
-                  (click)="applyViewToAll()">
-            {{ 'permissions.actions.applyViewAll' | transloco }}
-          </button>
           <button class="btn btn-primary"
                   type="button"
                   [disabled]="saving || !hasPendingChanges"
