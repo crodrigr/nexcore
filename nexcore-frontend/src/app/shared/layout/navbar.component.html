@@ -74,29 +74,31 @@
           <ng-container *ngIf="profileMenus$ | async as profileMenus">
             <ng-container *ngFor="let menu of profileMenus">
               <!-- Menú tipo ITEM -->
-              <button *ngIf="menu.item_type === 'ITEM'" 
-                      class="item" 
+              <button *ngIf="menu.item_type === 'ITEM' && menu.access !== 'hidden'"
+                      class="item"
                       type="button"
                       [class.disabled]="isMenuDisabled(menu)"
                       (click)="navigateToMenu(menu); $event.stopPropagation()">
                 <img class="menu-icon" [src]="getIconUrl(menu)" [alt]="getIconName(menu)" aria-hidden="true" (error)="onIconError($event)" />
                 <span class="item-label">{{ getMenuLabel(menu) }}</span>
               </button>
-              
+
               <!-- Menú tipo DIVIDER -->
-              <div *ngIf="menu.item_type === 'DIVIDER'" class="divider"></div>
-              
+              <div *ngIf="menu.item_type === 'DIVIDER' && menu.access !== 'hidden'" class="divider"></div>
+
               <!-- Menú tipo GROUP - mostrar título y sus hijos -->
-              <ng-container *ngIf="menu.item_type === 'GROUP'">
+              <ng-container *ngIf="menu.item_type === 'GROUP' && menu.access !== 'hidden'">
                 <div class="group-title" *ngIf="menu.title">{{ getMenuLabel(menu) }}</div>
-                <button *ngFor="let child of menu.children"
-                        class="item" 
-                        type="button"
-                        [class.disabled]="isMenuDisabled(child)"
-                        (click)="navigateToMenu(child); $event.stopPropagation()">
-                  <img class="menu-icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
-                  <span class="item-label">{{ getMenuLabel(child) }}</span>
-                </button>
+                <ng-container *ngFor="let child of menu.children">
+                  <button *ngIf="child.access !== 'hidden'"
+                          class="item"
+                          type="button"
+                          [class.disabled]="isMenuDisabled(child)"
+                          (click)="navigateToMenu(child); $event.stopPropagation()">
+                    <img class="menu-icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
+                    <span class="item-label">{{ getMenuLabel(child) }}</span>
+                  </button>
+                </ng-container>
               </ng-container>
             </ng-container>
           </ng-container>

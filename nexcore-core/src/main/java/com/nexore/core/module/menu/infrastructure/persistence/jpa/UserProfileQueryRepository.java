@@ -1,6 +1,5 @@
 package com.nexore.core.module.menu.infrastructure.persistence.jpa;
 
-import com.nexore.core.module.menu.infrastructure.persistence.projection.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
@@ -69,6 +68,7 @@ public class UserProfileQueryRepository {
 
         String sql = """
                 SELECT
+                    c.id,
                     c.module_key,
                     c.route,
                     CASE MAX(cp.access)
@@ -91,7 +91,7 @@ public class UserProfileQueryRepository {
                 .getResultList();
 
         return rows.stream()
-                .map(r -> new ComponentAccessRow(str(r[0]), str(r[1]), toInt(r[2])))
+                .map(r -> new ComponentAccessRow(toUUID(r[0]), str(r[1]), str(r[2]), toInt(r[3])))
                 .toList();
     }
 
@@ -107,8 +107,8 @@ public class UserProfileQueryRepository {
                 SELECT
                     ce.element_key,
                     COALESCE(
-                        MAX(CASE ueo.access WHEN 'EXECUTE' THEN 2 WHEN 'VIEW' THEN 1 ELSE 0 END),
-                        MAX(CASE ep.access  WHEN 'EXECUTE' THEN 2 WHEN 'VIEW' THEN 1 ELSE 0 END)
+                        MAX(CASE ueo.access WHEN 'EXECUTE' THEN 2 WHEN 'VIEW' THEN 1 WHEN 'HIDDEN' THEN 0 ELSE NULL END),
+                        MAX(CASE ep.access  WHEN 'EXECUTE' THEN 2 WHEN 'VIEW' THEN 1 WHEN 'HIDDEN' THEN 0 ELSE NULL END)
                     ) AS effective_access
                 FROM nxc_menu.component_elements ce
                 JOIN nxc_menu.element_permissions ep ON ep.element_id = ce.id
@@ -117,6 +117,7 @@ public class UserProfileQueryRepository {
                     AND ueo.user_id = :userId
                     AND (ueo.expires_at IS NULL OR ueo.expires_at > NOW())
                 WHERE ce.component_id = :componentId
+                  AND ce.deleted_at IS NULL
                   AND ep.tenant_id = :tenantId
                   AND ep.role_id::text = ANY(:roleIds)
                 GROUP BY ce.element_key
@@ -155,17 +156,24 @@ public class UserProfileQueryRepository {
                     mi.location,
                     mi.item_type,
                     mi.order_index,
-                    MAX(CASE COALESCE(cp.access, mi.default_access)
+                    MAX(CASE COALESCE(ep_el.access, cp.access, mi.default_access)
                             WHEN 'EXECUTE' THEN 2
                             WHEN 'VIEW'    THEN 1
                             ELSE 0
                         END) AS effective_access
                 FROM nxc_menu.menu_items mi
-                LEFT JOIN nxc_menu.components c ON c.id = mi.component_id AND c.deleted_at IS NULL
                 LEFT JOIN nxc_menu.component_permissions cp
-                    ON cp.component_id = c.id
+                    ON cp.component_id = mi.component_id
                     AND cp.tenant_id = :tenantId
                     AND cp.role_id::text = ANY(:roleIds)
+                LEFT JOIN nxc_menu.component_elements ce
+                    ON ce.component_id = mi.component_id
+                    AND ce.element_key = LOWER(mi.name)
+                    AND ce.deleted_at IS NULL
+                LEFT JOIN nxc_menu.element_permissions ep_el
+                    ON ep_el.element_id = ce.id
+                    AND ep_el.tenant_id = :tenantId
+                    AND ep_el.role_id = cp.role_id
                 WHERE mi.tenant_id = :tenantId
                   AND mi.deleted_at IS NULL
                   AND mi.is_visible = TRUE
@@ -230,7 +238,7 @@ public class UserProfileQueryRepository {
             String fullName, String photoUrl, String status, String tenantStatus,
             String[] roleNames, String[] roleIds) {}
 
-    public record ComponentAccessRow(String moduleKey, String route, int effectiveAccess) {}
+    public record ComponentAccessRow(UUID componentId, String moduleKey, String route, int effectiveAccess) {}
 
     public record ElementAccessRow(String elementKey, int effectiveAccess) {}
 

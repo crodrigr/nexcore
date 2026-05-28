@@ -64,14 +64,11 @@ public class JpaUserProfileRepositoryAdapter implements UserProfileRepository {
         List<ComponentPermission> result = new ArrayList<>();
 
         for (ComponentAccessRow compRow : componentRows) {
-            // Resolve component UUID for element query
-            Optional<UUID> compIdOpt = queryRepository.findComponentId(compRow.moduleKey(), tenantId);
-            List<ElementPermission> elements = compIdOpt
-                    .map(compId -> queryRepository.findElementAccess(compId, tenantId, userId, roleIds)
-                            .stream()
-                            .map(mapper::toElementPermission)
-                            .toList())
-                    .orElse(List.of());
+            List<ElementPermission> elements = queryRepository
+                    .findElementAccess(compRow.componentId(), tenantId, userId, roleIds)
+                    .stream()
+                    .map(mapper::toElementPermission)
+                    .toList();
 
             result.add(mapper.toComponentPermission(compRow, elements));
         }

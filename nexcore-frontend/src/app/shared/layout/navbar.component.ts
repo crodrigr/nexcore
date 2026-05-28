@@ -216,7 +216,7 @@ export class NavbarComponent implements OnInit {
    * @param menu Item del menú
    */
   isMenuDisabled(menu: MenuItem): boolean {
-    return menu.access === 'view';
+    return menu.access === 'view' || menu.access === 'hidden';
   }
 
   getMenuLabel(menu: MenuItem): string {

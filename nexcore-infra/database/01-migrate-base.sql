@@ -600,11 +600,11 @@ BEGIN
         (v_tid_demo, v_role_tenant_admin, v_demo_el_user,     'EXECUTE'::nxc_menu.access_level, v_uid_admin, NOW(), NOW()),
         (v_tid_demo, v_role_tenant_admin, v_demo_el_permisos, 'EXECUTE'::nxc_menu.access_level, v_uid_admin, NOW(), NOW());
 
-    -- EDITOR: EXECUTE en profile elements; HIDDEN en admin elements
+    -- EDITOR: EXECUTE en profile/logout; HIDDEN en settings y admin elements
     INSERT INTO nxc_menu.element_permissions (tenant_id, role_id, element_id, access, created_by, created_at, updated_at)
     VALUES
         (v_tid_demo, v_role_editor, v_demo_el_profile,  'EXECUTE'::nxc_menu.access_level, v_uid_admin, NOW(), NOW()),
-        (v_tid_demo, v_role_editor, v_demo_el_settings, 'EXECUTE'::nxc_menu.access_level, v_uid_admin, NOW(), NOW()),
+        (v_tid_demo, v_role_editor, v_demo_el_settings, 'HIDDEN'::nxc_menu.access_level,  v_uid_admin, NOW(), NOW()),
         (v_tid_demo, v_role_editor, v_demo_el_logout,   'EXECUTE'::nxc_menu.access_level, v_uid_admin, NOW(), NOW()),
         (v_tid_demo, v_role_editor, v_demo_el_user,     'HIDDEN'::nxc_menu.access_level,  v_uid_admin, NOW(), NOW()),
         (v_tid_demo, v_role_editor, v_demo_el_permisos, 'HIDDEN'::nxc_menu.access_level,  v_uid_admin, NOW(), NOW());

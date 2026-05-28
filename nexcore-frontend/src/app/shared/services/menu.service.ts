@@ -27,15 +27,21 @@ export class MenuService {
             .map(item => {
               const children = item.children ? filterRecursive(item.children) : [];
               const matchesLocation = item.location === location;
-              // Keep item if itself matches location or any child matches
-              if ((matchesLocation || (children && children.length > 0)) &&
-                  (item.access === 'execute' || item.access === 'view')) {
-                return { ...item, children } as MenuItem;
+              const hasVisibleChildren = children.length > 0;
+              const isAccessible = item.access === 'execute' || item.access === 'view';
+
+              if (!isAccessible) return null;
+
+              // GROUP solo se incluye si tiene hijos visibles (evita grupos vacíos)
+              if (item.item_type === 'GROUP') {
+                return hasVisibleChildren ? { ...item, children } : null;
               }
-              // If item doesn't match but children matched, we may still expose it
-              if ((children && children.length > 0) && (item.access === 'execute' || item.access === 'view')) {
-                return { ...item, children } as MenuItem;
+
+              // ITEM, DIVIDER, EXTERNAL_LINK: incluir si coincide la ubicación
+              if (matchesLocation || hasVisibleChildren) {
+                return { ...item, children };
               }
+
               return null;
             })
             .filter((i): i is MenuItem => i !== null);
