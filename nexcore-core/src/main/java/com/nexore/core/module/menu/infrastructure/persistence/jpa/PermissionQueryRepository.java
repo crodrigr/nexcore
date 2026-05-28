@@ -23,7 +23,7 @@ public class PermissionQueryRepository {
         List<Object[]> rows = em.createNativeQuery("""
                 SELECT c.id, c.module_key, c.name, c.route, c.description, c.is_system
                 FROM nxc_menu.components c
-                WHERE (c.tenant_id = :tenantId OR c.is_system = TRUE)
+                WHERE c.tenant_id = :tenantId
                   AND c.deleted_at IS NULL
                 ORDER BY c.name
                 """)

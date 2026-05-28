@@ -27,7 +27,7 @@ public class ComponentQueryRepository {
                        (SELECT COUNT(*) FROM nxc_menu.component_elements ce
                         WHERE ce.component_id = c.id AND ce.deleted_at IS NULL) AS element_count
                 FROM nxc_menu.components c
-                WHERE (c.tenant_id = :tenantId OR c.is_system = TRUE)
+                WHERE c.tenant_id = :tenantId
                   AND c.deleted_at IS NULL
                 """);
         if (search != null && !search.isBlank()) {
@@ -55,7 +55,7 @@ public class ComponentQueryRepository {
         StringBuilder sql = new StringBuilder("""
                 SELECT COUNT(*)
                 FROM nxc_menu.components c
-                WHERE (c.tenant_id = :tenantId OR c.is_system = TRUE)
+                WHERE c.tenant_id = :tenantId
                   AND c.deleted_at IS NULL
                 """);
         if (search != null && !search.isBlank()) {
@@ -83,7 +83,7 @@ public class ComponentQueryRepository {
                        (SELECT COUNT(*) FROM nxc_menu.component_elements ce
                         WHERE ce.component_id = c.id AND ce.deleted_at IS NULL) AS element_count
                 FROM nxc_menu.components c
-                WHERE (c.tenant_id = :tenantId OR c.is_system = TRUE)
+                WHERE c.tenant_id = :tenantId
                   AND c.id = :id
                   AND c.deleted_at IS NULL
                 """)
@@ -117,7 +117,7 @@ public class ComponentQueryRepository {
                        ce.label, ce.element_type, ce.deleted_at
                 FROM nxc_menu.component_elements ce
                 JOIN nxc_menu.components c ON c.id = ce.component_id
-                WHERE (c.tenant_id = :tenantId OR c.is_system = TRUE)
+                WHERE c.tenant_id = :tenantId
                   AND ce.id = :elementId
                   AND ce.deleted_at IS NULL
                 """)
