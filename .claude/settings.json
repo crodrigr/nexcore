@@ -3,7 +3,13 @@
     "allow": [
       "Bash(grep -n -A 40 \"-- 14. menu_items\" /home/crodrigr/Documents/Proyectos/nexcore/nexcore-infra/database/schema-nexcore.sql)",
       "Bash(xargs ls)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(npm install *)",
+      "Bash(mkdir -p /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide && cp /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons/*.svg /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide/ && ls /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide/ | wc -l)",
+      "Bash([ -f \"$LUCIDE/$icon.svg\" ])"
+    ],
+    "additionalDirectories": [
+      "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"
     ]
   }
 }

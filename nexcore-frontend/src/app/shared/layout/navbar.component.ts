@@ -217,20 +217,25 @@ export class NavbarComponent implements OnInit {
   private readonly defaultIcon = 'menu';
 
   private readonly iconAliases: Record<string, string> = {
-    'layout-dashboard': 'dashboard',
-    'alert-circle': 'bell',
-    'chart-bar': 'chart-bar',
-    history: 'chart-bar',
-    lock: 'settings',
-    logout: 'close',
-    menu: 'menu',
-    profile: 'profile',
-    radar: 'donut',
-    settings: 'settings',
-    shield: 'settings',
-    user: 'profile',
-    'user-circle': 'profile',
-    users: 'users'
+    'dashboard':        'layout-dashboard',
+    'logout':           'log-out',
+    'close':            'x',
+    'profile':          'user-round',
+    'user-circle':      'user-round',
+    'user':             'user',
+    'users':            'users',
+    'settings':         'settings',
+    'shield':           'shield',
+    'lock':             'lock',
+    'bell':             'bell',
+    'building':         'building',
+    'chart-bar':        'chart-bar',
+    'alert-circle':     'alert-circle',
+    'layout-dashboard': 'layout-dashboard',
+    'history':          'history',
+    'radar':            'radar',
+    'donut':            'donut',
+    'menu':             'menu',
   };
 
   getIconUrl(menu: MenuItem): string {
@@ -243,7 +248,7 @@ export class NavbarComponent implements OnInit {
       return;
     }
 
-    if (img.src.endsWith('/menu.svg')) {
+    if (img.src.endsWith('/lucide/menu.svg')) {
       return;
     }
 
@@ -330,7 +335,7 @@ export class NavbarComponent implements OnInit {
   private buildIconUrl(icon: string | null | undefined): string {
     const normalizedIcon = (icon || this.defaultIcon).trim().toLowerCase().replace(/\.svg$/i, '');
     const aliasedIcon = this.iconAliases[normalizedIcon] || normalizedIcon;
-    return `/assets/icons/${aliasedIcon}.svg`;
+    return `/assets/icons/lucide/${aliasedIcon}.svg`;
   }
 }
 
