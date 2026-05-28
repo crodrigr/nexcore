@@ -16,7 +16,6 @@ import { Observable } from 'rxjs';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
-  isCollapsed = false;
   showNotifications = false;
   showProfile = false;
   notificationAnchor: DOMRect | null = null;
@@ -53,16 +52,6 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    try {
-      const saved = localStorage.getItem('nexcore-sidebar-collapsed');
-      if (saved === 'true') {
-        document.body.classList.add('sidebar-collapsed');
-        this.isCollapsed = true;
-      }
-    } catch (e) {
-      // ignore (e.g., SSR or blocked storage)
-    }
-
     // Initialize language from localStorage or transloco default
     try {
       const lang = (localStorage.getItem('nexcore-lang') || (this.transloco.getActiveLang() as string) || 'en') as string;
@@ -96,21 +85,6 @@ export class NavbarComponent implements OnInit {
     this.subscriptions.push(this.navbarMenus$.subscribe(nm => {
       console.debug('[Navbar] navbarMenus emitted:', nm);
     }));
-  }
-
-  toggleSidebar() {
-    const body = document.body;
-    const collapsed = body.classList.toggle('sidebar-collapsed');
-    this.isCollapsed = !!collapsed;
-    try { localStorage.setItem('nexcore-sidebar-collapsed', String(this.isCollapsed)); } catch(e) {}
-
-    // Also toggle a class on the sidebar element itself for higher-specificity rules
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) {
-      sidebar.classList.toggle('collapsed');
-      if (this.isCollapsed) sidebar.classList.add('collapsed');
-      else sidebar.classList.remove('collapsed');
-    }
   }
 
   toggleNotifications() {

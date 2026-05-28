@@ -1,17 +1,16 @@
 .navbar {
   position: fixed;
   top: 0;
-  left: 0;
+  /* left es controlado desde styles.scss para evitar el scoping de Angular */
   right: 0;
   height: 64px;
-  width: 100%;
   display: flex;
   align-items: center;
   padding: 0 16px;
   background: linear-gradient(180deg, var(--color-bg-secondary), var(--color-surface));
   border-bottom: 1px solid var(--color-border-light);
   box-shadow: none;
-  z-index: 1000;
+  z-index: 200;
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;

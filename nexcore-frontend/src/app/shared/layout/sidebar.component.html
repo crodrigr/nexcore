@@ -1,9 +1,26 @@
-<aside class="sidebar">
-  <!-- Profile removed: avatar and texts intentionally omitted per request -->
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+
+  <!-- Header: brand + collapse toggle -->
+  <div class="sidebar-header">
+    <a routerLink="/dashboard" class="sidebar-brand" [title]="isCollapsed ? 'NexCore' : ''">
+      <div class="brand-mark">N</div>
+      <span class="brand-label">NexCore</span>
+    </a>
+    <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <svg *ngIf="!isCollapsed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      <svg *ngIf="isCollapsed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </button>
+  </div>
 
   <nav class="sidebar-nav">
     <ng-container *ngIf="sidebarMenus$ | async as sidebarMenus">
       <ng-container *ngFor="let menu of sidebarMenus">
+
+        <!-- ITEM -->
         <a *ngIf="menu.item_type === 'ITEM'"
             [routerLink]="getMenuRoute(menu.route)"
            class="sidebar-link"
@@ -12,9 +29,10 @@
             (click)="setActiveMenu(menu.route)"
              [attr.data-tooltip]="getMenuLabel(menu)">
           <img class="icon" [src]="getIconUrl(menu)" [alt]="getIconName(menu)" aria-hidden="true" (error)="onIconError($event)" />
-           <span>{{ getMenuLabel(menu) }}</span>
+          <span class="link-label">{{ getMenuLabel(menu) }}</span>
         </a>
 
+        <!-- GROUP -->
         <div *ngIf="menu.item_type === 'GROUP'" class="sidebar-group" [class.expanded]="isGroupExpanded(menu)">
           <button type="button"
                   class="sidebar-group-toggle"
@@ -25,28 +43,49 @@
               <img class="icon" [src]="getIconUrl(menu)" [alt]="getIconName(menu)" aria-hidden="true" (error)="onIconError($event)" />
               <span class="sidebar-group-title">{{ getMenuLabel(menu) }}</span>
             </span>
-            <span class="sidebar-group-chevron" [class.open]="isGroupExpanded(menu)">▾</span>
+            <span class="sidebar-group-chevron" [class.open]="isGroupExpanded(menu)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </span>
           </button>
 
+          <!-- Flyout for collapsed state (CSS hover) -->
+          <div class="sidebar-group-flyout">
+            <div class="flyout-header">{{ getMenuLabel(menu) }}</div>
+            <a *ngFor="let child of menu.children"
+               [routerLink]="getMenuRoute(child.route)"
+               class="flyout-link"
+               [class.active]="isMenuActive(child.route)"
+               [class.disabled]="isMenuDisabled(child)"
+               (click)="setActiveMenu(child.route)">
+              <img class="icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
+              <span>{{ getMenuLabel(child) }}</span>
+            </a>
+          </div>
+
+          <!-- Children for expanded state -->
           <div class="sidebar-group-children" [class.hidden]="!isGroupExpanded(menu)">
             <a *ngFor="let child of menu.children"
               [routerLink]="getMenuRoute(child.route)"
                class="sidebar-link child-link"
                [class.active]="isMenuActive(child.route)"
                [class.disabled]="isMenuDisabled(child)"
-               (click)="setActiveMenu(child.route)"
-               [attr.data-tooltip]="getMenuLabel(child)">
+               (click)="setActiveMenu(child.route)">
               <img class="icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
               <span>{{ getMenuLabel(child) }}</span>
             </a>
           </div>
         </div>
+
       </ng-container>
     </ng-container>
   </nav>
- <div class="sidebar-footer">
-    <div class="plan-card">   
+
+  <div class="sidebar-footer">
+    <div class="plan-card">
       <div class="small">© 2026 NexCore Enterprise · v0.0.2</div>
     </div>
   </div>
+
 </aside>
