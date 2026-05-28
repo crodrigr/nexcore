@@ -311,20 +311,31 @@
 .sidebar.collapsed,
 body.sidebar-collapsed .sidebar {
   width: 68px;
+  overflow: visible;
 }
 
-/* Header collapsed: N centrada (*ngIf maneja qué se muestra) */
+/* Header collapsed: N centrada, label oculto */
 .sidebar.collapsed .sidebar-header,
 body.sidebar-collapsed .sidebar-header {
   justify-content: center;
   padding: 0;
 }
+.sidebar.collapsed .sidebar-brand,
+body.sidebar-collapsed .sidebar-brand {
+  flex: 0 0 auto;
+  justify-content: center;
+}
+.sidebar.collapsed .brand-label,
+body.sidebar-collapsed .brand-label {
+  display: none;
+}
 
-/* Nav collapsed: center icons */
+/* Nav collapsed: center icons + allow flyouts to escape */
 .sidebar.collapsed .sidebar-nav,
 body.sidebar-collapsed .sidebar-nav {
   padding: 10px 6px 0;
   gap: 2px;
+  overflow: visible;
 }
 
 /* ITEM link collapsed: center icon */
@@ -387,21 +398,24 @@ body.sidebar-collapsed .small {
   display: none;
 }
 
-/* Flyout: shown on hover in collapsed state */
+/* ── Flyout mixin base ─────────────────────────────────────────────────────── */
+.sidebar-group-flyout,
+.sidebar-group-flyout * { box-sizing: border-box; }
+
+/* Flyout GROUP: shown on hover when collapsed */
 .sidebar.collapsed .sidebar-group:hover .sidebar-group-flyout,
 body.sidebar-collapsed .sidebar-group:hover .sidebar-group-flyout {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   position: absolute;
-  left: calc(100% + 8px);
+  left: calc(100% + 6px);
   top: 0;
-  min-width: 200px;
+  min-width: 180px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(2,6,23,0.14);
-  padding: 6px;
+  box-shadow: 0 8px 28px rgba(2,6,23,0.13);
+  padding: 4px;
   z-index: 300;
 }
 
@@ -410,42 +424,38 @@ body.sidebar-collapsed .sidebar-group:hover .sidebar-group-flyout {
   font-weight: 700;
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  padding: 6px 10px 4px;
+  letter-spacing: 0.5px;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 2px;
 }
 
 .flyout-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  display: block;
+  padding: 7px 12px;
   border-radius: 7px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-primary);
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
   text-decoration: none;
-  transition: background 140ms ease, color 140ms ease;
+  transition: background 130ms ease, color 130ms ease;
+  white-space: nowrap;
 }
 .flyout-link:hover {
   background: var(--hover-bg);
-  color: var(--hover-text);
+  color: var(--color-text-primary);
+  font-weight: 500;
 }
 .flyout-link.active {
-  background: var(--color-interactive-primary);
-  color: var(--color-text-inverse);
+  color: var(--color-interactive-primary);
+  font-weight: 600;
 }
 .flyout-link.disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   pointer-events: none;
 }
-.flyout-link .icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  object-fit: contain;
-}
 
-/* Tooltip for ITEM links in collapsed state */
+/* Tooltip ITEM: label popup when collapsed */
 .sidebar.collapsed .sidebar-link[data-tooltip],
 body.sidebar-collapsed .sidebar-link[data-tooltip] {
   position: relative;
@@ -454,21 +464,21 @@ body.sidebar-collapsed .sidebar-link[data-tooltip] {
 body.sidebar-collapsed .sidebar-link[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: calc(100% + 10px);
+  left: calc(100% + 6px);
   top: 50%;
   transform: translateY(-50%) translateX(-4px);
   white-space: nowrap;
-  background: var(--tooltip-bg, var(--color-surface));
-  color: var(--tooltip-text, var(--color-text-primary));
-  padding: 6px 12px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 7px 14px;
   border-radius: 8px;
   border: 1px solid var(--color-border-light);
-  box-shadow: 0 4px 16px rgba(2,6,23,0.12);
-  font-size: 12px;
+  box-shadow: 0 8px 28px rgba(2,6,23,0.13);
+  font-size: 12.5px;
   font-weight: 500;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition: opacity 150ms ease, transform 150ms ease;
   z-index: 300;
 }
 .sidebar.collapsed .sidebar-link[data-tooltip]:hover::after,

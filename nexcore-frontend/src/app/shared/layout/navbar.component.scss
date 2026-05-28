@@ -17,7 +17,31 @@
   will-change: transform;
 }
 
-.navbar-left { flex: 0 0 auto; display:flex; align-items:center; gap:8px; min-width: 0 }
+.navbar-left { flex: 0 0 auto; display:flex; align-items:center; gap:8px; min-width: 0; }
+
+.sidebar-toggle-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.sidebar-toggle-btn:hover {
+  background: var(--hover-bg);
+  color: var(--color-text-primary);
+}
+.sidebar-toggle-btn:focus { outline: none; }
+.sidebar-toggle-btn:focus-visible {
+  outline: 2px solid var(--color-interactive-primary);
+  outline-offset: 2px;
+}
 .brand {
   display:inline-flex;
   align-items:center;
