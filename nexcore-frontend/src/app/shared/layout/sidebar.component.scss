@@ -58,7 +58,7 @@
 
 .brand-label {
   font-weight: 800;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--color-text-primary);
   letter-spacing: -0.3px;
   white-space: nowrap;
@@ -132,7 +132,7 @@
 .sidebar-group-toggle,
 .sidebar-group-title {
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -243,7 +243,7 @@
 .sidebar-group .child-link {
   padding: 7px 10px 7px 10px;
   min-height: 34px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 .sidebar-group .child-link.active {
@@ -408,7 +408,7 @@ body.sidebar-collapsed .sidebar-group:hover .sidebar-group-flyout {
   gap: 10px;
   padding: 8px 10px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--color-text-primary);
   text-decoration: none;
@@ -452,7 +452,7 @@ body.sidebar-collapsed .sidebar-link[data-tooltip]::after {
   border-radius: 8px;
   border: 1px solid var(--color-border-light);
   box-shadow: 0 4px 16px rgba(2,6,23,0.12);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   opacity: 0;
   pointer-events: none;
