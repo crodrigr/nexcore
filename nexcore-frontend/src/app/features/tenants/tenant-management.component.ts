@@ -3,8 +3,6 @@ import { Component, HostListener, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoModule } from '@ngneat/transloco';
 import { firstValueFrom } from 'rxjs';
-import { NavbarComponent } from '../../shared/layout/navbar.component';
-import { SidebarComponent } from '../../shared/layout/sidebar.component';
 import {
   Tenant,
   TenantCreateRequest,
@@ -16,7 +14,7 @@ import {
 @Component({
   selector: 'app-tenant-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, SidebarComponent, TranslocoModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: './tenant-management.component.html',
   styleUrls: ['./tenant-management.component.scss']
 })

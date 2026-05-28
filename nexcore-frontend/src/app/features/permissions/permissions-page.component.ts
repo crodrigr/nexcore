@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule } from '@ngneat/transloco';
 import { firstValueFrom } from 'rxjs';
-import { NavbarComponent } from '../../shared/layout/navbar.component';
-import { SidebarComponent } from '../../shared/layout/sidebar.component';
 import {
   AccessLevel,
   ComponentPermissionState,
@@ -21,8 +19,6 @@ import { ComponentAccordionItemComponent } from './component-accordion-item.comp
     CommonModule,
     FormsModule,
     TranslocoModule,
-    NavbarComponent,
-    SidebarComponent,
     ComponentAccordionItemComponent,
   ],
   templateUrl: './permissions-page.component.html',

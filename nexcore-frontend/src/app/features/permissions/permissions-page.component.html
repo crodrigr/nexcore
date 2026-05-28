@@ -1,85 +1,75 @@
-<app-navbar></app-navbar>
+<main class="content module-content">
 
-<div class="page-wrap module-shell">
-  <div class="layout module-layout">
-    <app-sidebar></app-sidebar>
+  <!-- Cabecera -->
+  <header class="page-header module-header">
+    <div class="module-title-group">
+      <h1 class="module-title">{{ 'permissions.header.title' | transloco }}</h1>
+      <p class="subtitle module-subtitle">{{ 'permissions.header.subtitle' | transloco }}</p>
+    </div>
+  </header>
 
-    <main class="content module-content">
+  <!-- Feedback global -->
+  <section class="feedback module-feedback" *ngIf="errorMessage">
+    <div class="alert module-alert error">{{ errorMessage | transloco }}</div>
+  </section>
 
-      <!-- Cabecera -->
-      <header class="page-header module-header">
-        <div class="module-title-group">
-          <h1 class="module-title">{{ 'permissions.header.title' | transloco }}</h1>
-          <p class="subtitle module-subtitle">{{ 'permissions.header.subtitle' | transloco }}</p>
-        </div>
-      </header>
+  <!-- Selector de rol -->
+  <section class="card module-card role-selector-card">
+    <span class="role-selector-label">{{ 'permissions.roleSelector.label' | transloco }}</span>
+    <select class="role-selector-select"
+            [ngModel]="selectedRoleId"
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onRoleChange($event)">
+      <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
+    </select>
+  </section>
 
-      <!-- Feedback global -->
-      <section class="feedback module-feedback" *ngIf="errorMessage">
-        <div class="alert module-alert error">{{ errorMessage | transloco }}</div>
-      </section>
+  <!-- Toolbar: búsqueda + acciones -->
+  <section class="card module-card toolbar module-toolbar">
+    <div class="search-block">
+      <label for="compSearch">{{ 'permissions.search.label' | transloco }}</label>
+      <input id="compSearch"
+             type="text"
+             [placeholder]="'permissions.search.placeholder' | transloco"
+             [value]="searchTerm"
+             (input)="searchTerm = $any($event.target).value" />
+    </div>
+    <div class="toolbar-actions module-toolbar-actions">
+      <button class="btn btn-primary"
+              type="button"
+              [disabled]="saving || !hasPendingChanges"
+              (click)="saveChanges()">
+        <span *ngIf="saving" class="btn-spinner"></span>
+        {{ saving ? ('permissions.actions.saving' | transloco) : ('permissions.actions.save' | transloco) }}
+      </button>
+    </div>
+  </section>
 
-      <!-- Selector de rol -->
-      <section class="card module-card role-selector-card">
-        <span class="role-selector-label">{{ 'permissions.roleSelector.label' | transloco }}</span>
-        <select class="role-selector-select"
-                [ngModel]="selectedRoleId"
-                [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="onRoleChange($event)">
-          <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
-        </select>
-      </section>
+  <!-- Lista de componentes en acordeón -->
+  <section class="card module-card accordion-card">
+    <div class="loading" *ngIf="loading">{{ 'permissions.list.loading' | transloco }}</div>
 
-      <!-- Toolbar: búsqueda + acciones -->
-      <section class="card module-card toolbar module-toolbar">
-        <div class="search-block">
-          <label for="compSearch">{{ 'permissions.search.label' | transloco }}</label>
-          <input id="compSearch"
-                 type="text"
-                 [placeholder]="'permissions.search.placeholder' | transloco"
-                 [value]="searchTerm"
-                 (input)="searchTerm = $any($event.target).value" />
-        </div>
-        <div class="toolbar-actions module-toolbar-actions">
-          <button class="btn btn-primary"
-                  type="button"
-                  [disabled]="saving || !hasPendingChanges"
-                  (click)="saveChanges()">
-            <span *ngIf="saving" class="btn-spinner"></span>
-            {{ saving ? ('permissions.actions.saving' | transloco) : ('permissions.actions.save' | transloco) }}
-          </button>
-        </div>
-      </section>
+    <ng-container *ngIf="!loading">
+      <div class="empty" *ngIf="!filteredComponents.length">
+        {{ 'permissions.list.empty' | transloco }}
+      </div>
 
-      <!-- Lista de componentes en acordeón -->
-      <section class="card module-card accordion-card">
-        <div class="loading" *ngIf="loading">{{ 'permissions.list.loading' | transloco }}</div>
+      <div class="accordion-list" *ngIf="filteredComponents.length">
+        <app-component-accordion-item
+          *ngFor="let comp of filteredComponents"
+          [component]="comp"
+          (toggleExpand)="toggleAccordion($event)"
+          (accessChange)="onComponentAccessChange($event)"
+          (elementAccessChange)="onElementAccessChange($event)">
+        </app-component-accordion-item>
+      </div>
+    </ng-container>
+  </section>
 
-        <ng-container *ngIf="!loading">
-          <div class="empty" *ngIf="!filteredComponents.length">
-            {{ 'permissions.list.empty' | transloco }}
-          </div>
-
-          <div class="accordion-list" *ngIf="filteredComponents.length">
-            <app-component-accordion-item
-              *ngFor="let comp of filteredComponents"
-              [component]="comp"
-              (toggleExpand)="toggleAccordion($event)"
-              (accessChange)="onComponentAccessChange($event)"
-              (elementAccessChange)="onElementAccessChange($event)">
-            </app-component-accordion-item>
-          </div>
-        </ng-container>
-      </section>
-
-    </main>
-  </div>
-</div>
+</main>
 
 <!-- Toast de éxito -->
 <div class="toast-container" *ngIf="showToast">
   <div class="toast toast-success">
-    <span class="toast-icon">✓</span>
-    <span>{{ toastMessage | transloco }}</span>
-  </div>
-</div>
+<span class="toast-icon">✓</span>
+<span>{{ toastMessage | transloco }}</span>

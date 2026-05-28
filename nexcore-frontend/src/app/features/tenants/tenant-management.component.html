@@ -1,468 +1,460 @@
-<app-navbar></app-navbar>
+<main class="content module-content">
+  <header class="page-header module-header">
+    <div class="module-title-group">
+      <h1 class="module-title">{{ 'tenant.header.title' | transloco }}</h1>
+      <p class="subtitle module-subtitle">{{ 'tenant.header.subtitle' | transloco }}</p>
+    </div>
+  </header>
 
-<div class="page-wrap module-shell">
-  <div class="layout module-layout">
-    <app-sidebar></app-sidebar>
+  <section class="feedback module-feedback" *ngIf="errorMessage || successMessage">
+    <div class="alert module-alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert module-alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  </section>
 
-    <main class="content module-content">
-      <header class="page-header module-header">
-        <div class="module-title-group">
-          <h1 class="module-title">{{ 'tenant.header.title' | transloco }}</h1>
-          <p class="subtitle module-subtitle">{{ 'tenant.header.subtitle' | transloco }}</p>
-        </div>
-      </header>
-
-      <section class="feedback module-feedback" *ngIf="errorMessage || successMessage">
-        <div class="alert module-alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
-        <div class="alert module-alert success" *ngIf="successMessage">{{ successMessage }}</div>
-      </section>
-
-      <section class="card module-card toolbar module-toolbar">
-        <div class="search-block">
-          <label for="tenant-search">{{ 'tenant.search.label' | transloco }}</label>
-          <input
-            id="tenant-search"
-            type="text"
-            [placeholder]="'tenant.search.placeholder' | transloco"
-            [value]="searchTerm"
-            (input)="onSearchChange($any($event.target).value)"
-          />
-        </div>
-        <div class="toolbar-actions module-toolbar-actions">
-          <div class="toolbar-pager" *ngIf="!loading && totalElements > 0">
-            <div class="pager-left">
-              <div class="pager-meta">
-                {{ 'tenant.pager.range' | transloco: { start: pageStart, end: pageEnd, total: totalElements } }}
-              </div>
-              <select id="page-size-select" class="page-size-select" [attr.aria-label]="'tenant.pager.pageSize' | transloco" [ngModel]="size" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onPageSizeChange($event)">
-                <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
-              </select>
-            </div>
-
-            <div class="pager-controls" aria-label="pagination controls">
-              <button
-                class="pager-btn"
-                type="button"
-                [attr.aria-label]="'tenant.pager.first' | transloco"
-                [disabled]="page === 0"
-                (click)="goToFirstPage()">
-                <span class="pager-icon">&laquo;</span>
-              </button>
-              <button
-                class="pager-btn"
-                type="button"
-                [attr.aria-label]="'tenant.pager.previous' | transloco"
-                [disabled]="page === 0"
-                (click)="goToPage(page - 1)">
-                <span class="pager-icon">&lsaquo;</span>
-              </button>
-              <button
-                class="pager-btn"
-                type="button"
-                [attr.aria-label]="'tenant.pager.next' | transloco"
-                [disabled]="page >= totalPages - 1"
-                (click)="goToPage(page + 1)">
-                <span class="pager-icon">&rsaquo;</span>
-              </button>
-              <button
-                class="pager-btn"
-                type="button"
-                [attr.aria-label]="'tenant.pager.last' | transloco"
-                [disabled]="page >= totalPages - 1"
-                (click)="goToLastPage()">
-                <span class="pager-icon">&raquo;</span>
-              </button>
-            </div>
+  <section class="card module-card toolbar module-toolbar">
+    <div class="search-block">
+      <label for="tenant-search">{{ 'tenant.search.label' | transloco }}</label>
+      <input
+        id="tenant-search"
+        type="text"
+        [placeholder]="'tenant.search.placeholder' | transloco"
+        [value]="searchTerm"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+    </div>
+    <div class="toolbar-actions module-toolbar-actions">
+      <div class="toolbar-pager" *ngIf="!loading && totalElements > 0">
+        <div class="pager-left">
+          <div class="pager-meta">
+            {{ 'tenant.pager.range' | transloco: { start: pageStart, end: pageEnd, total: totalElements } }}
           </div>
-          <button class="btn btn-primary" type="button" (click)="openCreateModal()">{{ 'tenant.actions.create' | transloco }}</button>
+          <select id="page-size-select" class="page-size-select" [attr.aria-label]="'tenant.pager.pageSize' | transloco" [ngModel]="size" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onPageSizeChange($event)">
+            <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
+          </select>
         </div>
-      </section>
 
-      <section class="card module-card table-card">
-        <div class="loading" *ngIf="loading">{{ 'tenant.list.loading' | transloco }}</div>
+        <div class="pager-controls" aria-label="pagination controls">
+          <button
+            class="pager-btn"
+            type="button"
+            [attr.aria-label]="'tenant.pager.first' | transloco"
+            [disabled]="page === 0"
+            (click)="goToFirstPage()">
+            <span class="pager-icon">&laquo;</span>
+          </button>
+          <button
+            class="pager-btn"
+            type="button"
+            [attr.aria-label]="'tenant.pager.previous' | transloco"
+            [disabled]="page === 0"
+            (click)="goToPage(page - 1)">
+            <span class="pager-icon">&lsaquo;</span>
+          </button>
+          <button
+            class="pager-btn"
+            type="button"
+            [attr.aria-label]="'tenant.pager.next' | transloco"
+            [disabled]="page >= totalPages - 1"
+            (click)="goToPage(page + 1)">
+            <span class="pager-icon">&rsaquo;</span>
+          </button>
+          <button
+            class="pager-btn"
+            type="button"
+            [attr.aria-label]="'tenant.pager.last' | transloco"
+            [disabled]="page >= totalPages - 1"
+            (click)="goToLastPage()">
+            <span class="pager-icon">&raquo;</span>
+          </button>
+        </div>
+      </div>
+      <button class="btn btn-primary" type="button" (click)="openCreateModal()">{{ 'tenant.actions.create' | transloco }}</button>
+    </div>
+  </section>
 
-        <ng-container *ngIf="!loading">
-          <div class="empty" *ngIf="!filteredTenants.length">
-            {{ 'tenant.list.empty' | transloco }}
-          </div>
+  <section class="card module-card table-card">
+    <div class="loading" *ngIf="loading">{{ 'tenant.list.loading' | transloco }}</div>
 
-          <div class="table-wrap" *ngIf="filteredTenants.length">
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('name')">
-                      {{ 'tenant.table.name' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('name')" [class.desc]="isSortedDesc('name')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('slug')">
-                      {{ 'tenant.table.slug' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('slug')" [class.desc]="isSortedDesc('slug')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('plan')">
-                      {{ 'tenant.table.plan' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('plan')" [class.desc]="isSortedDesc('plan')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('mode')">
-                      {{ 'tenant.table.mode' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('mode')" [class.desc]="isSortedDesc('mode')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('status')">
-                      {{ 'tenant.table.status' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('status')" [class.desc]="isSortedDesc('status')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('timezone')">
-                      {{ 'tenant.table.timezone' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('timezone')" [class.desc]="isSortedDesc('timezone')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" class="sort-btn" (click)="toggleSort('createdAt')">
-                      {{ 'tenant.table.createdAt' | transloco }}
-                      <span class="sort-indicator" [class.asc]="isSortedAsc('createdAt')" [class.desc]="isSortedDesc('createdAt')">
-                        <span class="sort-chevron up">▲</span>
-                        <span class="sort-chevron down">▼</span>
-                      </span>
-                    </button>
-                  </th>
-                  <th>{{ 'tenant.table.actions' | transloco }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let tenant of filteredTenants">
-                  <td>{{ tenant.name }}</td>
-                  <td>{{ tenant.slug }}</td>
-                  <td>{{ tenant.plan }}</td>
-                  <td>{{ tenant.mode }}</td>
-                  <td>
-                    <span class="status-chip" [ngClass]="statusClass(tenant.status)">
-                      {{ tenant.status || ('tenant.table.unknown' | transloco) }}
-                    </span>
-                  </td>
-                  <td>{{ tenant.timezone }}</td>
-                  <td>{{ tenant.createdAt ? (tenant.createdAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
-                  <td>
-                    <div class="actions">
-                      <button class="btn btn-secondary" (click)="openEditModal(tenant)">{{ 'tenant.actions.edit' | transloco }}</button>
-                      <button
-                        class="btn btn-danger"
-                        *ngIf="(tenant.status || '').toUpperCase() !== 'SUSPENDED'"
-                        (click)="openSuspendModal(tenant)">
-                        {{ 'tenant.actions.suspend' | transloco }}
-                      </button>
-                      <button
-                        class="btn btn-success"
-                        *ngIf="(tenant.status || '').toUpperCase() === 'SUSPENDED'"
-                        (click)="openActivateModal(tenant)">
-                        {{ 'tenant.actions.activate' | transloco }}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </ng-container>
-      </section>
+    <ng-container *ngIf="!loading">
+      <div class="empty" *ngIf="!filteredTenants.length">
+        {{ 'tenant.list.empty' | transloco }}
+      </div>
 
-    </main>
-  </div>
-</div>
+      <div class="table-wrap" *ngIf="filteredTenants.length">
+        <table>
+          <thead>
+            <tr>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('name')">
+                  {{ 'tenant.table.name' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('name')" [class.desc]="isSortedDesc('name')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('slug')">
+                  {{ 'tenant.table.slug' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('slug')" [class.desc]="isSortedDesc('slug')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('plan')">
+                  {{ 'tenant.table.plan' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('plan')" [class.desc]="isSortedDesc('plan')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('mode')">
+                  {{ 'tenant.table.mode' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('mode')" [class.desc]="isSortedDesc('mode')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('status')">
+                  {{ 'tenant.table.status' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('status')" [class.desc]="isSortedDesc('status')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('timezone')">
+                  {{ 'tenant.table.timezone' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('timezone')" [class.desc]="isSortedDesc('timezone')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" (click)="toggleSort('createdAt')">
+                  {{ 'tenant.table.createdAt' | transloco }}
+                  <span class="sort-indicator" [class.asc]="isSortedAsc('createdAt')" [class.desc]="isSortedDesc('createdAt')">
+                    <span class="sort-chevron up">▲</span>
+                    <span class="sort-chevron down">▼</span>
+                  </span>
+                </button>
+              </th>
+              <th>{{ 'tenant.table.actions' | transloco }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tenant of filteredTenants">
+              <td>{{ tenant.name }}</td>
+              <td>{{ tenant.slug }}</td>
+              <td>{{ tenant.plan }}</td>
+              <td>{{ tenant.mode }}</td>
+              <td>
+                <span class="status-chip" [ngClass]="statusClass(tenant.status)">
+                  {{ tenant.status || ('tenant.table.unknown' | transloco) }}
+                </span>
+              </td>
+              <td>{{ tenant.timezone }}</td>
+              <td>{{ tenant.createdAt ? (tenant.createdAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-secondary" (click)="openEditModal(tenant)">{{ 'tenant.actions.edit' | transloco }}</button>
+                  <button
+                    class="btn btn-danger"
+                    *ngIf="(tenant.status || '').toUpperCase() !== 'SUSPENDED'"
+                    (click)="openSuspendModal(tenant)">
+                    {{ 'tenant.actions.suspend' | transloco }}
+                  </button>
+                  <button
+                    class="btn btn-success"
+                    *ngIf="(tenant.status || '').toUpperCase() === 'SUSPENDED'"
+                    (click)="openActivateModal(tenant)">
+                    {{ 'tenant.actions.activate' | transloco }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </section>
+
+</main>
 
 <div class="modal-backdrop" *ngIf="showCreateModal">
   <section class="modal modal-xl tenant-form-shell">
-    <header class="modal-header tenant-topbar">
-      <div class="tenant-head">
-        <h2>{{ 'tenant.create.title' | transloco }}</h2>
-        <p>{{ 'tenant.create.description' | transloco }}</p>
+<header class="modal-header tenant-topbar">
+  <div class="tenant-head">
+    <h2>{{ 'tenant.create.title' | transloco }}</h2>
+    <p>{{ 'tenant.create.description' | transloco }}</p>
+  </div>
+  <button class="icon-btn" (click)="closeCreateModal()">X</button>
+</header>
+
+<form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="tenant-form-body">
+  <section class="tenant-form-card">
+    <header class="tenant-section-head">
+      <div class="section-icon blue">CI</div>
+      <div>
+        <h3>{{ 'tenant.sections.company.title' | transloco }}</h3>
+        <p>{{ 'tenant.sections.company.description' | transloco }}</p>
       </div>
-      <button class="icon-btn" (click)="closeCreateModal()">X</button>
     </header>
-
-    <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="tenant-form-body">
-      <section class="tenant-form-card">
-        <header class="tenant-section-head">
-          <div class="section-icon blue">CI</div>
-          <div>
-            <h3>{{ 'tenant.sections.company.title' | transloco }}</h3>
-            <p>{{ 'tenant.sections.company.description' | transloco }}</p>
-          </div>
-        </header>
-        <div class="field-grid two-col">
-          <label>{{ 'tenant.fields.name' | transloco }}
-            <input formControlName="name" [placeholder]="'tenant.placeholders.name' | transloco" />
-          </label>
-          <label>{{ 'tenant.fields.slug' | transloco }}
-            <div class="slug-composite">
-              <span class="slug-prefix">nexcore.io/</span>
-              <input formControlName="slug" [placeholder]="'tenant.placeholders.slug' | transloco" />
-            </div>
-            <small class="error" *ngIf="createForm.controls.slug.touched && createForm.controls.slug.invalid">
-              {{ 'tenant.validation.slug' | transloco }}
-            </small>
-          </label>
-          <label>{{ 'tenant.fields.legalName' | transloco }}
-            <input formControlName="legalName" [placeholder]="'tenant.placeholders.legalName' | transloco" />
-          </label>
-          <label>{{ 'tenant.fields.taxId' | transloco }}
-            <input formControlName="taxId" [placeholder]="'tenant.placeholders.taxId' | transloco" />
-          </label>
+    <div class="field-grid two-col">
+      <label>{{ 'tenant.fields.name' | transloco }}
+        <input formControlName="name" [placeholder]="'tenant.placeholders.name' | transloco" />
+      </label>
+      <label>{{ 'tenant.fields.slug' | transloco }}
+        <div class="slug-composite">
+          <span class="slug-prefix">nexcore.io/</span>
+          <input formControlName="slug" [placeholder]="'tenant.placeholders.slug' | transloco" />
         </div>
-      </section>
+        <small class="error" *ngIf="createForm.controls.slug.touched && createForm.controls.slug.invalid">
+          {{ 'tenant.validation.slug' | transloco }}
+        </small>
+      </label>
+      <label>{{ 'tenant.fields.legalName' | transloco }}
+        <input formControlName="legalName" [placeholder]="'tenant.placeholders.legalName' | transloco" />
+      </label>
+      <label>{{ 'tenant.fields.taxId' | transloco }}
+        <input formControlName="taxId" [placeholder]="'tenant.placeholders.taxId' | transloco" />
+      </label>
+    </div>
+  </section>
 
-      <section class="tenant-form-card">
-        <header class="tenant-section-head">
-          <div class="section-icon sky">RL</div>
-          <div>
-            <h3>{{ 'tenant.sections.regional.title' | transloco }}</h3>
-            <p>{{ 'tenant.sections.regional.description' | transloco }}</p>
-          </div>
-        </header>
-        <div class="field-grid two-col">
-          <label>{{ 'tenant.fields.timezone' | transloco }}
-            <select formControlName="timezone">
-              <option value="America/Bogota">(UTC-05:00) America/Bogota</option>
-              <option value="UTC">(UTC+00:00) UTC</option>
-            </select>
-          </label>
-          <label>{{ 'tenant.fields.locale' | transloco }}
-            <select formControlName="locale">
-              <option value="es-CO">Spanish (Colombia) / es-CO</option>
-              <option value="en-US">English (United States) / en-US</option>
-            </select>
-          </label>
-          <label>{{ 'tenant.fields.dateFormat' | transloco }}
-            <select formControlName="dateFormat">
-              <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-              <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            </select>
-          </label>
-          <label>{{ 'tenant.fields.currency' | transloco }}
-            <select formControlName="currency">
-              <option value="COP">COP ($) - Colombian Peso</option>
-              <option value="USD">USD ($) - US Dollar</option>
-            </select>
-          </label>
-        </div>
-      </section>
+  <section class="tenant-form-card">
+    <header class="tenant-section-head">
+      <div class="section-icon sky">RL</div>
+      <div>
+        <h3>{{ 'tenant.sections.regional.title' | transloco }}</h3>
+        <p>{{ 'tenant.sections.regional.description' | transloco }}</p>
+      </div>
+    </header>
+    <div class="field-grid two-col">
+      <label>{{ 'tenant.fields.timezone' | transloco }}
+        <select formControlName="timezone">
+          <option value="America/Bogota">(UTC-05:00) America/Bogota</option>
+          <option value="UTC">(UTC+00:00) UTC</option>
+        </select>
+      </label>
+      <label>{{ 'tenant.fields.locale' | transloco }}
+        <select formControlName="locale">
+          <option value="es-CO">Spanish (Colombia) / es-CO</option>
+          <option value="en-US">English (United States) / en-US</option>
+        </select>
+      </label>
+      <label>{{ 'tenant.fields.dateFormat' | transloco }}
+        <select formControlName="dateFormat">
+          <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+          <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+        </select>
+      </label>
+      <label>{{ 'tenant.fields.currency' | transloco }}
+        <select formControlName="currency">
+          <option value="COP">COP ($) - Colombian Peso</option>
+          <option value="USD">USD ($) - US Dollar</option>
+        </select>
+      </label>
+    </div>
+  </section>
 
-      <section class="tenant-form-card">
-        <header class="tenant-section-head">
-          <div class="section-icon peach">PD</div>
-          <div>
-            <h3>{{ 'tenant.sections.plan.title' | transloco }}</h3>
-            <p>{{ 'tenant.sections.plan.description' | transloco }}</p>
-          </div>
-        </header>
-        <div class="field-grid two-col">
-          <label>{{ 'tenant.fields.plan' | transloco }}
-            <select formControlName="plan">
-              <option *ngFor="let plan of planOptions" [value]="plan">{{ plan }}</option>
-            </select>
-          </label>
-          <label>{{ 'tenant.fields.mode' | transloco }}
-            <select formControlName="mode">
-              <option *ngFor="let mode of modeOptions" [value]="mode">{{ mode }}</option>
-            </select>
-          </label>
-        </div>
-      </section>
+  <section class="tenant-form-card">
+    <header class="tenant-section-head">
+      <div class="section-icon peach">PD</div>
+      <div>
+        <h3>{{ 'tenant.sections.plan.title' | transloco }}</h3>
+        <p>{{ 'tenant.sections.plan.description' | transloco }}</p>
+      </div>
+    </header>
+    <div class="field-grid two-col">
+      <label>{{ 'tenant.fields.plan' | transloco }}
+        <select formControlName="plan">
+          <option *ngFor="let plan of planOptions" [value]="plan">{{ plan }}</option>
+        </select>
+      </label>
+      <label>{{ 'tenant.fields.mode' | transloco }}
+        <select formControlName="mode">
+          <option *ngFor="let mode of modeOptions" [value]="mode">{{ mode }}</option>
+        </select>
+      </label>
+    </div>
+  </section>
 
-      <div class="tenant-form-footer-gap" aria-hidden="true"></div>
-      <footer class="tenant-form-footer">
-        <div class="footer-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
-          <button type="submit" class="btn btn-primary" [disabled]="submitting">{{ submitting ? ('tenant.actions.creating' | transloco) : ('tenant.actions.create' | transloco) }}</button>
-        </div>
-      </footer>
-    </form>
+  <div class="tenant-form-footer-gap" aria-hidden="true"></div>
+  <footer class="tenant-form-footer">
+    <div class="footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="submitting">{{ submitting ? ('tenant.actions.creating' | transloco) : ('tenant.actions.create' | transloco) }}</button>
+    </div>
+  </footer>
+</form>
   </section>
 </div>
 
 <div class="modal-backdrop" *ngIf="showEditModal">
   <section class="modal modal-xl tenant-form-shell">
-    <header class="modal-header tenant-topbar">
-      <div class="tenant-head">
-        <h2>{{ 'tenant.edit.title' | transloco }}</h2>
-        <p>{{ 'tenant.edit.description' | transloco }}</p>
+<header class="modal-header tenant-topbar">
+  <div class="tenant-head">
+    <h2>{{ 'tenant.edit.title' | transloco }}</h2>
+    <p>{{ 'tenant.edit.description' | transloco }}</p>
+  </div>
+  <button class="icon-btn" (click)="closeEditModal()">X</button>
+</header>
+
+<form [formGroup]="updateForm" (ngSubmit)="requestUpdateConfirmation()" class="tenant-form-body">
+  <section class="tenant-form-card">
+    <header class="tenant-section-head">
+      <div class="section-icon blue">CI</div>
+      <div>
+        <h3>{{ 'tenant.sections.company.title' | transloco }}</h3>
+        <p>{{ 'tenant.edit.companyDescription' | transloco }}</p>
       </div>
-      <button class="icon-btn" (click)="closeEditModal()">X</button>
     </header>
+    <div class="field-grid two-col">
+      <label>{{ 'tenant.fields.name' | transloco }}
+        <input formControlName="name" />
+      </label>
+      <label>{{ 'tenant.fields.legalName' | transloco }}
+        <input formControlName="legalName" />
+      </label>
+    </div>
+  </section>
 
-    <form [formGroup]="updateForm" (ngSubmit)="requestUpdateConfirmation()" class="tenant-form-body">
-      <section class="tenant-form-card">
-        <header class="tenant-section-head">
-          <div class="section-icon blue">CI</div>
-          <div>
-            <h3>{{ 'tenant.sections.company.title' | transloco }}</h3>
-            <p>{{ 'tenant.edit.companyDescription' | transloco }}</p>
-          </div>
-        </header>
-        <div class="field-grid two-col">
-          <label>{{ 'tenant.fields.name' | transloco }}
-            <input formControlName="name" />
-          </label>
-          <label>{{ 'tenant.fields.legalName' | transloco }}
-            <input formControlName="legalName" />
-          </label>
-        </div>
-      </section>
+  <section class="tenant-form-card">
+    <header class="tenant-section-head">
+      <div class="section-icon sky">RL</div>
+      <div>
+        <h3>{{ 'tenant.sections.regional.title' | transloco }}</h3>
+        <p>{{ 'tenant.edit.regionalDescription' | transloco }}</p>
+      </div>
+    </header>
+    <div class="field-grid two-col">
+      <label>{{ 'tenant.fields.timezone' | transloco }}
+        <input formControlName="timezone" />
+      </label>
+      <label>{{ 'tenant.fields.locale' | transloco }}
+        <input formControlName="locale" />
+      </label>
+    </div>
+  </section>
 
-      <section class="tenant-form-card">
-        <header class="tenant-section-head">
-          <div class="section-icon sky">RL</div>
-          <div>
-            <h3>{{ 'tenant.sections.regional.title' | transloco }}</h3>
-            <p>{{ 'tenant.edit.regionalDescription' | transloco }}</p>
-          </div>
-        </header>
-        <div class="field-grid two-col">
-          <label>{{ 'tenant.fields.timezone' | transloco }}
-            <input formControlName="timezone" />
-          </label>
-          <label>{{ 'tenant.fields.locale' | transloco }}
-            <input formControlName="locale" />
-          </label>
-        </div>
-      </section>
+  <section class="tenant-form-card">
+    <header class="tenant-section-head">
+      <div class="section-icon peach">SP</div>
+      <div>
+        <h3>{{ 'tenant.sections.security.title' | transloco }}</h3>
+        <p>{{ 'tenant.sections.security.description' | transloco }}</p>
+      </div>
+    </header>
+    <div class="field-grid two-col">
+      <label>{{ 'tenant.fields.mfaRequired' | transloco }}
+        <select formControlName="mfaRequired">
+          <option [ngValue]="false">{{ 'tenant.common.no' | transloco }}</option>
+          <option [ngValue]="true">{{ 'tenant.common.yes' | transloco }}</option>
+        </select>
+      </label>
+      <label>{{ 'tenant.fields.sessionTimeoutMinutes' | transloco }}
+        <input type="number" formControlName="sessionTimeoutMinutes" />
+      </label>
+      <label>{{ 'tenant.fields.maxLoginAttempts' | transloco }}
+        <input type="number" formControlName="maxLoginAttempts" />
+      </label>
+      <label>{{ 'tenant.fields.passwordMinLength' | transloco }}
+        <input type="number" formControlName="passwordMinLength" />
+      </label>
+      <label>{{ 'tenant.fields.passwordRequiresUpper' | transloco }}
+        <select formControlName="passwordRequiresUpper">
+          <option [ngValue]="true">{{ 'tenant.common.yes' | transloco }}</option>
+          <option [ngValue]="false">{{ 'tenant.common.no' | transloco }}</option>
+        </select>
+      </label>
+      <label>{{ 'tenant.fields.passwordRequiresSpecial' | transloco }}
+        <select formControlName="passwordRequiresSpecial">
+          <option [ngValue]="true">{{ 'tenant.common.yes' | transloco }}</option>
+          <option [ngValue]="false">{{ 'tenant.common.no' | transloco }}</option>
+        </select>
+      </label>
+    </div>
+  </section>
 
-      <section class="tenant-form-card">
-        <header class="tenant-section-head">
-          <div class="section-icon peach">SP</div>
-          <div>
-            <h3>{{ 'tenant.sections.security.title' | transloco }}</h3>
-            <p>{{ 'tenant.sections.security.description' | transloco }}</p>
-          </div>
-        </header>
-        <div class="field-grid two-col">
-          <label>{{ 'tenant.fields.mfaRequired' | transloco }}
-            <select formControlName="mfaRequired">
-              <option [ngValue]="false">{{ 'tenant.common.no' | transloco }}</option>
-              <option [ngValue]="true">{{ 'tenant.common.yes' | transloco }}</option>
-            </select>
-          </label>
-          <label>{{ 'tenant.fields.sessionTimeoutMinutes' | transloco }}
-            <input type="number" formControlName="sessionTimeoutMinutes" />
-          </label>
-          <label>{{ 'tenant.fields.maxLoginAttempts' | transloco }}
-            <input type="number" formControlName="maxLoginAttempts" />
-          </label>
-          <label>{{ 'tenant.fields.passwordMinLength' | transloco }}
-            <input type="number" formControlName="passwordMinLength" />
-          </label>
-          <label>{{ 'tenant.fields.passwordRequiresUpper' | transloco }}
-            <select formControlName="passwordRequiresUpper">
-              <option [ngValue]="true">{{ 'tenant.common.yes' | transloco }}</option>
-              <option [ngValue]="false">{{ 'tenant.common.no' | transloco }}</option>
-            </select>
-          </label>
-          <label>{{ 'tenant.fields.passwordRequiresSpecial' | transloco }}
-            <select formControlName="passwordRequiresSpecial">
-              <option [ngValue]="true">{{ 'tenant.common.yes' | transloco }}</option>
-              <option [ngValue]="false">{{ 'tenant.common.no' | transloco }}</option>
-            </select>
-          </label>
-        </div>
-      </section>
-
-      <div class="tenant-form-footer-gap" aria-hidden="true"></div>
-      <footer class="tenant-form-footer">
-        <div class="footer-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
-          <button type="submit" class="btn btn-primary" [disabled]="submitting">{{ 'tenant.actions.reviewChanges' | transloco }}</button>
-        </div>
-      </footer>
-    </form>
+  <div class="tenant-form-footer-gap" aria-hidden="true"></div>
+  <footer class="tenant-form-footer">
+    <div class="footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeEditModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="submitting">{{ 'tenant.actions.reviewChanges' | transloco }}</button>
+    </div>
+  </footer>
+</form>
   </section>
 </div>
 
 <div class="modal-backdrop" *ngIf="showUpdateConfirmModal">
   <section class="modal">
-    <header class="modal-header">
-      <h2>{{ 'tenant.confirm.title' | transloco }}</h2>
-    </header>
-    <div class="modal-body">
-      <p>{{ 'tenant.confirm.message' | transloco }}</p>
-      <div class="impact" *ngIf="updateImpactSummary.length">
-        <h4>{{ 'tenant.confirm.impactTitle' | transloco }}</h4>
-        <ul>
-          <li *ngFor="let impact of updateImpactSummary">{{ impact }}</li>
-        </ul>
-      </div>
-    </div>
-    <footer class="modal-actions">
-      <button class="btn btn-secondary" (click)="showUpdateConfirmModal = false">{{ 'tenant.actions.back' | transloco }}</button>
-      <button class="btn btn-primary" [disabled]="submitting" (click)="confirmUpdate()">{{ submitting ? ('tenant.actions.saving' | transloco) : ('tenant.actions.confirmUpdate' | transloco) }}</button>
-    </footer>
+<header class="modal-header">
+  <h2>{{ 'tenant.confirm.title' | transloco }}</h2>
+</header>
+<div class="modal-body">
+  <p>{{ 'tenant.confirm.message' | transloco }}</p>
+  <div class="impact" *ngIf="updateImpactSummary.length">
+    <h4>{{ 'tenant.confirm.impactTitle' | transloco }}</h4>
+    <ul>
+      <li *ngFor="let impact of updateImpactSummary">{{ impact }}</li>
+    </ul>
+  </div>
+</div>
+<footer class="modal-actions">
+  <button class="btn btn-secondary" (click)="showUpdateConfirmModal = false">{{ 'tenant.actions.back' | transloco }}</button>
+  <button class="btn btn-primary" [disabled]="submitting" (click)="confirmUpdate()">{{ submitting ? ('tenant.actions.saving' | transloco) : ('tenant.actions.confirmUpdate' | transloco) }}</button>
+</footer>
   </section>
 </div>
 
 <div class="modal-backdrop" *ngIf="showSuspendModal">
   <section class="modal">
-    <header class="modal-header danger-header">
-      <h2>{{ 'tenant.suspend.title' | transloco }}</h2>
-    </header>
-    <div class="modal-body">
-      <p>
-        {{ 'tenant.suspend.message' | transloco }} <strong>{{ selectedTenant?.name }}</strong>.
-        {{ 'tenant.suspend.warning' | transloco }}
-      </p>
-      <label>{{ 'tenant.suspend.typeToConfirm' | transloco }} <strong>{{ 'tenant.suspend.keyword' | transloco }}</strong> {{ 'tenant.suspend.toConfirm' | transloco }}
-        <input [value]="suspendConfirmText" (input)="suspendConfirmText = $any($event.target).value" />
-      </label>
-    </div>
-    <footer class="modal-actions">
-      <button class="btn btn-secondary" (click)="closeSuspendModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
-      <button class="btn btn-danger" [disabled]="suspendConfirmText !== 'SUSPEND' || submitting" (click)="confirmSuspend()">
-        {{ submitting ? ('tenant.actions.suspending' | transloco) : ('tenant.actions.suspend' | transloco) }}
-      </button>
-    </footer>
+<header class="modal-header danger-header">
+  <h2>{{ 'tenant.suspend.title' | transloco }}</h2>
+</header>
+<div class="modal-body">
+  <p>
+    {{ 'tenant.suspend.message' | transloco }} <strong>{{ selectedTenant?.name }}</strong>.
+    {{ 'tenant.suspend.warning' | transloco }}
+  </p>
+  <label>{{ 'tenant.suspend.typeToConfirm' | transloco }} <strong>{{ 'tenant.suspend.keyword' | transloco }}</strong> {{ 'tenant.suspend.toConfirm' | transloco }}
+    <input [value]="suspendConfirmText" (input)="suspendConfirmText = $any($event.target).value" />
+  </label>
+</div>
+<footer class="modal-actions">
+  <button class="btn btn-secondary" (click)="closeSuspendModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
+  <button class="btn btn-danger" [disabled]="suspendConfirmText !== 'SUSPEND' || submitting" (click)="confirmSuspend()">
+    {{ submitting ? ('tenant.actions.suspending' | transloco) : ('tenant.actions.suspend' | transloco) }}
+  </button>
+</footer>
   </section>
 </div>
 
 <div class="modal-backdrop" *ngIf="showActivateModal">
   <section class="modal">
-    <header class="modal-header">
-      <h2>{{ 'tenant.activate.title' | transloco }}</h2>
-    </header>
-    <div class="modal-body">
-      <p>
-        {{ 'tenant.activate.message' | transloco }} <strong>{{ selectedTenant?.name }}</strong>.
-      </p>
-    </div>
-    <footer class="modal-actions">
-      <button class="btn btn-secondary" (click)="closeActivateModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
-      <button class="btn btn-success" [disabled]="submitting" (click)="confirmActivate()">
-        {{ submitting ? ('tenant.actions.activating' | transloco) : ('tenant.actions.activate' | transloco) }}
-      </button>
-    </footer>
+<header class="modal-header">
+  <h2>{{ 'tenant.activate.title' | transloco }}</h2>
+</header>
+<div class="modal-body">
+  <p>
+    {{ 'tenant.activate.message' | transloco }} <strong>{{ selectedTenant?.name }}</strong>.
+  </p>
+</div>
+<footer class="modal-actions">
+  <button class="btn btn-secondary" (click)="closeActivateModal()">{{ 'tenant.actions.cancel' | transloco }}</button>
+  <button class="btn btn-success" [disabled]="submitting" (click)="confirmActivate()">
+    {{ submitting ? ('tenant.actions.activating' | transloco) : ('tenant.actions.activate' | transloco) }}
+  </button>
+</footer>
   </section>
 </div>

@@ -1,15 +1,13 @@
 import { Component, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule } from '@ngneat/transloco';
-import { NavbarComponent } from '../../shared/layout/navbar.component';
-import { SidebarComponent } from '../../shared/layout/sidebar.component';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/service/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SidebarComponent, TranslocoModule],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })

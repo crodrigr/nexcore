@@ -4,8 +4,6 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { TranslocoModule } from '@ngneat/transloco';
 import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { NavbarComponent } from '../../shared/layout/navbar.component';
-import { SidebarComponent } from '../../shared/layout/sidebar.component';
 import {
   UserService,
   UserRecord,
@@ -19,7 +17,7 @@ type ActiveTab = 'users' | 'invitations' | 'roles';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, SidebarComponent, TranslocoModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.scss']
 })

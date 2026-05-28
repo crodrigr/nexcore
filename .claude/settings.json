@@ -6,7 +6,8 @@
       "Bash(git restore *)",
       "Bash(npm install *)",
       "Bash(mkdir -p /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide && cp /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons/*.svg /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide/ && ls /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide/ | wc -l)",
-      "Bash([ -f \"$LUCIDE/$icon.svg\" ])"
+      "Bash([ -f \"$LUCIDE/$icon.svg\" ])",
+      "Bash(grep -n \"page-wrap\\\\|</div>$\" /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/app/features/dashboard/dashboard.component.html)"
     ],
     "additionalDirectories": [
       "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"

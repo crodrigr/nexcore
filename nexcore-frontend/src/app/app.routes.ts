@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LayoutShellComponent } from './shared/layout/layout-shell.component';
 
 export const routes: Routes = [
   {
@@ -7,38 +8,49 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
-    title: 'Dashboard'
-  },
-  {
-    path: 'tenants',
-    loadComponent: () =>
-      import('./features/tenants/tenant-management.component').then(m => m.TenantManagementComponent),
-    title: 'Tenant Management'
-  },
-  {
-    path: 'users',
-    loadComponent: () =>
-      import('./features/users/user-management.component').then(m => m.UserManagementComponent),
-    title: 'Usuarios & Roles'
-  },
-  {
-    path: 'permissions',
-    loadComponent: () =>
-      import('./features/permissions/permissions-page.component').then(m => m.PermissionsPageComponent),
-    title: 'Permisos de Componentes'
-  },
-  {
-    path: 'tenant-management',
-    redirectTo: 'tenants',
-    pathMatch: 'full'
-  },
-  {
-    path: 'identity-access',
-    redirectTo: 'tenants',
-    pathMatch: 'full'
+    path: '',
+    component: LayoutShellComponent,
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        title: 'Dashboard'
+      },
+      {
+        path: 'tenants',
+        loadComponent: () =>
+          import('./features/tenants/tenant-management.component').then(m => m.TenantManagementComponent),
+        title: 'Tenant Management'
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/users/user-management.component').then(m => m.UserManagementComponent),
+        title: 'Usuarios & Roles'
+      },
+      {
+        path: 'permissions',
+        loadComponent: () =>
+          import('./features/permissions/permissions-page.component').then(m => m.PermissionsPageComponent),
+        title: 'Permisos de Componentes'
+      },
+      {
+        path: 'crm',
+        loadChildren: () => import('./features/crm/crm.module').then(m => m.CrmModule),
+        title: 'CRM'
+      },
+      {
+        path: 'tenant-management',
+        redirectTo: 'tenants',
+        pathMatch: 'full'
+      },
+      {
+        path: 'identity-access',
+        redirectTo: 'tenants',
+        pathMatch: 'full'
+      },
+    ]
   },
   {
     path: 'reset-password',
@@ -86,9 +98,4 @@ export const routes: Routes = [
       }
     ]
   },
-  {
-    path: 'crm',
-    loadChildren: () => import('./features/crm/crm.module').then(m => m.CrmModule),
-    title: 'CRM'
-  }
 ];

@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
-import { SidebarComponent } from '../../shared/layout/sidebar.component';
-import { NavbarComponent } from '../../shared/layout/navbar.component';
 
 @Component({
   selector: 'app-crm',
   standalone: true,
-  imports: [SidebarComponent, NavbarComponent],
+  imports: [],
   templateUrl: './crm.component.html',
   styleUrls: ['./crm.component.scss']
 })
