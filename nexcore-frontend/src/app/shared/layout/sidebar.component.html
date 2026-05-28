@@ -86,12 +86,11 @@
           <div class="sidebar-group-children" [class.hidden]="!isGroupExpanded(menu)">
             <a *ngFor="let child of menu.children"
               [routerLink]="getMenuRoute(child.route)"
-               class="sidebar-link child-link"
+               class="child-link"
                [class.active]="isMenuActive(child.route)"
                [class.disabled]="isMenuDisabled(child)"
                (click)="setActiveMenu(child.route)">
-              <img class="icon" [src]="getIconUrl(child)" [alt]="getIconName(child)" aria-hidden="true" (error)="onIconError($event)" />
-              <span>{{ getMenuLabel(child) }}</span>
+              {{ getMenuLabel(child) }}
             </a>
           </div>
         </div>

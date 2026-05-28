@@ -231,25 +231,38 @@
 .sidebar-group-children {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin: 2px 0 0 12px;
-  padding: 4px 6px 4px 8px;
-  border-radius: 8px;
+  gap: 1px;
+  margin: 2px 0 4px 16px;
+  padding: 2px 0;
   border-left: 2px solid var(--color-border-light);
-  overflow: hidden;
 }
 .sidebar-group-children.hidden { display: none; }
 
-.sidebar-group .child-link {
-  padding: 7px 10px 7px 10px;
-  min-height: 34px;
+.child-link {
+  display: block;
+  padding: 6px 10px 6px 14px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: 0 6px 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 130ms ease, color 130ms ease;
 }
-.sidebar-group .child-link.active {
-  background: var(--color-interactive-primary);
-  color: var(--color-text-inverse);
-  box-shadow: var(--shadow-sm);
+.child-link:hover {
+  background: var(--hover-bg);
+  color: var(--color-text-primary);
+}
+.child-link.active {
+  background: rgba(10, 102, 168, 0.10);
+  color: var(--color-interactive-primary);
+  font-weight: 600;
+}
+.child-link.disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* ── GROUP flyout (collapsed state hover popup) ────────────────────────────── */
