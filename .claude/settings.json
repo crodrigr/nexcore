@@ -8,7 +8,9 @@
       "Bash(mkdir -p /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide && cp /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons/*.svg /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide/ && ls /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/assets/icons/lucide/ | wc -l)",
       "Bash([ -f \"$LUCIDE/$icon.svg\" ])",
       "Bash(grep -n \"page-wrap\\\\|</div>$\" /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/app/features/dashboard/dashboard.component.html)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(ls /home/crodrigr/Documents/Proyectos/nexcore/.claude/ 2>/dev/null && ls /home/crodrigr/.claude/commands/ 2>/dev/null)",
+      "Read(//home/crodrigr/.claude/**)"
     ],
     "additionalDirectories": [
       "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"
