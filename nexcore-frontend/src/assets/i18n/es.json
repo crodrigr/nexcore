@@ -43,7 +43,10 @@
     "projects": "Proyectos",
     "monitoring": "Monitoreo",
     "administration": "Administracion",
+    "user": "Usuarios",
     "users": "Usuarios",
+    "permisos": "Permisos",
+    "permissions": "Permisos",
     "roles": "Roles",
     "menus": "Menus",
     "audit": "Auditoria"

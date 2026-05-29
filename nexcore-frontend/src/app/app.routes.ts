@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutShellComponent } from './shared/layout/layout-shell.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { permissionGuard } from './shared/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -12,33 +13,39 @@ export const routes: Routes = [
     path: '',
     component: LayoutShellComponent,
     canActivate: [authGuard],
+    canActivateChild: [permissionGuard],
     children: [
       {
         path: 'dashboard',
+        canMatch: [authGuard],
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
         title: 'Dashboard'
       },
       {
         path: 'tenants',
+        canMatch: [authGuard],
         loadComponent: () =>
           import('./features/tenants/tenant-management.component').then(m => m.TenantManagementComponent),
         title: 'Tenant Management'
       },
       {
         path: 'users',
+        canMatch: [authGuard],
         loadComponent: () =>
           import('./features/users/user-management.component').then(m => m.UserManagementComponent),
         title: 'Usuarios & Roles'
       },
       {
         path: 'permissions',
+        canMatch: [authGuard],
         loadComponent: () =>
           import('./features/permissions/permissions-page.component').then(m => m.PermissionsPageComponent),
         title: 'Permisos de Componentes'
       },
       {
         path: 'crm',
+        canMatch: [authGuard],
         loadChildren: () => import('./features/crm/crm.module').then(m => m.CrmModule),
         title: 'CRM'
       },

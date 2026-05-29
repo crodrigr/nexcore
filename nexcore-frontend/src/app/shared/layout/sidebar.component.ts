@@ -79,18 +79,9 @@ export class SidebarComponent implements OnInit {
   }
 
   getMenuLabel(menu: MenuItem): string {
-    const directTranslation = this.translateIfAvailable(menu.title);
-    if (directTranslation) {
-      return directTranslation;
-    }
-
-    const fallbackKey = `menu.${this.normalizeMenuKey(menu.name)}`;
-    const fallbackTranslation = this.translateIfAvailable(fallbackKey);
-    if (fallbackTranslation) {
-      return fallbackTranslation;
-    }
-
-    return menu.title || menu.name;
+    const key = `menu.${this.normalizeMenuKey(menu.name)}`;
+    const translated = this.translateIfAvailable(key);
+    return translated ?? menu.title ?? menu.name;
   }
 
   getIconName(menu: MenuItem): string {
