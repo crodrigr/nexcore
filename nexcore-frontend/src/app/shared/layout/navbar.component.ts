@@ -62,29 +62,16 @@ export class NavbarComponent implements OnInit {
     
     // Cargar perfil desde el backend (o localStorage si ya existe)
     this.profileService.loadProfile().subscribe({
-      next: (profile) => {
-        if (profile) {
-          console.log('[NavbarComponent] Profile loaded successfully');
-        }
-      },
       error: (err) => {
         console.error('[NavbarComponent] Error loading profile:', err);
       }
     });
-    
+
     // Suscribirse a cambios de usuario para actualizar iniciales
     this.subscriptions.push(this.user$.subscribe(user => {
       if (user) {
         this.userInitials = this.profileService.getUserInitials();
       }
-    }));
-
-    // Debug: log emitted menu lists so we can inspect payloads
-    this.subscriptions.push(this.profileMenus$.subscribe(pm => {
-      console.debug('[Navbar] profileMenus emitted:', pm);
-    }));
-    this.subscriptions.push(this.navbarMenus$.subscribe(nm => {
-      console.debug('[Navbar] navbarMenus emitted:', nm);
     }));
   }
 
@@ -258,21 +245,14 @@ export class NavbarComponent implements OnInit {
   private openNotificationOverlay() {
     if (this.notifRef) return;
     try {
-      console.log('opening notification overlay, anchor=', this.notificationAnchor);
       const compRef = createComponent(NotificationComponent, { environmentInjector: this.environmentInjector, elementInjector: this.injector });
-      // pass anchor
       compRef.instance.anchor = this.notificationAnchor;
-      // run change detection so host bindings are computed
       compRef.changeDetectorRef.detectChanges();
-      // attach to app and body
       this.appRef.attachView(compRef.hostView);
       const domEl = (compRef.location && (compRef.location.nativeElement as HTMLElement)) || null;
       if (domEl) {
         domEl.style.zIndex = '1200';
         document.body.appendChild(domEl);
-        console.log('notification appended to body', domEl);
-      } else {
-        console.warn('notification created but domEl is null');
       }
       this.notifRef = compRef;
       this.fallbackInline = false;
