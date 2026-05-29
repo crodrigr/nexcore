@@ -4,13 +4,12 @@
             [attr.aria-label]="layout.isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
       <img src="/assets/icons/lucide/menu.svg" width="18" height="18" aria-hidden="true" alt="menu" />
     </button>
-  </div>
-  <div class="navbar-center">
     <div class="search">
       <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" fill="none"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.5"></line></svg>
-      <input placeholder="Search..." />
+      <input placeholder="Search for something..." />
     </div>
   </div>
+  <div class="navbar-center"></div>
 
   <div class="navbar-right">
     <button #notifBtn class="icon-btn notification-btn" aria-label="Notifications" aria-haspopup="true" data-count="3" (click)="toggleNotifications(); $event.stopPropagation()">

@@ -8,39 +8,40 @@ Nunca inventes estructuras nuevas; extiende las existentes.
 
 ## 1. Estructura HTML de página
 
+> **IMPORTANTE — Layout Shell:** El navbar y el sidebar son gestionados globalmente por
+> `LayoutShellComponent` (`src/app/shared/layout/layout-shell.component.ts`). Los componentes
+> de feature **NO** deben incluir `<app-navbar>`, `<app-sidebar>`, ni los divs `.page-wrap`/
+> `.layout`. El template de cada feature empieza directamente con `<main class="content ...">`.
+> Incluir esos wrappers causa errores de compilación `NG5002: Unexpected closing tag`.
+
 ```html
-<app-navbar></app-navbar>
+<!-- El template del feature empieza aquí directamente. -->
+<!-- La clase "content" aplica margin-left:247px desde styles.scss global,   -->
+<!-- dejando espacio para el sidebar fijo. SIN ella el contenido queda bajo el sidebar. -->
+<main class="content module-content">
 
-<div class="page-wrap module-shell">
-  <div class="layout module-layout">
-    <app-sidebar></app-sidebar>
+  <!-- Cabecera -->
+  <header class="page-header module-header">
+    <div class="module-title-group">
+      <h1 class="module-title">{{ 'module.header.title' | transloco }}</h1>
+      <p class="subtitle module-subtitle">{{ 'module.header.subtitle' | transloco }}</p>
+    </div>
+  </header>
 
-    <main class="content module-content">
+  <!-- Tabs (si aplica) -->
+  <div class="tabs"> ... </div>
 
-      <!-- Cabecera -->
-      <header class="page-header module-header">
-        <div class="module-title-group">
-          <h1 class="module-title">{{ 'module.header.title' | transloco }}</h1>
-          <p class="subtitle module-subtitle">{{ 'module.header.subtitle' | transloco }}</p>
-        </div>
-      </header>
+  <!-- Toolbar (búsqueda + filtros + paginador + acciones) -->
+  <section class="card module-card toolbar module-toolbar"> ... </section>
 
-      <!-- Tabs (si aplica) -->
-      <div class="tabs"> ... </div>
+  <!-- Tabla -->
+  <section class="card module-card table-card"> ... </section>
 
-      <!-- Toolbar (búsqueda + filtros + paginador + acciones) -->
-      <section class="card module-card toolbar module-toolbar"> ... </section>
+</main>
 
-      <!-- Tabla -->
-      <section class="card module-card table-card"> ... </section>
+<!-- Modales al final del template, fuera del <main> -->
 
-    </main>
-  </div>
-</div>
-
-<!-- Modales al final del template -->
-
-<!-- Toast (siempre al final, fuera del page-wrap) -->
+<!-- Toast (siempre al final) -->
 <div class="toast-container" *ngIf="showToast">
   <div class="toast" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
     <span class="toast-icon">{{ toastType === 'success' ? '✓' : '✕' }}</span>
@@ -577,3 +578,5 @@ Agregar al final del archivo `.component.scss` del módulo:
 8. **El tab activo** controla qué sección cargar; solo mostrar errores del tab activo.
 9. **`loadRoles().then(() => loadInvitations())`** cuando una lista depende de un catálogo.
 10. **`box-sizing: border-box`** en `.btn` para que border no rompa alturas.
+11. **Layout Shell** — `<app-navbar>`, `<app-sidebar>`, `.page-wrap`, `.layout` **nunca** dentro de un feature component. Si aparecen en el template, eliminarlos junto con sus closing tags `</div>`. El único wrapper raíz válido es `<main class="content module-content">`.
+12. **Ruta en `app.routes.ts`** — toda ruta que deba mostrar sidebar+navbar debe declararse dentro del bloque `children` del `LayoutShellComponent`. Las rutas de auth van en el nivel raíz.
