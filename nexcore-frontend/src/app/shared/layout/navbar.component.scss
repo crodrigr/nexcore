@@ -212,7 +212,7 @@
   font-size: 14px;
 }
 
-.navbar-right { display:flex; align-items:center; gap:16px; flex:0 0 auto; position:relative }
+.navbar-right { display:flex; align-items:center; gap:4px; flex:0 0 auto; position:relative }
 
 .lang-select {
   appearance: none;
@@ -239,20 +239,27 @@
 
 /* Compact globe button visible in header */
 .lang-compact {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:36px;
-  height:36px;
-  font-size:16px;
-  padding:0;
-  border-radius:8px;
-  border:1px solid var(--color-border-light);
-  background:var(--lang-compact-bg, var(--color-bg-primary));
-  cursor:pointer;
-  position:relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  padding: 0;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background 140ms ease;
 }
 .lang-compact:hover { background: var(--hover-bg) }
+.lang-icon {
+  display: block;
+  color: var(--color-text-secondary);
+  transition: color 140ms ease;
+}
+.lang-compact:hover .lang-icon { color: var(--color-text-primary); }
 
 /* Popup for compact language button */
 .lang-compact-wrap { position: relative; display:inline-block }
@@ -283,10 +290,23 @@
 .icon-btn { background:transparent; border:none; padding:4px; cursor:pointer }
 .icon { width:16px; height:16px; color:var(--color-text-secondary) }
 
-/* Notification bell improvements */
-.notification-btn { position: relative; padding:8px; border-radius:8px }
-.notification-btn .icon { width:22px; height:22px; color:var(--color-text-tertiary); transition: color 150ms ease }
-.notification-btn:hover { background: var(--hover-bg); border-radius:8px }
+/* Notification bell */
+.notification-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+.notification-btn .icon { width:18px; height:18px; color:var(--color-text-secondary); transition: color 150ms ease }
+.notification-btn:hover { background: var(--hover-bg) }
 .notification-btn:hover .icon { color:var(--color-text-primary) }
 .notification-btn:active { transform: translateY(1px) }
 

@@ -1,28 +1,26 @@
 .theme-toggle {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-2);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  &:hover {
-    background: var(--color-surface-hover);
-    border-color: var(--color-border-medium);
-  }
-  
-  &:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus);
-  }
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 140ms ease;
+
+  &:hover { background: var(--hover-bg); }
+  &:focus { outline: none; }
+  &:focus-visible { outline: 2px solid var(--color-interactive-primary); outline-offset: 2px; }
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
-  color: var(--color-text-primary);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
   stroke-width: 2;
+  transition: color 140ms ease;
+
+  .theme-toggle:hover & { color: var(--color-text-primary); }
 }
