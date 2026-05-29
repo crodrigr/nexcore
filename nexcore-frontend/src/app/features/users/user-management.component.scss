@@ -534,13 +534,13 @@ tbody tr:hover { background: var(--color-surface-hover, #fafafa); }
   font-size: .88rem;
   font-weight: 800;
   letter-spacing: .06em;
-  color: #0f172a;
-  border: 1px solid rgba(15,23,42,.08);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-light);
   flex-shrink: 0;
 }
 
-.section-icon.blue { background: #dbeafe; }
-.section-icon.sky  { background: #e0f2fe; }
+.section-icon.blue { background: rgba(33, 150, 243, 0.15); }
+.section-icon.sky  { background: rgba(2, 179, 228, 0.15); }
 
 .user-section-head h3 { margin: 0; font-size: 1rem; line-height: 1.2; }
 .user-section-head p  { margin: 4px 0 0; color: var(--color-text-secondary); font-size: .9rem; }
@@ -565,6 +565,7 @@ label {
   border-radius: 11px;
   border: 1px solid var(--color-border-light);
   background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   padding: 0 14px;
   font-size: .96rem;
 }

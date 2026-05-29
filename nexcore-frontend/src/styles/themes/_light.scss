@@ -1,6 +1,8 @@
 @use '../tokens/colors' as *;
 
 [data-theme='light'] {
+  color-scheme: light;
+
   // Backgrounds
   --color-bg-primary: #{$color-neutral-0};
   --color-bg-secondary: #{$color-neutral-50};

@@ -1,6 +1,8 @@
 @use '../tokens/colors' as *;
 
 [data-theme='dark'] {
+  color-scheme: dark;
+
   // Backgrounds (invertidos)
   --color-bg-primary: #{$color-neutral-900};
   --color-bg-secondary: #{$color-neutral-800};
