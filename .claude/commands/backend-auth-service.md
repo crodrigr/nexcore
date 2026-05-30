@@ -20,29 +20,65 @@ integrar con nuevos proveedores.
 
 ---
 
-## Arquitectura Hexagonal
+## Arquitectura Hexagonal (DDD)
 
 ```
 com.nexore.auth/
 ├── application/
 │   ├── dto/
-│   │   ├── request/       ← DTOs de entrada
-│   │   └── response/      ← DTOs de salida
-│   └── service/           ← Casos de uso (AuthService, PasswordService)
+│   │   ├── request/       ← DTOs de entrada (LoginRequest, VerifyOtpRequest, etc.)
+│   │   └── response/      ← DTOs de salida (SessionResponse, ChallengeResponse, etc.)
+│   ├── port/
+│   │   ├── in/            ← Interfaces de casos de uso (puertos de entrada)
+│   │   │                     AuthUseCase, PasswordUseCase
+│   │   └── out/           ← Puertos de salida no-persistencia
+│   │                         EmailPort, NexcoreCoreClientPort
+│   └── service/           ← Implementaciones de casos de uso
+│                             AuthService, PasswordService
 ├── domain/
 │   ├── exception/         ← Excepciones de dominio (RuntimeException)
-│   ├── model/             ← Entidades de dominio (POJO con Lombok)
-│   ├── repository/        ← Interfaces (sin Spring)
-│   └── service/           ← Servicios de dominio (TokenService, OtpService, etc.)
+│   ├── model/             ← Entidades de dominio (POJO puro con Lombok)
+│   ├── repository/        ← Puertos de salida de persistencia (sin Spring)
+│   │                         UserRepository, SessionRepository, etc.
+│   └── service/           ← Servicios de dominio (lógica de negocio pura)
+│                             TokenService, OtpService, BruteForceProtection
 └── infrastructure/
-    ├── client/            ← Clientes HTTP externos (NexcoreCoreClientImpl)
-    ├── config/            ← SecurityConfig, WebConfig, RestTemplateConfig
-    ├── email/             ← EmailServiceImpl (JavaMailSender + Thymeleaf)
-    └── persistence/
-        ├── adapter/       ← Jpa*RepositoryAdapter
-        ├── entity/        ← JPA entities
-        └── jpa/           ← SpringData interfaces
+    ├── client/            ← NexcoreCoreClientImpl (implementa NexcoreCoreClientPort)
+    ├── config/
+    │   └── security/      ← AuthApiPolicyInterceptor, RoleApiPolicyCacheService,
+    │                         PolicyCacheLoader, RoleApiPolicyDto
+    ├── email/             ← EmailServiceImpl (implementa EmailPort)
+    │                         JavaMailSender + Thymeleaf
+    ├── persistence/
+    │   ├── adapter/       ← Implementaciones de domain/repository/*
+    │   │                     *RepositoryAdapter
+    │   ├── entity/        ← JPA entities (@Entity, @Table)
+    │   ├── jpa/           ← Spring Data interfaces (*JpaRepository)
+    │   └── mapper/        ← EntityMapper (dominio ↔ entity)
+    └── web/
+        ├── AuthController.java
+        ├── PasswordController.java
+        └── GlobalExceptionHandler.java
 ```
+
+### Reglas de capas
+
+| Capa | Puede depender de | No puede depender de |
+|---|---|---|
+| `domain` | Nadie | `application`, `infrastructure` |
+| `application` | `domain` | `infrastructure` |
+| `infrastructure` | `application`, `domain` | Nadie |
+
+### Clasificación de servicios de dominio vs puertos de salida
+
+| Clase | Tipo | Ubicación correcta |
+|---|---|---|
+| `TokenService` | Servicio de dominio (lógica JWT pura) | `domain/service/` |
+| `OtpService` | Servicio de dominio (hashing + validación OTP) | `domain/service/` |
+| `BruteForceProtection` | Servicio de dominio (conteo de intentos) | `domain/service/` |
+| `EmailPort` | Puerto de salida (infra externa) | `application/port/out/` |
+| `NexcoreCoreClientPort` | Puerto de salida (HTTP externo) | `application/port/out/` |
+| `*Repository` | Puerto de salida (persistencia) | `domain/repository/` |
 
 ---
 
@@ -186,15 +222,29 @@ Instant expiresAt, Instant usedAt, Instant createdAt
 
 ---
 
-## Servicios de dominio (interfaces)
+## Servicios e interfaces
+
+### Servicios de dominio — `domain/service/` (lógica pura, sin dependencias de infra)
 
 | Interface | Responsabilidad |
 |---|---|
 | `TokenService` | Generar/validar JWT (access, challenge, refresh string) |
 | `OtpService` | Crear, validar y hashear OTPs |
-| `EmailService` | Enviar emails (OTP, password reset, password changed) |
 | `BruteForceProtection` | Control de intentos fallidos por usuario/IP |
-| `NexcoreCoreClient` | Obtener perfil del usuario desde nexcore-core |
+
+### Puertos de salida — `application/port/out/` (contratos hacia infraestructura externa)
+
+| Interface | Responsabilidad | Implementación en infra |
+|---|---|---|
+| `EmailPort` | Enviar emails (OTP, password reset, etc.) | `EmailServiceImpl` |
+| `NexcoreCoreClientPort` | Obtener perfil del usuario desde nexcore-core | `NexcoreCoreClientImpl` |
+
+### Puertos de entrada — `application/port/in/` (contratos de casos de uso)
+
+| Interface | Responsabilidad | Implementación |
+|---|---|---|
+| `AuthUseCase` | Login, verify-otp, refresh, logout | `AuthService` |
+| `PasswordUseCase` | Change password, reset request, reset confirm | `PasswordService` |
 
 ---
 
@@ -216,9 +266,8 @@ PasswordMismatchException
 TooManyPasswordResetAttemptsException
 ```
 
-No hay `GlobalExceptionHandler` genérico definido en auth-service; Spring Security
-maneja los 401/403 automáticamente. Agregar `@RestControllerAdvice` si se necesita
-mapear las excepciones de dominio a respuestas JSON consistentes.
+`GlobalExceptionHandler` (`@RestControllerAdvice`) vive en `infrastructure/web/` y mapea
+las excepciones de dominio a `ApiError` JSON. Spring Security maneja los 401/403 por separado.
 
 ---
 
@@ -239,12 +288,14 @@ nexcore.core.endpoints.user-profile: /api/v1/me/profile
 ## Agregar un nuevo flujo de autenticación
 
 1. **Dominio:** crear modelo en `domain/model/`, interfaz de repositorio en `domain/repository/`.
-2. **Servicio de dominio:** si se necesita lógica nueva (ej. TOTP), crear interfaz en `domain/service/` e implementación en `infrastructure/`.
-3. **Application service:** crear o extender `AuthService`/`PasswordService` en `application/service/`.
-4. **DTOs:** crear request/response en `application/dto/`.
-5. **Controller:** agregar endpoint en `infrastructure/web/` o crear nuevo controller.
-6. **Persistencia:** entity → JpaRepository → Adapter.
-7. **Email (si aplica):** template HTML en `src/main/resources/templates/email/` + método en `EmailService`.
+2. **Servicio de dominio** (solo si es lógica de negocio pura): crear interfaz en `domain/service/` e implementación en `infrastructure/`.
+3. **Puerto de salida** (si requiere infra externa — HTTP, email, etc.): crear interfaz en `application/port/out/` e implementación en `infrastructure/`.
+4. **Puerto de entrada:** agregar método a la interfaz en `application/port/in/` (`AuthUseCase` o `PasswordUseCase`).
+5. **Application service:** implementar el caso de uso en `application/service/`.
+6. **DTOs:** crear request/response en `application/dto/`.
+7. **Controller:** agregar endpoint en `infrastructure/web/`.
+8. **Persistencia:** entity → JpaRepository → Adapter implementa `domain/repository/`.
+9. **Email (si aplica):** template HTML en `src/main/resources/templates/email/` + método en `EmailPort`.
 
 ---
 

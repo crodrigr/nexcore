@@ -12,7 +12,9 @@
       "Bash(ls /home/crodrigr/Documents/Proyectos/nexcore/.claude/ 2>/dev/null && ls /home/crodrigr/.claude/commands/ 2>/dev/null)",
       "Read(//home/crodrigr/.claude/**)",
       "Bash(git checkout *)",
-      "Bash(./gradlew dependencies *)"
+      "Bash(./gradlew dependencies *)",
+      "Bash(find /home/crodrigr -name \"backend-auth-service*\" 2>/dev/null; find /home/crodrigr/Documents/Proyectos/nexcore -name \"*.md\" 2>/dev/null | head -20)",
+      "Read(//home/crodrigr/**)"
     ],
     "additionalDirectories": [
       "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"

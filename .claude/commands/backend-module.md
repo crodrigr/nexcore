@@ -17,20 +17,47 @@ module/<nombre>/
 │   │   ├── request/       ← DTOs de entrada (validados con jakarta.validation)
 │   │   └── response/      ← DTOs de salida
 │   ├── mapper/            ← Mappers domain ↔ DTO (manual, @Component, sin MapStruct)
-│   └── service/           ← Casos de uso (@Service, @Transactional)
+│   ├── port/
+│   │   ├── in/            ← Interfaces de casos de uso (puertos de entrada)
+│   │   │                     <Entidad>UseCase
+│   │   └── out/           ← Puertos de salida no-persistencia
+│   │                         EmailPort, <ClienteExterno>Port
+│   └── service/           ← Implementaciones de casos de uso (@Service, @Transactional)
 ├── domain/
+│   ├── exception/         ← Excepciones de dominio (extienden BusinessException)
 │   ├── model/             ← Entidades de dominio (POJO con Lombok @Builder)
-│   └── repository/        ← Interfaces de repositorio (sin Spring)
+│   └── repository/        ← Interfaces de repositorio — puertos de salida (sin Spring)
 └── infrastructure/
+    ├── email/             ← EmailServiceImpl (solo si el módulo envía emails)
     ├── persistence/
+    │   ├── adapter/       ← Jpa<X>RepositoryAdapter — implementa domain/repository
     │   ├── entity/        ← JPA entities (@Entity, @Table con schema)
     │   ├── jpa/           ← SpringData interfaces (extends JpaRepository)
-    │   ├── mapper/        ← Mappers entity ↔ domain (@Component)
-    │   └── Jpa<X>RepositoryAdapter.java  ← implementa la interfaz de dominio
+    │   └── mapper/        ← Mappers entity ↔ domain (@Component)
     └── web/
         ├── <X>Controller.java
-        └── GlobalExceptionHandler.java  ← solo si es el primer módulo del paquete
+        └── GlobalExceptionHandler.java  ← solo en el módulo tenant (compartido)
 ```
+
+### Reglas de capas
+
+| Capa | Puede depender de | No puede depender de |
+|---|---|---|
+| `domain` | Nadie | `application`, `infrastructure` |
+| `application` | `domain` | `infrastructure` |
+| `infrastructure` | `application`, `domain` | Nadie |
+
+### Tipos en cada capa
+
+| Tipo | Capa | Paquete |
+|---|---|---|
+| Lógica de negocio pura | `domain/service/` | Solo si no depende de infra |
+| Excepción de negocio | `domain/exception/` | Extiende `BusinessException` |
+| Puerto de entrada | `application/port/in/` | Interfaz del caso de uso |
+| Puerto de salida (email, HTTP externo) | `application/port/out/` | Interfaz hacia infra |
+| Puerto de salida (persistencia) | `domain/repository/` | Interfaz sin Spring |
+| Caso de uso | `application/service/` | Implementa el puerto de entrada |
+| Respuesta HTTP de error | `infrastructure/web/` | `ApiError` — solo en tenant/web |
 
 ---
 
@@ -85,7 +112,63 @@ public interface <Entidad>Repository {
 
 ---
 
-## 4. JPA Entity
+## 4. Excepciones de dominio
+
+Las excepciones de negocio del módulo van en `domain/exception/` y usan los factory methods de `BusinessException` (ubicado en `com.nexore.core.module.tenant.domain.exception`):
+
+```java
+// Usar en application/service — nunca lanzar excepciones genéricas de Java
+throw BusinessException.<moduloNotFound>();
+throw BusinessException.<moduloNameDuplicated>(name);
+```
+
+`BusinessException` es el único punto de error de negocio. `ApiError` (respuesta HTTP) vive exclusivamente en `infrastructure/web/` del módulo `tenant` y es compartido por todos los módulos a través del `GlobalExceptionHandler`.
+
+---
+
+## 5. Puerto de entrada — `application/port/in/`
+
+Definir la interfaz del caso de uso para que el controller dependa de la abstracción, no de la implementación:
+
+```java
+package com.nexore.core.module.<nombre>.application.port.in;
+
+import com.nexore.core.module.<nombre>.application.dto.request.<Entidad>CreateRequest;
+import com.nexore.core.module.<nombre>.application.dto.response.<Entidad>Response;
+import com.nexore.core.module.tenant.application.dto.response.PageResponse;
+import java.util.UUID;
+
+public interface <Entidad>UseCase {
+    <Entidad>Response create(UUID tenantId, <Entidad>CreateRequest request);
+    <Entidad>Response getById(UUID tenantId, UUID id);
+    PageResponse<<Entidad>Response> list(UUID tenantId, int page, int size);
+    void delete(UUID tenantId, UUID id);
+}
+```
+
+El `<Entidad>Service` en `application/service/` implementa esta interfaz.
+El `<Entidad>Controller` inyecta `<Entidad>UseCase`, no `<Entidad>Service`.
+
+---
+
+## 6. Puerto de salida externo — `application/port/out/` (solo si aplica)
+
+Si el módulo necesita enviar emails u llamar a un servicio externo:
+
+```java
+package com.nexore.core.module.<nombre>.application.port.out;
+
+public interface EmailPort {
+    void sendWelcomeEmail(String to, String name);
+    // métodos específicos del módulo
+}
+```
+
+La implementación (`EmailServiceImpl`) vive en `infrastructure/email/` e inyecta `JavaMailSender`.
+
+---
+
+## 7. JPA Entity
 
 ```java
 package com.nexore.core.module.<nombre>.infrastructure.persistence.entity;
@@ -148,7 +231,7 @@ public class <Entidad>JpaEntity {
 
 ---
 
-## 5. SpringData JPA Repository
+## 8. SpringData JPA Repository
 
 ```java
 package com.nexore.core.module.<nombre>.infrastructure.persistence.jpa;
@@ -170,10 +253,10 @@ public interface SpringData<Entidad>Repository extends JpaRepository<<Entidad>Jp
 
 ---
 
-## 6. Adapter (implementa repositorio de dominio)
+## 9. Adapter (implementa repositorio de dominio)
 
 ```java
-package com.nexore.core.module.<nombre>.infrastructure.persistence;
+package com.nexore.core.module.<nombre>.infrastructure.persistence.adapter;
 
 import com.nexore.core.module.<nombre>.domain.model.<Entidad>;
 import com.nexore.core.module.<nombre>.domain.repository.<Entidad>Repository;
@@ -220,7 +303,7 @@ public class Jpa<Entidad>RepositoryAdapter implements <Entidad>Repository {
 
 ---
 
-## 7. Persistence Mapper
+## 10. Persistence Mapper
 
 ```java
 package com.nexore.core.module.<nombre>.infrastructure.persistence.mapper;
@@ -258,7 +341,7 @@ public class <Entidad>PersistenceMapper {
 
 ---
 
-## 8. Application Service
+## 11. Application Service
 
 ```java
 package com.nexore.core.module.<nombre>.application.service;
@@ -266,10 +349,11 @@ package com.nexore.core.module.<nombre>.application.service;
 import com.nexore.core.module.<nombre>.application.dto.request.<Entidad>CreateRequest;
 import com.nexore.core.module.<nombre>.application.dto.response.<Entidad>Response;
 import com.nexore.core.module.<nombre>.application.mapper.<Entidad>Mapper;
+import com.nexore.core.module.<nombre>.application.port.in.<Entidad>UseCase;
 import com.nexore.core.module.<nombre>.domain.model.<Entidad>;
 import com.nexore.core.module.<nombre>.domain.repository.<Entidad>Repository;
 import com.nexore.core.module.tenant.application.dto.response.PageResponse;
-import com.nexore.core.module.tenant.application.exception.BusinessException;
+import com.nexore.core.module.tenant.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -279,7 +363,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class <Entidad>Service {
+public class <Entidad>Service implements <Entidad>UseCase {
 
     private final <Entidad>Repository repository;
     private final <Entidad>Mapper mapper;
@@ -326,7 +410,7 @@ public class <Entidad>Service {
 
 ---
 
-## 9. Application Mapper (DTO ↔ Domain)
+## 12. Application Mapper (DTO ↔ Domain)
 
 ```java
 package com.nexore.core.module.<nombre>.application.mapper;
@@ -364,7 +448,7 @@ public class <Entidad>Mapper {
 
 ---
 
-## 10. DTOs
+## 13. DTOs
 
 ### Request
 
@@ -405,14 +489,14 @@ public class <Entidad>Response {
 
 ---
 
-## 11. Controller REST
+## 14. Controller REST
 
 ```java
 package com.nexore.core.module.<nombre>.infrastructure.web;
 
 import com.nexore.core.module.<nombre>.application.dto.request.<Entidad>CreateRequest;
 import com.nexore.core.module.<nombre>.application.dto.response.<Entidad>Response;
-import com.nexore.core.module.<nombre>.application.service.<Entidad>Service;
+import com.nexore.core.module.<nombre>.application.port.in.<Entidad>UseCase;
 import com.nexore.core.module.tenant.application.dto.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -433,7 +517,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class <Entidad>Controller {
 
-    private final <Entidad>Service service;
+    private final <Entidad>UseCase service;
 
     /** GET /api/v1/<recurso> */
     @GetMapping
@@ -488,7 +572,7 @@ public class <Entidad>Controller {
 
 ---
 
-## 12. BusinessException — añadir errores del módulo
+## 15. BusinessException — añadir errores del módulo
 
 Agregar los factory methods al `BusinessException.java` existente en
 `com.nexore.core.module.tenant.application.exception`:
@@ -510,7 +594,7 @@ public static BusinessException <moduloNameDuplicated>(String name) {
 
 ---
 
-## 13. Convenciones generales
+## 16. Convenciones generales
 
 | Tema | Regla |
 |---|---|
