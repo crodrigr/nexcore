@@ -12,6 +12,76 @@
 --   nxc_menu es para navegación y visibilidad de UI (component_permissions,
 --   menu_items, etc.), que es una capa distinta.
 --
+-- =============================================================================
+-- DECISIONES DE DISEÑO
+-- =============================================================================
+--
+-- 1. POR QUÉ role_name (TEXT) y no role_id (UUID)
+-- ─────────────────────────────────────────────────
+--   Los roles TENANT_ADMIN, EDITOR y VIEWER se crean automáticamente por
+--   trigger en cada INSERT de tenant. Cada tenant tiene su propio UUID para
+--   el mismo rol semántico:
+--
+--     Tenant A → TENANT_ADMIN UUID: aaa-111
+--     Tenant B → TENANT_ADMIN UUID: bbb-222
+--
+--   Usar role_id requeriría una fila por tenant. Usar role_name cubre todos
+--   los tenants con una sola política. Es coherente con nxc_tenant.roles.name
+--   como clave de negocio.
+--
+-- 2. POR QUÉ SIN tenant_id (políticas globales)
+-- ──────────────────────────────────────────────
+--   Las políticas de API definen el contrato de seguridad de la PLATAFORMA,
+--   no de cada tenant. Que un TENANT_ADMIN pueda llamar a PATCH /api/*/users/*
+--   es igual en todos los tenants — la diferenciación de datos entre tenants
+--   ocurre en otras capas:
+--
+--     · RLS en PostgreSQL       → filtra por tenant_id en cada tabla
+--     · Business logic          → X-Tenant-Id limita qué datos ve cada tenant
+--     · component_permissions   → personaliza visibilidad de UI por tenant
+--
+--   Si un tenant necesita restricciones especiales de API, se resuelve con
+--   tenant_feature_flags, no con políticas de API por tenant.
+--
+-- 3. DIFERENCIA CON component_permissions (dos capas distintas)
+-- ──────────────────────────────────────────────────────────────
+--   ┌──────────────────────┬──────────────────────────────────────────────┐
+--   │ component_permissions│ role_api_policies                            │
+--   ├──────────────────────┼──────────────────────────────────────────────┤
+--   │ Controla VISIBILIDAD │ Controla AUTORIZACIÓN en la API              │
+--   │ en la UI             │                                              │
+--   │ Usa role_id UUID     │ Usa role_name TEXT                           │
+--   │ (específico/tenant)  │ (global para todos los tenants)              │
+--   │ TENANT_ADMIN gestiona│ Solo SUPER_ADMIN puede modificar             │
+--   │ por tenant           │ (vía scripts; RLS is_system_admin())         │
+--   └──────────────────────┴──────────────────────────────────────────────┘
+--
+--   La UI puede ser más restrictiva que la API (ocultar un botón no implica
+--   que la API lo bloquee). La seguridad real vive en la API.
+--
+-- 4. CAMPO module (organizativo, no afecta evaluación)
+-- ──────────────────────────────────────────────────────
+--   Agrupa políticas por dominio de negocio para facilitar consultas de
+--   administración y auditoría de seguridad:
+--     auth | profile | tenants | users | roles | components | permissions | general
+--
+--   El interceptor NO filtra por module. Es solo para la UI de admin y reportes.
+--
+-- 5. CACHÉ EN REDIS
+-- ─────────────────
+--   El interceptor carga las políticas UNA VEZ por combinación de roles
+--   y las guarda en Redis (compartido entre instancias). TTL recomendado: 5 min.
+--
+--   Cache key: "service::role1,role2"  (roles ordenados alfabéticamente)
+--     "core::EDITOR,TENANT_ADMIN"
+--     "core::SUPER_ADMIN"
+--     "auth::TENANT_ADMIN"
+--
+--   La BD solo se consulta en el primer request de cada combinación y al
+--   expirar el TTL. No hay query a BD en cada petición HTTP.
+--
+-- =============================================================================
+--
 -- PREREQUISITO: schema-nexcore.sql debe haber sido ejecutado primero.
 --   El schema nxc_tenant debe existir con sus funciones RLS.
 --
@@ -19,7 +89,8 @@
 --   1. Conectarse a la BD con psql o DBeaver.
 --   2. Asegurarse de estar en la BD correcta (nexcore_db).
 --   3. Ejecutar este script completo (F5 en DBeaver o \i en psql).
---   4. Verificar con: SELECT * FROM nxc_tenant.role_api_policies LIMIT 5;
+--   4. Luego ejecutar 07-seed-role-api-policies.sql para cargar las políticas.
+--   5. Verificar con: SELECT * FROM nxc_tenant.role_api_policies LIMIT 5;
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------

@@ -13,11 +13,29 @@
 --   2. Ejecutar este script completo.
 --   3. Verificar con las queries al final del script.
 --
--- CONVENCIÓN DE PRIORIDADES:
+-- =============================================================================
+-- DISEÑO: por qué las políticas son GLOBALES (sin tenant_id)
+-- =============================================================================
+--
+--   Las políticas de API son un contrato de la PLATAFORMA, no de cada tenant.
+--   Todos los TENANT_ADMIN de todos los tenants pueden llamar a los mismos
+--   endpoints — la separación de datos entre tenants la hacen otras capas:
+--     · RLS en PostgreSQL (filtra por tenant_id)
+--     · Business logic (X-Tenant-Id en headers)
+--     · component_permissions (visibilidad de UI, sí es por tenant)
+--
+--   Ver 06-create-role-api-policies.sql para la explicación completa de las
+--   decisiones de diseño (role_name vs role_id, caché Redis, dos capas, etc.).
+--
+-- =============================================================================
+-- CONVENCIÓN DE PRIORIDADES
+-- =============================================================================
 --   100 → ALLOW general (rol puede acceder)
 --   500 → DENY específico (bloqueo explícito que anula un ALLOW de nivel 100)
 --
--- CONVENCIÓN DE PATRONES:
+-- =============================================================================
+-- CONVENCIÓN DE PATRONES DE PATH
+-- =============================================================================
 --   El segmento de versión (v1, v2…) se escribe siempre como *
 --   /api/*/recurso          → cubre /api/v1/recurso, /api/v2/recurso, etc.
 --   /api/*/recurso/*        → un segmento variable (/{id})
@@ -25,7 +43,9 @@
 --   /api/*/recurso/*/accion → variable en el medio + sufijo exacto
 --   /api/**                 → cualquier path bajo /api/ (para DENY globales)
 --
--- MÓDULOS (campo module):
+-- =============================================================================
+-- MÓDULOS (campo module — organizativo, no afecta evaluación del interceptor)
+-- =============================================================================
 --   auth        → endpoints de autenticación (nexcore-auth-service)
 --   profile     → perfil del usuario (/me/profile)
 --   tenants     → gestión de tenants
@@ -33,7 +53,20 @@
 --   roles       → gestión de roles
 --   components  → componentes de UI (/menu/components)
 --   permissions → matriz de permisos por rol (/menu/permissions)
---   general     → políticas transversales / fallback
+--   general     → políticas transversales / fallback (DENY globales de VIEWER)
+--
+-- =============================================================================
+-- SECCIONES
+-- =============================================================================
+--   1. Auth service  — endpoints autenticados de nexcore-auth-service
+--   2. Público       — POST /api/*/users/invitations/accept (sin JWT)
+--   3. Perfil        — GET /api/*/me/profile
+--   4. Tenants       — CRUD de tenants (mayormente SUPER_ADMIN)
+--   5. Usuarios      — CRUD de usuarios e invitaciones
+--   6. Roles         — CRUD de roles
+--   7. Componentes   — Consulta de componentes de UI
+--   8. Permisos      — Matriz de permisos por rol
+--   9. DENY          — Bloqueos explícitos de alta prioridad
 -- =============================================================================
 
 DO $$
