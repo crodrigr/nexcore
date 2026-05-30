@@ -2,16 +2,18 @@
   "info": {
     "name": "Nexcore - Platform API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Colección de endpoints NexCore: módulo tenant (Tenants, Usuarios, Roles) y módulo menu (Perfil de UI)."
+    "description": "Colección de endpoints NexCore: módulo tenant (Tenants, Usuarios, Roles) y módulo menu (Perfil de UI). Todos los endpoints bajo /api/** requieren X-Actor-Id y X-Tenant-Id (validados por RoleApiPolicyInterceptor con Redis)."
   },
   "variable": [
     { "key": "base_url",          "value": "http://localhost:8080" },
     { "key": "auth_base_url",     "value": "http://localhost:8081", "description": "Base URL for Auth Service" },
     { "key": "tenant_system_id",  "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant system" },
     { "key": "tenant_demo_id",    "value": "00000000-0000-0000-0000-000000000002", "description": "Tenant demo" },
-    { "key": "tenant_id",         "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant activo usado en los headers (cambiar según contexto)" },
-    { "key": "actor_id",          "value": "00000000-0000-0000-0001-000000000001", "description": "super.admin (sistema)" },
-    { "key": "actor_demo_id",     "value": "00000000-0000-0000-0001-000000000002", "description": "admin.demo (tenant demo)" },
+    { "key": "tenant_id",         "value": "00000000-0000-0000-0000-000000000001", "description": "Tenant activo (system=SUPER_ADMIN, demo=TENANT_ADMIN/EDITOR)" },
+    { "key": "actor_id",          "value": "00000000-0000-0000-0001-000000000001", "description": "super.admin — usuario autenticado que hace la petición (X-Actor-Id)" },
+    { "key": "actor_demo_id",     "value": "00000000-0000-0000-0001-000000000002", "description": "admin.demo (tenant demo, rol TENANT_ADMIN) — usuario autenticado alternativo" },
+    { "key": "actor_editor_id",   "value": "00000000-0000-0000-0001-000000000005", "description": "test.editor (tenant demo, rol EDITOR) — usuario autenticado alternativo" },
+    { "key": "target_user_id",    "value": "00000000-0000-0000-0001-000000000002", "description": "admin.demo — usuario objetivo en la URL (el que se consulta/actualiza/suspende/elimina)" },
     { "key": "tenant_slug",       "value": "demo" },
     { "key": "test_username",     "value": "super.admin" },
     { "key": "test_password",     "value": "NexCore@2026!" },
@@ -21,7 +23,7 @@
     { "key": "session_id",        "value": "", "description": "Current session ID" },
     { "key": "user_id",           "value": "", "description": "Current user ID" },
     { "key": "component_id",      "value": "", "description": "UUID del componente (completar con UUID real de la BD)" },
-    { "key": "role_id",           "value": "00000000-0000-0000-0000-000000000010", "description": "UUID del rol (TENANT_ADMIN del tenant demo)" },
+    { "key": "role_id",           "value": "00000000-0000-0000-0000-000000000010", "description": "UUID del rol TENANT_ADMIN del tenant demo" },
     { "key": "element_id",        "value": "", "description": "UUID del elemento de componente (completar con UUID real de la BD)" }
   ],
   "item": [
@@ -41,7 +43,11 @@
                 { "key": "size", "value": "20" }
               ]
             },
-            "description": "SUPER_ADMIN — Lista todos los tenants paginados."
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "SUPER_ADMIN — Lista todos los tenants paginados.\ntenant_id=system, actor_id=super.admin"
           }
         },
         {
@@ -54,7 +60,9 @@
               "path": ["api", "v1", "tenants"]
             },
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
             "body": {
               "mode": "raw",
@@ -72,7 +80,11 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "tenants", "{{tenant_id}}"]
             },
-            "description": "Obtiene el detalle de un tenant por su UUID."
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Obtiene el detalle de un tenant por su UUID."
           }
         },
         {
@@ -85,14 +97,16 @@
               "path": ["api", "v1", "tenants", "{{tenant_id}}"]
             },
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Content-Type",       "value": "application/json" },
+              { "key": "X-Tenant-Id",        "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
               { "key": "X-Actor-Super-Admin", "value": "false" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Mi Empresa Actualizada SAS\",\n  \"legalName\": \"Mi Empresa Actualizada S.A.S.\",\n  \"timezone\": \"America/Bogota\",\n  \"locale\": \"es-CO\",\n  \"mfaRequired\": false,\n  \"sessionTimeoutMinutes\": 480,\n  \"maxLoginAttempts\": 5,\n  \"passwordMinLength\": 8,\n  \"passwordRequiresUpper\": true,\n  \"passwordRequiresSpecial\": false\n}"
             },
-            "description": "Actualiza datos del tenant. X-Actor-Super-Admin=true permite cambiar plan/modo."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Actualiza datos del tenant. X-Actor-Super-Admin=true permite cambiar plan/modo."
           }
         },
         {
@@ -104,6 +118,10 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "tenants", "{{tenant_id}}", "suspend"]
             },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
             "description": "SUPER_ADMIN — Suspende el tenant. Retorna 204 No Content."
           }
         },
@@ -116,6 +134,10 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "tenants", "{{tenant_id}}", "activate"]
             },
+            "header": [
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
+            ],
             "description": "SUPER_ADMIN — Reactiva un tenant suspendido. Retorna 204 No Content."
           }
         }
@@ -133,16 +155,17 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "users"],
               "query": [
-                { "key": "page", "value": "0" },
-                { "key": "size", "value": "20" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" },
                 { "key": "status", "value": "ACTIVE", "disabled": true },
-                { "key": "search", "value": "", "disabled": true }
+                { "key": "search", "value": "",        "disabled": true }
               ]
             },
             "header": [
-              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Lista usuarios del tenant con paginación y filtros opcionales: status (PENDING_ACTIVATION|ACTIVE|SUSPENDED|BLOCKED|DELETED) y search."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Lista usuarios del tenant.\nPara tenant demo usar: tenant_id={{tenant_demo_id}}, actor_id={{actor_demo_id}}"
           }
         },
         {
@@ -163,7 +186,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"nuevo.usuario@empresa.com\",\n  \"username\": \"nuevo.usuario\",\n  \"fullName\": \"Nuevo Usuario\",\n  \"phone\": \"3001234567\",\n  \"roleIds\": [],\n  \"sendInvite\": true\n}"
             },
-            "description": "Crea un usuario dentro del tenant. sendInvite=true envía correo de activación."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Crea un usuario dentro del tenant. sendInvite=true envía correo de activación."
           }
         },
         {
@@ -179,7 +202,7 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
               { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Retorna el perfil del usuario autenticado (actor)."
+            "description": "* (cualquier rol autenticado) — Retorna el perfil del usuario autenticado."
           }
         },
         {
@@ -187,14 +210,15 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/v1/users/{{actor_id}}",
+              "raw": "{{base_url}}/api/v1/users/{{target_user_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", "{{actor_id}}"]
+              "path": ["api", "v1", "users", "{{target_user_id}}"]
             },
             "header": [
-              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Obtiene el detalle de un usuario específico del tenant."
+            "description": "SUPER_ADMIN / TENANT_ADMIN / EDITOR — Obtiene el detalle de un usuario específico del tenant."
           }
         },
         {
@@ -202,21 +226,21 @@
           "request": {
             "method": "PATCH",
             "url": {
-              "raw": "{{base_url}}/api/v1/users/{{actor_id}}",
+              "raw": "{{base_url}}/api/v1/users/{{target_user_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", "{{actor_id}}"]
+              "path": ["api", "v1", "users", "{{target_user_id}}"]
             },
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Content-Type",      "value": "application/json" },
               { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
-              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
-              { "key": "X-Is-Tenant-Admin",  "value": "false" }
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "false" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"Nombre Actualizado\",\n  \"phone\": \"3009876543\",\n  \"photoUrl\": \"https://cdn.ejemplo.com/foto.png\"\n}"
             },
-            "description": "Actualiza datos del usuario. X-Is-Tenant-Admin=true amplía los campos editables."
+            "description": "SUPER_ADMIN / TENANT_ADMIN / EDITOR — Actualiza datos del usuario. EDITOR solo puede editar su propio perfil (validado en capa de negocio)."
           }
         },
         {
@@ -224,15 +248,15 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{base_url}}/api/v1/users/{{actor_id}}/suspend",
+              "raw": "{{base_url}}/api/v1/users/{{target_user_id}}/suspend",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", "{{actor_id}}", "suspend"]
+              "path": ["api", "v1", "users", "{{target_user_id}}", "suspend"]
             },
             "header": [
               { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
               { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Suspende el usuario. Retorna 204 No Content."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Suspende el usuario. EDITOR recibe 403. Retorna 204 No Content."
           }
         },
         {
@@ -240,15 +264,15 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{base_url}}/api/v1/users/{{actor_id}}/activate",
+              "raw": "{{base_url}}/api/v1/users/{{target_user_id}}/activate",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", "{{actor_id}}", "activate"]
+              "path": ["api", "v1", "users", "{{target_user_id}}", "activate"]
             },
             "header": [
               { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
               { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Activa un usuario suspendido. Retorna 204 No Content."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Activa un usuario suspendido. EDITOR recibe 403. Retorna 204 No Content."
           }
         },
         {
@@ -256,15 +280,15 @@
           "request": {
             "method": "DELETE",
             "url": {
-              "raw": "{{base_url}}/api/v1/users/{{actor_id}}",
+              "raw": "{{base_url}}/api/v1/users/{{target_user_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", "{{actor_id}}"]
+              "path": ["api", "v1", "users", "{{target_user_id}}"]
             },
             "header": [
               { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
               { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Soft-delete del usuario. Retorna 204 No Content."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Soft-delete del usuario. EDITOR recibe 403. Retorna 204 No Content."
           }
         },
         {
@@ -272,9 +296,9 @@
           "request": {
             "method": "PUT",
             "url": {
-              "raw": "{{base_url}}/api/v1/users/{{actor_id}}/roles",
+              "raw": "{{base_url}}/api/v1/users/{{target_user_id}}/roles",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", "{{actor_id}}", "roles"]
+              "path": ["api", "v1", "users", "{{target_user_id}}", "roles"]
             },
             "header": [
               { "key": "Content-Type", "value": "application/json" },
@@ -285,7 +309,7 @@
               "mode": "raw",
               "raw": "{\n  \"assignments\": [\n    {\n      \"roleId\": \"00000000-0000-0000-0000-000000000010\",\n      \"expiresAt\": null\n    }\n  ]\n}"
             },
-            "description": "Reemplaza los roles del usuario. Los roles anteriores se eliminan y se asignan los nuevos."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Reemplaza los roles del usuario."
           }
         }
       ]
@@ -311,7 +335,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"invitado@empresa.com\",\n  \"roleIds\": [\n    \"00000000-0000-0000-0000-000000000010\"\n  ]\n}"
             },
-            "description": "Envía una invitación por email al usuario con los roles pre-asignados."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Envía una invitación por email."
           }
         },
         {
@@ -331,7 +355,7 @@
               "mode": "raw",
               "raw": "{\n  \"token\": \"TOKEN_DE_INVITACION\",\n  \"username\": \"nuevo.usuario\",\n  \"fullName\": \"Nuevo Usuario Invitado\"\n}"
             },
-            "description": "El usuario acepta la invitación usando el token recibido por email."
+            "description": "PÚBLICO — Endpoint excluido del interceptor. No requiere X-Actor-Id."
           }
         },
         {
@@ -344,9 +368,10 @@
               "path": ["api", "v1", "users", "invitations"]
             },
             "header": [
-              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Lista todas las invitaciones del tenant (pendientes, aceptadas y revocadas)."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Lista todas las invitaciones del tenant."
           }
         },
         {
@@ -362,7 +387,7 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
               { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Revoca una invitación pendiente por su ID. Retorna 204 No Content."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Revoca una invitación pendiente. Retorna 204 No Content."
           }
         }
       ]
@@ -380,9 +405,10 @@
               "path": ["api", "v1", "roles"]
             },
             "header": [
-              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Lista todos los roles del tenant (incluye los de sistema: TENANT_ADMIN, EDITOR, VIEWER)."
+            "description": "SUPER_ADMIN / TENANT_ADMIN / EDITOR / VIEWER — Lista todos los roles del tenant."
           }
         },
         {
@@ -403,7 +429,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"SUPERVISOR\",\n  \"description\": \"Rol de supervisión con acceso de lectura extendido\",\n  \"isDefault\": false\n}"
             },
-            "description": "Crea un rol personalizado para el tenant."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Crea un rol personalizado para el tenant."
           }
         },
         {
@@ -416,9 +442,10 @@
               "path": ["api", "v1", "roles", "00000000-0000-0000-0000-000000000010"]
             },
             "header": [
-              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Obtiene el detalle de un rol con el conteo de usuarios activos."
+            "description": "SUPER_ADMIN / TENANT_ADMIN / EDITOR / VIEWER — Obtiene el detalle de un rol."
           }
         },
         {
@@ -439,7 +466,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"SUPERVISOR\",\n  \"description\": \"Descripción actualizada del rol\",\n  \"isDefault\": false\n}"
             },
-            "description": "Actualiza nombre y descripción del rol. No se pueden modificar roles de sistema."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Actualiza nombre y descripción del rol."
           }
         },
         {
@@ -452,16 +479,17 @@
               "path": ["api", "v1", "roles", "00000000-0000-0000-0000-000000000010"]
             },
             "header": [
-              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" }
+              { "key": "X-Tenant-Id", "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",  "value": "{{actor_id}}" }
             ],
-            "description": "Elimina un rol personalizado. Falla si el rol tiene usuarios asignados o es de sistema. Retorna 204 No Content."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Elimina un rol personalizado. Falla si tiene usuarios asignados o es de sistema. Retorna 204."
           }
         }
       ]
     },
     {
       "name": "Menu — Perfil de UI",
-      "description": "Módulo menu: perfil completo de UI del usuario autenticado (user, permissions, menus).",
+      "description": "Módulo menu: perfil completo de UI del usuario autenticado.",
       "item": [
         {
           "name": "Perfil de UI — super.admin (tenant system)",
@@ -476,7 +504,7 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_system_id}}", "description": "Tenant system" },
               { "key": "X-Actor-Id",  "value": "{{actor_id}}",         "description": "super.admin" }
             ],
-            "description": "Retorna el perfil de UI del usuario super.admin en el tenant system.\n\nEsperar:\n- user.roles: [\"SUPER_ADMIN\"]\n- permissions: todos los componentes con acceso efectivo\n- menus: árbol completo con location y access por ítem"
+            "description": "* — Retorna el perfil de UI del usuario super.admin en el tenant system.\n\nEsperar:\n- user.roles: [\"SUPER_ADMIN\"]\n- permissions: todos los componentes\n- menus: árbol completo"
           }
         },
         {
@@ -492,7 +520,7 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}", "description": "Tenant demo" },
               { "key": "X-Actor-Id",  "value": "{{actor_demo_id}}", "description": "admin.demo" }
             ],
-            "description": "Retorna el perfil de UI del usuario admin.demo en el tenant demo.\n\nEsperar:\n- user.roles: [\"TENANT_ADMIN\"]\n- permissions: componentes con access execute/view/hidden\n- menus: navbar items con access execute, Administration con access hidden"
+            "description": "* — Retorna el perfil de UI del usuario admin.demo en el tenant demo."
           }
         },
         {
@@ -508,11 +536,11 @@
               { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}" },
               { "key": "X-Actor-Id",  "value": "00000000-0000-0000-0000-000000000099", "description": "UUID inexistente" }
             ],
-            "description": "Debe retornar HTTP 404 con código NXC-MNU-0001."
+            "description": "Debe retornar HTTP 404 con código NXC-MNU-0001. El interceptor deja pasar (UUID válido) pero el servicio responde 404."
           }
         },
         {
-          "name": "Perfil de UI — header faltante (400)",
+          "name": "Perfil de UI — sin X-Actor-Id (401)",
           "request": {
             "method": "GET",
             "url": {
@@ -523,14 +551,14 @@
             "header": [
               { "key": "X-Tenant-Id", "value": "{{tenant_demo_id}}" }
             ],
-            "description": "Sin X-Actor-Id. Debe retornar HTTP 400 (header requerido faltante)."
+            "description": "Sin X-Actor-Id. El interceptor retorna HTTP 401 Authentication required."
           }
         }
       ]
     },
     {
       "name": "Componentes (Permisos)",
-      "description": "Módulo permisos — Phase 1: consulta de componentes y sus elementos de UI. Los componentes se registran por seed/script; estos endpoints son de solo lectura.",
+      "description": "Módulo permisos — consulta de componentes y sus elementos de UI.",
       "item": [
         {
           "name": "Listar componentes del tenant",
@@ -543,15 +571,16 @@
               "query": [
                 { "key": "page",     "value": "0" },
                 { "key": "size",     "value": "20" },
-                { "key": "search",   "value": "", "disabled": true, "description": "Filtro sobre name y moduleKey" },
-                { "key": "isSystem", "value": "true", "disabled": true, "description": "true = solo componentes de sistema" }
+                { "key": "search",   "value": "", "disabled": true },
+                { "key": "isSystem", "value": "true", "disabled": true }
               ]
             },
             "header": [
               { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
               { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
-            "description": "UC-PRM-001 — Lista paginada de componentes del tenant, incluye componentes de sistema (is_system = TRUE). Soporta filtros: search (sobre name y moduleKey) e isSystem.\n\nRetorna: PageResponse<ComponentSummaryResponse> con elementCount por componente."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Lista paginada de componentes del tenant."
           }
         },
         {
@@ -565,9 +594,10 @@
             },
             "header": [
               { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
               { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
-            "description": "UC-PRM-002 — Retorna el detalle del componente con la lista completa de sus elementos de UI activos.\n\nError: 404 NXC-CMP-0001 si el componente no existe en el tenant."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Retorna el detalle del componente con sus elementos."
           }
         },
         {
@@ -581,16 +611,17 @@
             },
             "header": [
               { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
               { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
-            "description": "UC-PRM-002 — Lista los elementos de UI activos del componente (buttons, tabs, fields, sections, actions). Alimenta la tabla de elementos en la pantalla de permisos.\n\nError: 404 NXC-CMP-0001 si el componente no existe en el tenant."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Lista los elementos de UI activos del componente."
           }
         }
       ]
     },
     {
       "name": "Permisos por Rol",
-      "description": "Módulo permisos — Phase 1: gestión de permisos de UI por rol. Soporta asignación a nivel de componente y de elemento individual.",
+      "description": "Módulo permisos — gestión de permisos de UI por rol.",
       "item": [
         {
           "name": "Matriz de permisos del rol",
@@ -603,9 +634,10 @@
             },
             "header": [
               { "key": "X-Tenant-Id",      "value": "{{tenant_id}}" },
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
               { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
-            "description": "UC-PRM-003 — API principal de la pantalla de gestión de permisos. Retorna todos los componentes del tenant con el nivel de acceso configurado para el rol, y dentro de cada componente todos sus elementos con el campo `inherited` indicando si el acceso viene del componente padre o de una regla explícita de elemento.\n\nEjemplo de response:\n{\n  \"roleId\": \"...\",\n  \"roleName\": \"EDITOR\",\n  \"tenantId\": \"...\",\n  \"components\": [\n    {\n      \"componentId\": \"...\",\n      \"moduleKey\": \"user-management\",\n      \"name\": \"Gestión de usuarios\",\n      \"route\": \"/admin/users\",\n      \"access\": \"execute\",\n      \"elements\": [\n        { \"elementId\": \"...\", \"elementKey\": \"btn-delete-user\", \"access\": \"view\", \"inherited\": false },\n        { \"elementId\": \"...\", \"elementKey\": \"searchInput\",     \"access\": \"execute\", \"inherited\": true }\n      ]\n    }\n  ]\n}\n\nError: 404 NXC-PRM-0001 si el rol no pertenece al tenant."
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Retorna todos los componentes con el nivel de acceso configurado para el rol."
           }
         },
         {
@@ -620,14 +652,14 @@
             "header": [
               { "key": "Content-Type",      "value": "application/json" },
               { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
-              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
-              { "key": "X-Is-Tenant-Admin",  "value": "true" }
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"access\": \"EXECUTE\"\n}"
             },
-            "description": "UC-PRM-004 — Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un componente completo. Si no existía el registro lo crea; si ya existía lo actualiza. Usa INSERT ON CONFLICT DO UPDATE.\n\nValores válidos para access: HIDDEN | VIEW | EXECUTE\n\nRetorna: ComponentPermissionResultResponse\n\nErrores:\n- 404 NXC-PRM-0001: rol no encontrado en el tenant\n- 404 NXC-CMP-0001: componente no encontrado en el tenant"
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un componente."
           }
         },
         {
@@ -642,14 +674,14 @@
             "header": [
               { "key": "Content-Type",      "value": "application/json" },
               { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
-              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
-              { "key": "X-Is-Tenant-Admin",  "value": "true" }
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"permissions\": [\n    { \"componentId\": \"{{component_id}}\", \"access\": \"EXECUTE\" }\n  ]\n}"
             },
-            "description": "UC-PRM-005 — Asigna o actualiza (upsert) en una sola transacción los permisos de un rol sobre múltiples componentes. Útil para la acción 'aplicar a todos' en el UI. Máximo 100 componentes por request.\n\nSi algún componentId no pertenece al tenant, la operación entera falla antes de ejecutar ningún upsert.\n\nRetorna: List<ComponentPermissionResultResponse>\n\nErrores:\n- 404 NXC-PRM-0001: rol no encontrado\n- 422 NXC-PRM-0002: uno o más componentIds no pertenecen al tenant (incluye la lista de IDs inválidos)"
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Upsert en una transacción para múltiples componentes. Máximo 100."
           }
         },
         {
@@ -664,21 +696,21 @@
             "header": [
               { "key": "Content-Type",      "value": "application/json" },
               { "key": "X-Tenant-Id",       "value": "{{tenant_id}}" },
-              { "key": "X-Actor-Id",         "value": "{{actor_id}}" },
-              { "key": "X-Is-Tenant-Admin",  "value": "true" }
+              { "key": "X-Actor-Id",        "value": "{{actor_id}}" },
+              { "key": "X-Is-Tenant-Admin", "value": "true" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"access\": \"VIEW\"\n}"
             },
-            "description": "UC-PRM-006 — Asigna o actualiza (upsert) el nivel de acceso de un rol sobre un elemento de UI específico. Sobrescribe la herencia del componente padre con un permiso granular. El campo `inherited` en la respuesta será siempre false tras este upsert.\n\nValores válidos para access: HIDDEN | VIEW | EXECUTE\n\nRetorna: ElementPermissionResultResponse\n\nErrores:\n- 404 NXC-PRM-0001: rol no encontrado en el tenant\n- 404 NXC-ELM-0001: elemento no encontrado"
+            "description": "SUPER_ADMIN / TENANT_ADMIN — Asigna permiso granular a un elemento de UI específico."
           }
         }
       ]
     },
     {
       "name": "Autenticación (Auth Service)",
-      "description": "Endpoints del servicio de autenticación: login 2FA, gestión de sesiones y recuperación de contraseña.",
+      "description": "Endpoints del servicio de autenticación (puerto 8081). Los endpoints públicos no requieren headers de auth.",
       "item": [
         {
           "name": "Login - Paso 1 (Enviar OTP)",
@@ -696,7 +728,7 @@
               "mode": "raw",
               "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"username\": \"{{test_username}}\",\n  \"password\": \"{{test_password}}\"\n}"
             },
-            "description": "Paso 1 del login 2FA: valida credenciales y envía OTP al email del usuario.\n\nRespuesta exitosa (200):\n{\n  \"challengeToken\": \"eyJhbGc...\",\n  \"message\": \"OTP sent to your email\",\n  \"expiresIn\": 300\n}\n\nGuardar challengeToken en variable de entorno para el paso 2."
+            "description": "PÚBLICO — Valida credenciales y envía OTP al email."
           },
           "event": [
             {
@@ -728,9 +760,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"challengeToken\": \"{{challenge_token}}\",\n  \"code\": \"123456\"\n}"
+              "raw": "{\n  \"challengeToken\": \"{{challenge_token}}\",\n  \"code\": \"111111\"\n}"
             },
-            "description": "Paso 2 del login 2FA: verifica el código OTP recibido por email.\n\nRespuesta exitosa (200):\n{\n  \"token\": \"eyJhbGc...\",\n  \"refreshToken\": \"a1b2c3...\",\n  \"expiresIn\": 900,\n  \"profile\": { ... }\n}\n\nGuardar token, refreshToken y sessionId para uso posterior."
+            "description": "PÚBLICO — Verifica el OTP. OTP fijo de desarrollo: 111111 (usuarios: super.admin, test.admin, test.editor en tenant demo)."
           },
           "event": [
             {
@@ -762,7 +794,7 @@
             "header": [
               { "key": "X-Refresh-Token", "value": "{{refresh_token}}" }
             ],
-            "description": "Genera un nuevo access token usando el refresh token.\n\nRespuesta exitosa (200):\n{\n  \"token\": \"eyJhbGc...\",\n  \"refreshToken\": \"a1b2c3...\",\n  \"expiresIn\": 900,\n  \"profile\": { ... }\n}\n\nEl refreshToken se mantiene igual."
+            "description": "Autenticado — Genera un nuevo access token usando el refresh token."
           },
           "event": [
             {
@@ -792,7 +824,7 @@
                 { "key": "sessionId", "value": "{{session_id}}" }
               ]
             },
-            "description": "Cierra la sesión actual invalidando el refresh token.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Logged out successfully\"\n}"
+            "description": "Autenticado — Cierra la sesión actual invalidando el refresh token."
           }
         },
         {
@@ -804,11 +836,11 @@
               "host": ["{{auth_base_url}}"],
               "path": ["auth", "logout-all"],
               "query": [
-                { "key": "userId", "value": "{{user_id}}" },
+                { "key": "userId",           "value": "{{user_id}}" },
                 { "key": "currentSessionId", "value": "{{session_id}}" }
               ]
             },
-            "description": "Cierra todas las sesiones del usuario excepto la actual.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"All other sessions have been logged out\"\n}"
+            "description": "Autenticado — Cierra todas las sesiones excepto la actual."
           }
         },
         {
@@ -827,7 +859,7 @@
               "mode": "raw",
               "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"email\": \"usuario@empresa.com\"\n}"
             },
-            "description": "Solicita un reset de contraseña enviando un email con el token.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Password reset email sent\"\n}\n\nEl token se envía por email y tiene validez de 1 hora."
+            "description": "PÚBLICO — Solicita un reset de contraseña enviando email con token."
           }
         },
         {
@@ -846,7 +878,7 @@
               "mode": "raw",
               "raw": "{\n  \"token\": \"RESET_TOKEN_FROM_EMAIL\",\n  \"newPassword\": \"NewPassword123!\"\n}"
             },
-            "description": "Confirma el reset usando el token recibido por email y establece la nueva contraseña.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Password reset successfully\"\n}"
+            "description": "PÚBLICO — Confirma el reset con el token del email."
           }
         },
         {
@@ -862,14 +894,14 @@
               ]
             },
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"currentPassword\": \"OldPassword123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
             },
-            "description": "Permite al usuario autenticado cambiar su contraseña proporcionando la contraseña actual.\n\nRespuesta exitosa (200):\n{\n  \"message\": \"Password changed successfully\"\n}"
+            "description": "Autenticado — Permite al usuario cambiar su contraseña."
           }
         }
       ]

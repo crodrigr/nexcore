@@ -10,7 +10,9 @@
       "Bash(grep -n \"page-wrap\\\\|</div>$\" /home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/src/app/features/dashboard/dashboard.component.html)",
       "Bash(xargs ls -la)",
       "Bash(ls /home/crodrigr/Documents/Proyectos/nexcore/.claude/ 2>/dev/null && ls /home/crodrigr/.claude/commands/ 2>/dev/null)",
-      "Read(//home/crodrigr/.claude/**)"
+      "Read(//home/crodrigr/.claude/**)",
+      "Bash(git checkout *)",
+      "Bash(./gradlew dependencies *)"
     ],
     "additionalDirectories": [
       "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"

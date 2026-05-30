@@ -38,9 +38,18 @@ spring:
             enable: true
     default-encoding: UTF-8
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  api-policy:
+    service-name: core
+    policy-ttl-seconds: 300
+    user-roles-ttl-seconds: 120
   mail:
     from: crodrigr@gmail.com
     from-name: NexCore Platform

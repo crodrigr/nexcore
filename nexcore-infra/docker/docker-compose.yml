@@ -1,4 +1,3 @@
-
 services:
 
   # 🗄 POSTGRES
@@ -35,8 +34,22 @@ services:
     networks:
       - nexcore-network
 
+  # 🔴 REDIS — caché de políticas de API (role_api_policies)
+  redis:
+    image: redis:7-alpine
+    container_name: nexcore-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - nexcore_redis_data:/data
+    networks:
+      - nexcore-network
+
 volumes:
   nexcore_postgres_data:
+  nexcore_redis_data:
 
 networks:
   nexcore-network:

@@ -25,6 +25,20 @@ public interface SpringDataUserRoleRepository extends JpaRepository<UserRoleJpaE
 
     boolean existsByTenantIdAndUserIdAndRoleId(UUID tenantId, UUID userId, UUID roleId);
 
+    @Query(value = """
+            SELECT r.name
+            FROM nxc_tenant.user_roles ur
+            JOIN nxc_tenant.roles r ON r.id = ur.role_id
+            WHERE ur.user_id = :userId
+              AND ur.tenant_id = :tenantId
+              AND r.deleted_at IS NULL
+              AND (ur.expires_at IS NULL OR ur.expires_at > NOW())
+            """, nativeQuery = true)
+    List<String> findRoleNamesByUserIdAndTenantId(
+            @Param("userId") UUID userId,
+            @Param("tenantId") UUID tenantId
+    );
+
     @Modifying
     @Query(value = """
         INSERT INTO nxc_tenant.user_roles

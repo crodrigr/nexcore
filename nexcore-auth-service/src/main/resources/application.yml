@@ -27,6 +27,11 @@ spring:
         format_sql: true
         default_schema: nxc_auth
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
   # Flyway removed from this service; migrations managed externally
 
   mail:
