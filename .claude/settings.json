@@ -19,7 +19,15 @@
       "Bash(python3 -c ' *)",
       "Bash(docker volume *)",
       "Bash(grep -q \"^\\\\.env$\" /home/crodrigr/Documents/Proyectos/nexcore/.gitignore)",
-      "Bash(docker exec *)"
+      "Bash(docker exec *)",
+      "Bash(awk -F/ '{print $4}')",
+      "Bash(awk -F/ '{print $1}')",
+      "Bash(git -C /home/crodrigr/Documents/Proyectos/nexcore log --oneline)",
+      "Bash(git -C /home/crodrigr/Documents/Proyectos/nexcore log --format=\"%ad\" --date=short)",
+      "Read(//tmp/**)",
+      "Bash(sort -t/ -k3)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:4200)",
+      "Bash(google-chrome --headless=new --no-sandbox --disable-gpu --window-size=1440,900 --screenshot=/home/crodrigr/Documents/Proyectos/nexcore/nexcore-infra/website/images/dashboard.png http://localhost:4200/dashboard)"
     ],
     "additionalDirectories": [
       "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"

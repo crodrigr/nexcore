@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:180px;background:#fff;border-right:1px solid #e2e8f0;flex-shrink:0}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:16px;border-bottom:1px solid #e2e8f0}
+.logo-mark{width:28px;height:28px;background:#3b82f6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px}
+.logo-text{font-weight:700;font-size:15px;color:#0f172a}
+.nav-item{padding:10px 16px;font-size:13px;color:#64748b;margin:2px 8px;border-radius:6px;cursor:pointer}
+.nav-item.active-p{background:#eff6ff;color:#2563eb;font-weight:600}
+.nav-sub{padding:8px 16px 8px 32px;font-size:12px;color:#94a3b8;cursor:pointer}
+.nav-sub.active{color:#3b82f6;font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;gap:16px}
+.search{display:flex;align-items:center;gap:8px;background:#f1f5f9;border-radius:8px;padding:7px 14px;flex:1;max-width:340px}
+.search span{font-size:13px;color:#94a3b8}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:16px}
+.notif{position:relative}
+.notif-dot{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#ef4444;border-radius:50%;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.avatar-top{width:32px;height:32px;background:#0ea5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.content{flex:1;padding:28px 32px;overflow-y:auto}
+.page-title{font-size:28px;font-weight:800;color:#0f172a;margin-bottom:4px}
+.page-sub{font-size:14px;color:#64748b;margin-bottom:20px}
+.role-bar{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.role-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.role-select{border:1px solid #e2e8f0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;color:#0f172a;background:#fff}
+.search-bar{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.search-left{display:flex;align-items:center;gap:12px}
+.search-label{font-size:12px;font-weight:600;color:#64748b}
+.search-input{border:1px solid #e2e8f0;border-radius:8px;padding:7px 12px;font-size:13px;color:#94a3b8;width:380px}
+.btn-save{background:#bfdbfe;color:#2563eb;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.perm-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.perm-row{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f8fafc}
+.perm-row:last-child{border-bottom:none}
+.perm-expand{color:#94a3b8;font-size:12px;margin-right:10px;cursor:pointer}
+.perm-name{flex:1;font-size:14px;font-weight:500;color:#0f172a}
+.perm-path{font-size:11px;color:#94a3b8;margin-left:22px;display:block;margin-top:2px}
+.perm-actions{display:flex;gap:6px;align-items:center}
+.perm-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent}
+.perm-btn.hidden.active{background:#64748b;color:#fff;border-color:#64748b}
+.perm-btn.hidden{background:#fff;color:#64748b;border-color:#e2e8f0}
+.perm-btn.view{background:#fff;color:#64748b;border-color:#e2e8f0}
+.perm-btn.execute.active{background:#10b981;color:#fff;border-color:#10b981}
+.perm-btn.execute{background:#fff;color:#64748b;border-color:#e2e8f0}
+.footer{padding:12px 24px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;background:#fff;text-align:center}
+</style>
+</head><body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo-mark">N</div><span class="logo-text">OpenNxc</span></div>
+  <div style="padding:8px 0">
+    <div class="nav-item">📊 Dashboard</div>
+    <div class="nav-item active-p">👤 Admin ▾</div>
+    <div class="nav-sub">Users</div>
+    <div class="nav-sub active">Permissions</div>
+    <div class="nav-item">🤝 CRM</div>
+    <div class="nav-item">📈 Monitoring</div>
+  </div>
+</aside>
+<div class="main">
+  <div class="topbar">
+    <span style="font-size:18px;color:#64748b">☰</span>
+    <div class="search"><span>🔍 Search for something...</span></div>
+    <div class="topbar-actions">
+      <div class="notif">🔔<span class="notif-dot">3</span></div>
+      <span style="font-size:18px;color:#64748b">🌙</span>
+      <span style="font-size:18px;color:#64748b">🌐</span>
+      <div class="avatar-top">TA</div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page-title">Component Permissions</div>
+    <div class="page-sub">Manage role-level access to each component and its UI elements.</div>
+    <div class="role-bar">
+      <span class="role-label">Selected Role</span>
+      <select class="role-select"><option>EDITOR</option></select>
+    </div>
+    <div class="search-bar">
+      <div class="search-left">
+        <span class="search-label">Search</span>
+        <input class="search-input" type="text" placeholder="Filter by component or element..."/>
+      </div>
+      <button class="btn-save">Save Changes</button>
+    </div>
+    <div class="perm-card">
+      <div class="perm-row">
+        <span class="perm-expand">▶</span>
+        <div style="flex:1"><span class="perm-name">Administración</span></div>
+        <div class="perm-actions">
+          <button class="perm-btn hidden active">HIDDEN</button>
+          <button class="perm-btn view">VIEW</button>
+          <button class="perm-btn execute">EXECUTE</button>
+        </div>
+      </div>
+      <div class="perm-row">
+        <span class="perm-expand">▶</span>
+        <div style="flex:1">
+          <span class="perm-name">CRM</span>
+          <span class="perm-path">/crm</span>
+        </div>
+        <div class="perm-actions">
+          <button class="perm-btn hidden">HIDDEN</button>
+          <button class="perm-btn view">VIEW</button>
+          <button class="perm-btn execute active">EXECUTE</button>
+        </div>
+      </div>
+      <div class="perm-row">
+        <span class="perm-expand">▶</span>
+        <div style="flex:1">
+          <span class="perm-name">Dashboard</span>
+          <span class="perm-path">/dashboard</span>
+        </div>
+        <div class="perm-actions">
+          <button class="perm-btn hidden">HIDDEN</button>
+          <button class="perm-btn view">VIEW</button>
+          <button class="perm-btn execute active">EXECUTE</button>
+        </div>
+      </div>
+      <div class="perm-row">
+        <span class="perm-expand">▶</span>
+        <div style="flex:1">
+          <span class="perm-name">Monitoring</span>
+          <span class="perm-path">/monitoring</span>
+        </div>
+        <div class="perm-actions">
+          <button class="perm-btn hidden">HIDDEN</button>
+          <button class="perm-btn view">VIEW</button>
+          <button class="perm-btn execute active">EXECUTE</button>
+        </div>
+      </div>
+      <div class="perm-row">
+        <span class="perm-expand">▶</span>
+        <div style="flex:1"><span class="perm-name">Profile Menu</span></div>
+        <div class="perm-actions">
+          <button class="perm-btn hidden">HIDDEN</button>
+          <button class="perm-btn view">VIEW</button>
+          <button class="perm-btn execute active">EXECUTE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© 2026 OpenNxc Enterprise · v0.0.1</div>
+</div>
+</body></html>
