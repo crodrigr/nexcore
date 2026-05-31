@@ -49,8 +49,11 @@ services:
 
 volumes:
   nexcore_postgres_data:
+    name: docker_nexcore_postgres_data
   nexcore_redis_data:
+    name: docker_nexcore_redis_data
 
 networks:
   nexcore-network:
     driver: bridge
+    name: nexcore-network

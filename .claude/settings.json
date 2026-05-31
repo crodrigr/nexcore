@@ -15,7 +15,11 @@
       "Bash(./gradlew dependencies *)",
       "Bash(find /home/crodrigr -name \"backend-auth-service*\" 2>/dev/null; find /home/crodrigr/Documents/Proyectos/nexcore -name \"*.md\" 2>/dev/null | head -20)",
       "Read(//home/crodrigr/**)",
-      "Bash(python3 -c \"import json; d=json.load\\(open\\('/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/angular.json'\\)\\); proj=list\\(d['projects'].keys\\(\\)\\); print\\(proj\\); p=proj[0]; print\\(d['projects'][p]['architect']['build']['options']\\)\")"
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/angular.json'\\)\\); proj=list\\(d['projects'].keys\\(\\)\\); print\\(proj\\); p=proj[0]; print\\(d['projects'][p]['architect']['build']['options']\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(docker volume *)",
+      "Bash(grep -q \"^\\\\.env$\" /home/crodrigr/Documents/Proyectos/nexcore/.gitignore)",
+      "Bash(docker exec *)"
     ],
     "additionalDirectories": [
       "/home/crodrigr/Documents/Proyectos/nexcore/nexcore-frontend/node_modules/lucide-static/icons"

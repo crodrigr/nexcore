@@ -4,9 +4,7 @@ services:
   # nexcore-core  →  puerto 8080
   # ─────────────────────────────────────────────
   nexcore-core:
-    build:
-      context: ../../nexcore-core
-      dockerfile: ../nexcore-infra/docker/dockerfiles/Dockerfile-core.yml
+    image: nexcore-core:latest
     container_name: nexcore-core
     restart: unless-stopped
     ports:
@@ -20,21 +18,14 @@ services:
       REDIS_PORT: 6379
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
-      GMAIL_USER: ${GMAIL_USER:-}
-      GMAIL_PASS: ${GMAIL_PASS:-}
     networks:
       - nexcore-network
-    depends_on:
-      - postgres
-      - redis
 
   # ─────────────────────────────────────────────
   # nexcore-auth-service  →  puerto 8081
   # ─────────────────────────────────────────────
   nexcore-auth:
-    build:
-      context: ../../nexcore-auth-service
-      dockerfile: ../nexcore-infra/docker/dockerfiles/Dockerfile-auth.yml
+    image: nexcore-auth:latest
     container_name: nexcore-auth
     restart: unless-stopped
     ports:
@@ -50,24 +41,18 @@ services:
       NEXCORE_CORE_URL: http://nexcore-core:8080
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
       APP_FRONTEND_URL: ${APP_FRONTEND_URL:-http://localhost:4200}
-      GMAIL_USER: ${GMAIL_USER:-}
-      GMAIL_PASS: ${GMAIL_PASS:-}
       NEXCORE_AUTH_OTP_FIXED_ENABLED: ${OTP_FIXED_ENABLED:-true}
       NEXCORE_AUTH_OTP_FIXED_CODE: ${OTP_FIXED_CODE:-111111}
     networks:
       - nexcore-network
     depends_on:
-      - postgres
-      - redis
       - nexcore-core
 
   # ─────────────────────────────────────────────
   # nexcore-frontend  →  puerto 4200
   # ─────────────────────────────────────────────
   nexcore-frontend:
-    build:
-      context: ../../nexcore-frontend
-      dockerfile: ../nexcore-infra/docker/dockerfiles/Dockerfile-frontend.yml
+    image: nexcore-frontend:latest
     container_name: nexcore-frontend
     restart: unless-stopped
     ports:

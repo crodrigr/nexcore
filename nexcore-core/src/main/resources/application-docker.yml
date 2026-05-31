@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-db:5432/postgres}
+    username: ${DB_USER:admin}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USER:crodrigr.test1@gmail.com}
+    password: ${GMAIL_PASS:xqwd vqvg pauk mptb}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    default-encoding: UTF-8
+
+  data:
+    redis:
+      host: ${REDIS_HOST:nexcore-redis}
+      port: ${REDIS_PORT:6379}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  api-policy:
+    service-name: core
+    policy-ttl-seconds: 300
+    user-roles-ttl-seconds: 120
+  mail:
+    from: ${GMAIL_USER:crodrigr@gmail.com}
+    from-name: NexCore Platform
+    frontend-url: ${FRONTEND_URL:http://localhost:4200}
