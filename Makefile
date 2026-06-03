@@ -82,7 +82,7 @@ auth:
 # ── nexcore-frontend ──────────────────────────────────────────────
 frontend:
 	@echo ">>> [1/3] Compilando nexcore-frontend con Angular..."
-	cd nexcore-frontend && npm run build
+	cd nexcore-frontend && npm install && npm run build
 	@echo ">>> [2/3] Construyendo imagen Docker nexcore-frontend..."
 	docker build -f $(DOCKERFILE_FRONTEND) -t nexcore-frontend:latest nexcore-frontend/
 	@echo ">>> [3/3] Levantando contenedor nexcore-frontend..."
