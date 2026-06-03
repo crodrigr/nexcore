@@ -1,4 +1,7 @@
-// Environment configuration (development)
+// Auto-generado por scripts/set-env.js — no editar manualmente.
+// Valores configurables desde el .env raíz del proyecto:
+//   AUTH_BASE_URL   (vacío = nginx proxy, 'http://host:8081' = directo)
+//   CORE_BASE_URL   (vacío = nginx proxy, 'http://host:8080' = directo)
 export const environment = {
   production: false,
   authBaseUrl: 'http://localhost:8081',
@@ -6,12 +9,9 @@ export const environment = {
   endpoints: {
     login: '/auth/login',
     verifyOtp: '/auth/verify-otp',
-    // Endpoint according to Postman collection
     forgotPassword: '/auth/password/reset/request',
     changePassword: '/auth/password',
     confirmReset: '/auth/password/reset/confirm'
-  }
-  ,
-  // Default tenant used for unauthenticated flows (can be overridden)
+  },
   defaultTenantId: '00000000-0000-0000-0000-000000000001'
 };
