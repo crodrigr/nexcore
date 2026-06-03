@@ -1,0 +1,110 @@
+services:
+
+  # ── Infraestructura ────────────────────────────────────────────────────────
+
+  postgres-db:
+    image: postgres:15
+    container_name: nxc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-nexcore_db}
+      POSTGRES_USER:     ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+    ports:
+      - "5432:5432"
+    volumes:
+      - nexcore_hub_postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexcore-hub-network
+
+  nexcore-redis:
+    image: redis:7-alpine
+    container_name: nxc-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - nexcore_hub_redis_data:/data
+    networks:
+      - nexcore-hub-network
+
+  postfix-relay:
+    image: boky/postfix:latest
+    container_name: nxc-postfix
+    restart: unless-stopped
+    ports:
+      - "1587:587"
+    environment:
+      - HOSTNAME=postfix
+      - ALLOWED_SENDER_DOMAINS=example.com
+    networks:
+      - nexcore-hub-network
+
+  # ── Aplicaciones (imágenes desde Docker Hub) ───────────────────────────────
+
+  nexcore-core:
+    image: ${DOCKER_HUB_USER}/nexcore-core:${IMAGE_TAG:-latest}
+    container_name: nxc-core
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${DB_NAME:-nexcore_db}
+      DB_USER: ${DB_USER:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
+      REDIS_HOST: nexcore-redis
+      REDIS_PORT: 6379
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+    depends_on:
+      - postgres-db
+      - nexcore-redis
+    networks:
+      - nexcore-hub-network
+
+  nexcore-auth:
+    image: ${DOCKER_HUB_USER}/nexcore-auth:${IMAGE_TAG:-latest}
+    container_name: nxc-auth
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${DB_NAME:-nexcore_db}
+      DB_USER: ${DB_USER:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
+      REDIS_HOST: nexcore-redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-changeme-this-is-a-secret-key-for-jwt-signing-must-be-at-least-256-bits}
+      NEXCORE_CORE_URL: http://nexcore-core:8080
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
+      APP_FRONTEND_URL: ${APP_FRONTEND_URL:-http://localhost:4200}
+      NEXCORE_AUTH_OTP_FIXED_ENABLED: ${OTP_FIXED_ENABLED:-true}
+      NEXCORE_AUTH_OTP_FIXED_CODE: ${OTP_FIXED_CODE:-111111}
+    depends_on:
+      - nexcore-core
+    networks:
+      - nexcore-hub-network
+
+  nexcore-frontend:
+    image: ${DOCKER_HUB_USER}/nexcore-frontend:${IMAGE_TAG:-latest}
+    container_name: nxc-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - nexcore-core
+      - nexcore-auth
+    networks:
+      - nexcore-hub-network
+
+volumes:
+  nexcore_hub_postgres_data:
+  nexcore_hub_redis_data:
+
+networks:
+  nexcore-hub-network:
+    driver: bridge
+    name: nexcore-hub-network
