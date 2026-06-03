@@ -363,6 +363,97 @@ CREATE INDEX IF NOT EXISTS ix_invitations_tenant_email
     ON nxc_tenant.user_invitations (tenant_id, email)
     WHERE accepted_at IS NULL AND is_revoked = FALSE;
 
+-- ---------------------------------------------------------------------------
+-- 7b. role_api_policies  --  políticas de autorización HTTP por nombre de rol
+--
+-- DISEÑO:
+--   · Usa role_name (TEXT) en vez de role_id (UUID) porque los roles
+--     TENANT_ADMIN/EDITOR/VIEWER existen con UUIDs distintos en cada tenant.
+--     Con role_name una sola fila cubre todos los tenants.
+--   · Sin tenant_id: las políticas son un contrato de la plataforma, no de
+--     cada tenant. La separación de datos entre tenants la hacen otras capas:
+--     RLS, business logic (X-Tenant-Id), y component_permissions (UI).
+--   · Evaluación fail-closed: si no hay política que aplique → DENY implícito.
+--   · Caché en Redis (TTL 5 min). Cache key: "service::rol1,rol2".
+--   · DIFERENCIA con component_permissions:
+--       component_permissions → visibilidad en la UI, usa role_id UUID, por tenant.
+--       role_api_policies     → autorización en la API, usa role_name TEXT, global.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS nxc_tenant.role_api_policies (
+
+    id            UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    -- Nombre del rol al que aplica. '*' = cualquier usuario autenticado.
+    -- Valores válidos: SUPER_ADMIN | TENANT_ADMIN | EDITOR | VIEWER | *
+    role_name     VARCHAR(100)  NOT NULL,
+
+    -- Verbo HTTP: GET | POST | PUT | PATCH | DELETE | * (cualquier verbo)
+    http_method   VARCHAR(10)   NOT NULL DEFAULT '*',
+
+    -- Patrón del path compatible con Spring PathPatternParser.
+    -- El segmento de versión se escribe como * (/api/*/recurso).
+    path_pattern  VARCHAR(500)  NOT NULL,
+
+    -- ALLOW = acceso permitido. DENY = acceso denegado (prioridad sobre ALLOW).
+    effect        VARCHAR(5)    NOT NULL DEFAULT 'ALLOW'
+                  CHECK (effect IN ('ALLOW', 'DENY')),
+
+    -- Microservicio al que aplica: core (8080) | auth (8081)
+    service       VARCHAR(20)   NOT NULL DEFAULT 'core'
+                  CHECK (service IN ('core', 'auth')),
+
+    -- Módulo de negocio (organizativo, no afecta evaluación):
+    --   auth | profile | tenants | users | roles | components | permissions | general
+    module        VARCHAR(50)   NOT NULL DEFAULT 'general',
+
+    -- Prioridad de evaluación. Mayor número = se evalúa primero.
+    -- 100 → ALLOW general;  500 → DENY específico;  900 → bloqueo de emergencia.
+    priority      INTEGER       NOT NULL DEFAULT 100,
+
+    description   VARCHAR(500),
+
+    -- Auditoría
+    created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    created_by    UUID          REFERENCES nxc_tenant.users(id),
+
+    -- Un rol no puede tener dos políticas iguales para el mismo método+path+servicio
+    UNIQUE (role_name, http_method, path_pattern, service)
+);
+
+CREATE INDEX IF NOT EXISTS ix_role_api_policies_service_role
+    ON nxc_tenant.role_api_policies (service, role_name);
+
+CREATE INDEX IF NOT EXISTS ix_role_api_policies_path
+    ON nxc_tenant.role_api_policies (path_pattern);
+
+CREATE INDEX IF NOT EXISTS ix_role_api_policies_module
+    ON nxc_tenant.role_api_policies (module);
+
+COMMENT ON TABLE nxc_tenant.role_api_policies IS
+    'Políticas de autorización HTTP por nombre de rol. '
+    'Vive en nxc_tenant porque es autorización (igual que roles/user_roles), '
+    'no visibilidad de UI (que va en nxc_menu). '
+    'Aplica globalmente para todos los tenants que tengan un rol con ese nombre. '
+    'Evaluación fail-closed: sin política → DENY implícito.';
+
+COMMENT ON COLUMN nxc_tenant.role_api_policies.role_name IS
+    'Nombre del rol (coincide con nxc_tenant.roles.name). '
+    'Usar * para cualquier usuario autenticado. '
+    'No usa UUID porque roles como TENANT_ADMIN tienen distintos UUIDs por tenant.';
+
+COMMENT ON COLUMN nxc_tenant.role_api_policies.path_pattern IS
+    'Patrón del path compatible con Spring PathPatternParser. '
+    'El segmento de versión se escribe como * (/api/*/users) para cubrir v1, v2, etc.';
+
+COMMENT ON COLUMN nxc_tenant.role_api_policies.effect IS
+    'ALLOW = acceso permitido. DENY = acceso denegado. '
+    'DENY con mayor priority tiene precedencia sobre ALLOW.';
+
+COMMENT ON COLUMN nxc_tenant.role_api_policies.priority IS
+    'Prioridad de evaluación. Mayor número = se evalúa primero. '
+    'Usar 100 para ALLOW generales, 500 para DENY específicos.';
+
 -- =============================================================================
 -- SCHEMA: nxc_auth
 -- Sesiones, refresh tokens, intentos de login, reset de contraseña
@@ -853,6 +944,7 @@ ALTER TABLE nxc_preference.table_column_configs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_preference.saved_filters        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_config.feature_flags        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nxc_config.tenant_configs       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nxc_tenant.role_api_policies    ENABLE ROW LEVEL SECURITY;
 
 -- Helpers RLS
 CREATE OR REPLACE FUNCTION nxc_tenant.current_tenant_id()
@@ -958,6 +1050,18 @@ CREATE POLICY rls_tenant ON nxc_config.feature_flags
 CREATE POLICY rls_tenant ON nxc_config.tenant_configs
     USING (nxc_tenant.rls_tenant_check(tenant_id));
 
+-- role_api_policies: lectura libre (el interceptor la necesita en cada request);
+-- escritura solo para el administrador de la plataforma vía scripts controlados.
+DROP POLICY IF EXISTS rls_api_policies_read ON nxc_tenant.role_api_policies;
+CREATE POLICY rls_api_policies_read ON nxc_tenant.role_api_policies
+    FOR SELECT
+    USING (TRUE);
+
+DROP POLICY IF EXISTS rls_api_policies_write ON nxc_tenant.role_api_policies;
+CREATE POLICY rls_api_policies_write ON nxc_tenant.role_api_policies
+    FOR ALL
+    USING (nxc_tenant.is_system_admin());
+
 -- =============================================================================
 -- 4. TRIGGERS
 -- =============================================================================
@@ -992,7 +1096,8 @@ DECLARE
         'nxc_preference.table_column_configs',
         'nxc_preference.saved_filters',
         'nxc_config.feature_flags',
-        'nxc_config.tenant_configs'
+        'nxc_config.tenant_configs',
+        'nxc_tenant.role_api_policies'
     ];
 BEGIN
     FOREACH tbl IN ARRAY tbls LOOP

@@ -7,7 +7,7 @@ spring:
       on-profile: docker
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-db:5432/postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-db:5432/${DB_NAME:-nexcore_db}}
     username: ${DB_USER:admin}
     password: ${DB_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver

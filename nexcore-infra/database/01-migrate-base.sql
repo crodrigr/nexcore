@@ -665,5 +665,259 @@ END $$;
 -- ORDER BY t.slug, r.name, c.module_key;
 
 -- =============================================================================
+-- BLOQUE 6 — POLÍTICAS DE ACCESO A LA API (role_api_policies)
+--
+-- Carga las políticas para todos los endpoints actuales de:
+--   nexcore-core (service='core', puerto 8080)
+--   nexcore-auth-service (service='auth', puerto 8081)
+--
+-- CONVENCIÓN DE PRIORIDADES:
+--   100 → ALLOW general (rol puede acceder)
+--   500 → DENY específico (bloqueo explícito que anula ALLOW de nivel 100)
+--
+-- CONVENCIÓN DE PATRONES DE PATH:
+--   /api/*/recurso         → cubre /api/v1/recurso, /api/v2/recurso, etc.
+--   /api/*/recurso/*       → un segmento variable (/{id})
+--   /api/*/recurso/**      → cualquier subruta (/{id}/accion, etc.)
+--   /api/**                → cualquier path bajo /api/ (para DENY globales)
+-- =============================================================================
+DO $$
+DECLARE
+    v_super_admin    UUID := '00000000-0000-0000-0001-000000000001'; -- super.admin
+BEGIN
+    RAISE NOTICE '=== BLOQUE 6: role_api_policies ===';
+
+    -- Limpiar políticas existentes para recarga idempotente
+    DELETE FROM nxc_tenant.role_api_policies;
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 1: NEXCORE-AUTH-SERVICE (puerto 8081)
+-- Endpoints que requieren JWT válido (los públicos son excluidos por el interceptor).
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('*', 'POST',   '/auth/refresh',   'ALLOW', 'auth', 'auth', 100,
+     'Refrescar access token con refresh token válido. Aplica a cualquier usuario autenticado.',
+     v_super_admin),
+    ('*', 'DELETE', '/auth/logout',    'ALLOW', 'auth', 'auth', 100,
+     'Cerrar la sesión actual del usuario autenticado.',
+     v_super_admin),
+    ('*', 'DELETE', '/auth/logout-all','ALLOW', 'auth', 'auth', 100,
+     'Cerrar todas las sesiones activas del usuario autenticado.',
+     v_super_admin),
+    ('*', 'PUT',    '/auth/password',  'ALLOW', 'auth', 'auth', 100,
+     'Cambiar contraseña. El usuario debe estar autenticado y proporcionar la contraseña actual.',
+     v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 2: NEXCORE-CORE — Endpoint público sin auth
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('*', 'POST', '/api/*/users/invitations/accept', 'ALLOW', 'core', 'users', 100,
+     'Aceptar invitación. Endpoint público: el invitado no tiene JWT aún, usa token del email.',
+     v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 3: PERFIL DE USUARIO — GET /api/*/me/profile
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('*', 'GET', '/api/*/me/profile', 'ALLOW', 'core', 'profile', 100,
+     'Obtener perfil completo del usuario autenticado (menus, permisos por componente).',
+     v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 4: TENANTS — /api/*/tenants
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('SUPER_ADMIN',  'GET',   '/api/*/tenants',          'ALLOW', 'core', 'tenants', 100,
+     'Listar todos los tenants de la plataforma. Operación exclusiva de SUPER_ADMIN.',          v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/tenants',          'ALLOW', 'core', 'tenants', 100,
+     'Crear un nuevo tenant en la plataforma. Operación exclusiva de SUPER_ADMIN.',             v_super_admin),
+    ('SUPER_ADMIN',  'GET',   '/api/*/tenants/*',        'ALLOW', 'core', 'tenants', 100,
+     'Ver detalle de cualquier tenant. SUPER_ADMIN tiene acceso total.',                        v_super_admin),
+    ('TENANT_ADMIN', 'GET',   '/api/*/tenants/*',        'ALLOW', 'core', 'tenants', 100,
+     'Ver detalle del propio tenant. La capa de negocio valida que solo sea el suyo.',          v_super_admin),
+    ('SUPER_ADMIN',  'PATCH', '/api/*/tenants/*',        'ALLOW', 'core', 'tenants', 100,
+     'Editar cualquier tenant, incluyendo cambio de plan/modo. Solo SUPER_ADMIN.',              v_super_admin),
+    ('TENANT_ADMIN', 'PATCH', '/api/*/tenants/*',        'ALLOW', 'core', 'tenants', 100,
+     'Editar el propio tenant. Sin acceso a cambiar plan/modo (validado en negocio).',          v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/tenants/*/suspend','ALLOW', 'core', 'tenants', 100,
+     'Suspender un tenant. Operación exclusiva de SUPER_ADMIN.',                                v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/tenants/*/activate','ALLOW','core', 'tenants', 100,
+     'Reactivar un tenant suspendido. Operación exclusiva de SUPER_ADMIN.',                     v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 5: USUARIOS — /api/*/users
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('*',           'GET',    '/api/*/users/me',                  'ALLOW', 'core', 'users', 100,
+     'Ver los datos propios del usuario autenticado (UserResponse básico).',                    v_super_admin),
+    ('SUPER_ADMIN',  'GET',   '/api/*/users',                     'ALLOW', 'core', 'users', 100,
+     'Listar usuarios de cualquier tenant (según X-Tenant-Id).',                               v_super_admin),
+    ('TENANT_ADMIN', 'GET',   '/api/*/users',                     'ALLOW', 'core', 'users', 100,
+     'Listar usuarios del propio tenant con filtros y paginación.',                            v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/users',                     'ALLOW', 'core', 'users', 100,
+     'Crear usuario directamente en cualquier tenant. Uso de SUPER_ADMIN.',                    v_super_admin),
+    ('TENANT_ADMIN', 'POST',  '/api/*/users',                     'ALLOW', 'core', 'users', 100,
+     'Crear usuario directamente en el propio tenant.',                                        v_super_admin),
+    ('SUPER_ADMIN',  'GET',   '/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Ver detalle de cualquier usuario en cualquier tenant.',                                  v_super_admin),
+    ('TENANT_ADMIN', 'GET',   '/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Ver detalle de usuarios del propio tenant.',                                             v_super_admin),
+    ('EDITOR',       'GET',   '/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Ver detalle de usuarios del propio tenant. Solo lectura.',                               v_super_admin),
+    ('SUPER_ADMIN',  'PATCH', '/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Editar cualquier usuario en cualquier tenant.',                                          v_super_admin),
+    ('TENANT_ADMIN', 'PATCH', '/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Editar usuarios del propio tenant.',                                                     v_super_admin),
+    ('EDITOR',       'PATCH', '/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Editar solo el propio perfil. La capa de negocio valida que id = actor.',                v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/users/*/suspend',           'ALLOW', 'core', 'users', 100,
+     'Suspender cualquier usuario en cualquier tenant.',                                       v_super_admin),
+    ('TENANT_ADMIN', 'POST',  '/api/*/users/*/suspend',           'ALLOW', 'core', 'users', 100,
+     'Suspender usuarios del propio tenant.',                                                  v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/users/*/activate',          'ALLOW', 'core', 'users', 100,
+     'Reactivar cualquier usuario en cualquier tenant.',                                       v_super_admin),
+    ('TENANT_ADMIN', 'POST',  '/api/*/users/*/activate',          'ALLOW', 'core', 'users', 100,
+     'Reactivar usuarios del propio tenant.',                                                  v_super_admin),
+    ('SUPER_ADMIN',  'DELETE','/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Eliminar (soft-delete) cualquier usuario en cualquier tenant.',                          v_super_admin),
+    ('TENANT_ADMIN', 'DELETE','/api/*/users/*',                   'ALLOW', 'core', 'users', 100,
+     'Eliminar (soft-delete) usuarios del propio tenant.',                                     v_super_admin),
+    ('SUPER_ADMIN',  'PUT',   '/api/*/users/*/roles',             'ALLOW', 'core', 'users', 100,
+     'Reasignar roles de cualquier usuario en cualquier tenant.',                              v_super_admin),
+    ('TENANT_ADMIN', 'PUT',   '/api/*/users/*/roles',             'ALLOW', 'core', 'users', 100,
+     'Reasignar roles de usuarios del propio tenant.',                                        v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/users/invite',              'ALLOW', 'core', 'users', 100,
+     'Enviar invitación de usuario en cualquier tenant.',                                      v_super_admin),
+    ('TENANT_ADMIN', 'POST',  '/api/*/users/invite',              'ALLOW', 'core', 'users', 100,
+     'Enviar invitación de usuario en el propio tenant.',                                      v_super_admin),
+    ('SUPER_ADMIN',  'GET',   '/api/*/users/invitations',         'ALLOW', 'core', 'users', 100,
+     'Listar invitaciones de cualquier tenant.',                                               v_super_admin),
+    ('TENANT_ADMIN', 'GET',   '/api/*/users/invitations',         'ALLOW', 'core', 'users', 100,
+     'Listar invitaciones del propio tenant.',                                                 v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/users/invitations/*/revoke','ALLOW', 'core', 'users', 100,
+     'Revocar invitación en cualquier tenant.',                                                v_super_admin),
+    ('TENANT_ADMIN', 'POST',  '/api/*/users/invitations/*/revoke','ALLOW', 'core', 'users', 100,
+     'Revocar invitación en el propio tenant.',                                                v_super_admin),
+    ('SUPER_ADMIN',  'POST',  '/api/*/users/invitations/*/resend','ALLOW', 'core', 'users', 100,
+     'Reenviar invitación en cualquier tenant.',                                               v_super_admin),
+    ('TENANT_ADMIN', 'POST',  '/api/*/users/invitations/*/resend','ALLOW', 'core', 'users', 100,
+     'Reenviar invitación en el propio tenant.',                                               v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 6: ROLES — /api/*/roles
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('SUPER_ADMIN',  'GET',    '/api/*/roles',  'ALLOW', 'core', 'roles', 100,
+     'Listar roles de cualquier tenant.',                                  v_super_admin),
+    ('TENANT_ADMIN', 'GET',    '/api/*/roles',  'ALLOW', 'core', 'roles', 100,
+     'Listar roles del propio tenant.',                                    v_super_admin),
+    ('EDITOR',       'GET',    '/api/*/roles',  'ALLOW', 'core', 'roles', 100,
+     'Leer lista de roles del tenant (solo lectura).',                     v_super_admin),
+    ('VIEWER',       'GET',    '/api/*/roles',  'ALLOW', 'core', 'roles', 100,
+     'Leer lista de roles del tenant (solo lectura).',                     v_super_admin),
+    ('SUPER_ADMIN',  'POST',   '/api/*/roles',  'ALLOW', 'core', 'roles', 100,
+     'Crear rol personalizado en cualquier tenant.',                       v_super_admin),
+    ('TENANT_ADMIN', 'POST',   '/api/*/roles',  'ALLOW', 'core', 'roles', 100,
+     'Crear rol personalizado en el propio tenant.',                       v_super_admin),
+    ('SUPER_ADMIN',  'GET',    '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Ver detalle de cualquier rol en cualquier tenant.',                  v_super_admin),
+    ('TENANT_ADMIN', 'GET',    '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Ver detalle de roles del propio tenant.',                            v_super_admin),
+    ('EDITOR',       'GET',    '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Ver detalle de roles del tenant (solo lectura).',                    v_super_admin),
+    ('VIEWER',       'GET',    '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Ver detalle de roles del tenant (solo lectura).',                    v_super_admin),
+    ('SUPER_ADMIN',  'PATCH',  '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Editar roles personalizados en cualquier tenant.',                   v_super_admin),
+    ('TENANT_ADMIN', 'PATCH',  '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Editar roles personalizados del propio tenant.',                     v_super_admin),
+    ('SUPER_ADMIN',  'DELETE', '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Eliminar rol personalizado en cualquier tenant.',                    v_super_admin),
+    ('TENANT_ADMIN', 'DELETE', '/api/*/roles/*','ALLOW', 'core', 'roles', 100,
+     'Eliminar rol personalizado del propio tenant.',                      v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 7: COMPONENTES UI — /api/*/menu/components
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('SUPER_ADMIN',  'GET', '/api/*/menu/components',          'ALLOW', 'core', 'components', 100,
+     'Listar componentes de UI de cualquier tenant.',                      v_super_admin),
+    ('TENANT_ADMIN', 'GET', '/api/*/menu/components',          'ALLOW', 'core', 'components', 100,
+     'Listar componentes de UI del propio tenant.',                        v_super_admin),
+    ('SUPER_ADMIN',  'GET', '/api/*/menu/components/*',        'ALLOW', 'core', 'components', 100,
+     'Ver detalle de cualquier componente de UI.',                         v_super_admin),
+    ('TENANT_ADMIN', 'GET', '/api/*/menu/components/*',        'ALLOW', 'core', 'components', 100,
+     'Ver detalle de un componente de UI del propio tenant.',              v_super_admin),
+    ('SUPER_ADMIN',  'GET', '/api/*/menu/components/*/elements','ALLOW','core', 'components', 100,
+     'Listar elementos de UI de cualquier componente.',                    v_super_admin),
+    ('TENANT_ADMIN', 'GET', '/api/*/menu/components/*/elements','ALLOW','core', 'components', 100,
+     'Listar elementos de UI de componentes del propio tenant.',           v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 8: PERMISOS POR ROL — /api/*/menu/permissions
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    ('SUPER_ADMIN',  'GET', '/api/*/menu/permissions/roles/*',                   'ALLOW', 'core', 'permissions', 100,
+     'Ver matriz de permisos de cualquier rol.',                                               v_super_admin),
+    ('TENANT_ADMIN', 'GET', '/api/*/menu/permissions/roles/*',                   'ALLOW', 'core', 'permissions', 100,
+     'Ver matriz de permisos de roles del propio tenant.',                                     v_super_admin),
+    ('SUPER_ADMIN',  'PUT', '/api/*/menu/permissions/roles/*/components/*',      'ALLOW', 'core', 'permissions', 100,
+     'Asignar permiso de cualquier rol sobre cualquier componente.',                           v_super_admin),
+    ('TENANT_ADMIN', 'PUT', '/api/*/menu/permissions/roles/*/components/*',      'ALLOW', 'core', 'permissions', 100,
+     'Asignar permiso de roles del propio tenant sobre componentes.',                         v_super_admin),
+    ('SUPER_ADMIN',  'PUT', '/api/*/menu/permissions/roles/*/components/batch',  'ALLOW', 'core', 'permissions', 100,
+     'Asignar permisos en batch sobre múltiples componentes (máx 100).',                      v_super_admin),
+    ('TENANT_ADMIN', 'PUT', '/api/*/menu/permissions/roles/*/components/batch',  'ALLOW', 'core', 'permissions', 100,
+     'Asignar permisos en batch sobre componentes del propio tenant.',                        v_super_admin),
+    ('SUPER_ADMIN',  'PUT', '/api/*/menu/permissions/roles/*/elements/*',        'ALLOW', 'core', 'permissions', 100,
+     'Asignar permiso granular de un rol sobre un elemento de UI.',                           v_super_admin),
+    ('TENANT_ADMIN', 'PUT', '/api/*/menu/permissions/roles/*/elements/*',        'ALLOW', 'core', 'permissions', 100,
+     'Asignar permiso granular de roles del propio tenant sobre elementos.',                  v_super_admin);
+
+-- -------------------------------------------------------------------------
+-- SECCIÓN 9: DENY EXPLÍCITOS — bloqueos de alta prioridad
+-- -------------------------------------------------------------------------
+    INSERT INTO nxc_tenant.role_api_policies
+        (role_name, http_method, path_pattern, effect, service, module, priority, description, created_by)
+    VALUES
+    -- EDITOR: no puede suspender/activar/eliminar usuarios
+    ('EDITOR', 'POST',   '/api/*/users/*/suspend',  'DENY', 'core', 'users', 500,
+     'DENY explícito: EDITOR no puede suspender usuarios bajo ninguna circunstancia.',  v_super_admin),
+    ('EDITOR', 'POST',   '/api/*/users/*/activate', 'DENY', 'core', 'users', 500,
+     'DENY explícito: EDITOR no puede reactivar usuarios.',                             v_super_admin),
+    ('EDITOR', 'DELETE', '/api/*/users/*',           'DENY', 'core', 'users', 500,
+     'DENY explícito: EDITOR no puede eliminar usuarios.',                              v_super_admin),
+    -- VIEWER: bloqueo general de escritura (POST/PUT/PATCH/DELETE)
+    ('VIEWER', 'POST',   '/api/**', 'DENY', 'core', 'general', 500,
+     'DENY general: VIEWER no puede ejecutar ningún POST en nexcore-core.',             v_super_admin),
+    ('VIEWER', 'PUT',    '/api/**', 'DENY', 'core', 'general', 500,
+     'DENY general: VIEWER no puede ejecutar ningún PUT en nexcore-core.',              v_super_admin),
+    ('VIEWER', 'PATCH',  '/api/**', 'DENY', 'core', 'general', 500,
+     'DENY general: VIEWER no puede ejecutar ningún PATCH en nexcore-core.',            v_super_admin),
+    ('VIEWER', 'DELETE', '/api/**', 'DENY', 'core', 'general', 500,
+     'DENY general: VIEWER no puede ejecutar ningún DELETE en nexcore-core.',           v_super_admin);
+
+    RAISE NOTICE 'role_api_policies OK. Registros: %',
+        (SELECT COUNT(*) FROM nxc_tenant.role_api_policies);
+END $$;
+
+-- =============================================================================
 -- FIN — V013__seed_initial_data.sql
 -- =============================================================================
