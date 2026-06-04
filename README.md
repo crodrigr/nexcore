@@ -46,8 +46,8 @@ nano ~/nexcore/.env
 At minimum, set these values:
 
 ```env
-# Your Docker Hub username
-DOCKER_HUB_USER=your-dockerhub-username
+# Do not change — points to the published images
+DOCKER_HUB_USER=crodrigr
 
 # Database password
 DB_PASSWORD=your-secure-password
