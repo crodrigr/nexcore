@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # NexCore — Instalador rápido
-# Uso: curl -fsSL https://raw.githubusercontent.com/<ORG>/<REPO>/main/nexcore-infra/deploy/install.sh | bash
+# Uso: curl -fsSL https://raw.githubusercontent.com/crodrigr/nexcore/master/nexcore-infra/deploy/install.sh | bash
 # =============================================================================
 set -euo pipefail
 
@@ -17,19 +17,8 @@ INSTALL_DIR="${HOME}/nexcore"
 log()  { echo "[nexcore] $*"; }
 fail() { echo "[nexcore] ERROR: $*" >&2; exit 1; }
 
-# Soporta repo privado: pasar GITHUB_TOKEN=<token> antes del script
-# Ejemplo: GITHUB_TOKEN=ghp_xxx curl -fsSL ... | bash
-AUTH_HEADER=""
-if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-    AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-fi
-
 fetch() {
-    if [[ -n "${AUTH_HEADER}" ]]; then
-        curl -fsSL -H "${AUTH_HEADER}" "$1" -o "$2"
-    else
-        curl -fsSL "$1" -o "$2"
-    fi
+    curl -fsSL "$1" -o "$2"
 }
 
 # ── Requisitos ────────────────────────────────────────────────────────────────
