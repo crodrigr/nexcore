@@ -4,7 +4,7 @@
 //   CORE_BASE_URL   (vacío = nginx proxy, 'http://host:8080' = directo)
 export const environment = {
   production: false,
-  authBaseUrl: 'http://localhost:8081',
+  authBaseUrl: '',
   coreBaseUrl: '',
   endpoints: {
     login: '/auth/login',
