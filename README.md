@@ -99,10 +99,11 @@ This pulls the latest Docker images from Docker Hub and starts all 6 containers.
 
 **Default credentials:**
 
-| User            | Password   | Role         |
-|-----------------|------------|--------------|
-| `super.admin`   | `Admin123!`| SUPER_ADMIN  |
-| `admin.demo`    | `Admin123!`| TENANT_ADMIN |
+| Tenant   | User          | Password       | Role         |
+|----------|---------------|----------------|--------------|
+| system   | `super.admin` | `NexCore@2026!`| SUPER_ADMIN  |
+| demo     | `test.admin`  | `NexCore@2026!`| TENANT_ADMIN |
+| demo     | `test.editor` | `NexCore@2026!`| EDITOR       |
 
 ---
 
