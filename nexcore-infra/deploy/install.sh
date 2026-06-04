@@ -6,9 +6,9 @@
 set -euo pipefail
 
 # ── Configura tu repositorio GitHub aquí ──────────────────────────────────────
-GITHUB_ORG="TU_ORG"
+GITHUB_ORG="crodrigr"
 GITHUB_REPO="nexcore"
-GITHUB_BRANCH="main"
+GITHUB_BRANCH="master"
 # ─────────────────────────────────────────────────────────────────────────────
 
 RAW="https://raw.githubusercontent.com/${GITHUB_ORG}/${GITHUB_REPO}/${GITHUB_BRANCH}"
