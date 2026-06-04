@@ -17,6 +17,21 @@ INSTALL_DIR="${HOME}/nexcore"
 log()  { echo "[nexcore] $*"; }
 fail() { echo "[nexcore] ERROR: $*" >&2; exit 1; }
 
+# Soporta repo privado: pasar GITHUB_TOKEN=<token> antes del script
+# Ejemplo: GITHUB_TOKEN=ghp_xxx curl -fsSL ... | bash
+AUTH_HEADER=""
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+fi
+
+fetch() {
+    if [[ -n "${AUTH_HEADER}" ]]; then
+        curl -fsSL -H "${AUTH_HEADER}" "$1" -o "$2"
+    else
+        curl -fsSL "$1" -o "$2"
+    fi
+}
+
 # ── Requisitos ────────────────────────────────────────────────────────────────
 command -v docker  >/dev/null 2>&1 || fail "Docker no está instalado. Instálalo desde https://docs.docker.com/engine/install/"
 docker compose version >/dev/null 2>&1 || fail "Docker Compose plugin no está instalado."
@@ -34,11 +49,11 @@ mkdir -p \
 # ── Descargar archivos ────────────────────────────────────────────────────────
 log "Descargando archivos de despliegue..."
 
-curl -fsSL "${RAW}/nexcore-infra/deploy/Makefile"              -o "${INSTALL_DIR}/nexcore-infra/deploy/Makefile"
-curl -fsSL "${RAW}/nexcore-infra/deploy/docker-compose.hub.yml" -o "${INSTALL_DIR}/nexcore-infra/deploy/docker-compose.hub.yml"
-curl -fsSL "${RAW}/nexcore-infra/database/schema-nexcore.sql"   -o "${INSTALL_DIR}/nexcore-infra/database/schema-nexcore.sql"
-curl -fsSL "${RAW}/nexcore-infra/database/01-migrate-base.sql"  -o "${INSTALL_DIR}/nexcore-infra/database/01-migrate-base.sql"
-curl -fsSL "${RAW}/nexcore-infra/deploy/.env.example"           -o "${INSTALL_DIR}/.env.example"
+fetch "${RAW}/nexcore-infra/deploy/Makefile"               "${INSTALL_DIR}/nexcore-infra/deploy/Makefile"
+fetch "${RAW}/nexcore-infra/deploy/docker-compose.hub.yml" "${INSTALL_DIR}/nexcore-infra/deploy/docker-compose.hub.yml"
+fetch "${RAW}/nexcore-infra/database/schema-nexcore.sql"   "${INSTALL_DIR}/nexcore-infra/database/schema-nexcore.sql"
+fetch "${RAW}/nexcore-infra/database/01-migrate-base.sql"  "${INSTALL_DIR}/nexcore-infra/database/01-migrate-base.sql"
+fetch "${RAW}/nexcore-infra/deploy/.env.example"           "${INSTALL_DIR}/.env.example"
 
 # ── Crear .env desde la plantilla ────────────────────────────────────────────
 if [[ ! -f "${INSTALL_DIR}/.env" ]]; then
